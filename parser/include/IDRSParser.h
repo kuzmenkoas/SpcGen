@@ -13,9 +13,8 @@ namespace Parser {
             usedPar.waveform = {DEFAULT_VALUE};
             usedPar.scaler = DEFAULT_VALUE;
 
-            Global::IHist bHist{"baseline", 1000, 0, 20000};
-            Global::IHist iHist{"charge", 1000, 0, 50000};
-            std::vector histVector = {bHist, iHist};
+            Global::IHist iHist{"charge", 1000, -2, 10};
+            std::vector histVector = {iHist};
             usedPar.hist = histVector;
 
             Global::IDate date;
@@ -24,5 +23,6 @@ namespace Parser {
             SetUsedParameters(usedPar);
         };
         ~IDRSParser() {};
+    private:
     };
 }

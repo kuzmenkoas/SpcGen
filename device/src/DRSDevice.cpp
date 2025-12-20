@@ -19,6 +19,8 @@ void Device::DRSDevice::PrepareDevice() {
 }
 
 void Device::DRSDevice::Start() {
+    Global::Parameters usedParameters = GetParser()->GetUsedParameters();
+
     for (std::filesystem::path path : GetBinaryPathVector()) {
         std::ifstream file(path.string());
         if (file.is_open()) {
@@ -31,6 +33,14 @@ void Device::DRSDevice::Start() {
         } else {
             std::cerr << "Error: File not found: " << path.string() << "\n";
             std::cerr << "Stop program." << "\n";
+        }
+    }
+    for (int i = 0; i < 4; i++) {
+        int k = 0;
+        for (size_t i = 0; i < size(fChannelHist[i]); i++) {
+            TString name = TString(usedParameters.hist.value()[k++].parameter);
+            std::cout << name << std::endl;
+            fChannelHist[i][k]->Write(name);        
         }
     }
 
@@ -66,6 +76,12 @@ void Device::DRSDevice::ConfigureRoot() {
             if (usedParameters.hist.has_value()) {
                 TDirectory* dirHist = dir->mkdir("Histograms");
                 dirHist->cd();
+
+                for (auto& hist : *usedParameters.hist) {
+                    TString name = TString(hist.parameter);
+                    TH1* h1 = new TH1D(name, name, hist.Nbins, hist.min, hist.max);
+                    fChannelHist[ch-1].push_back(h1);
+                }
             }
         }
         ch++;
@@ -210,6 +226,15 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                 if (usedParameters.baseline.has_value() || usedParameters.charge.has_value()) fChannelEventsTreeMap[channel-1]->Fill();
                 // Process event
                 eventCounter++;
+                int iHist = 0;
+                
+                auto& hists = *usedParameters.hist;
+                for (size_t i = 0; i < size(hists); i++) {
+                    if (hists[i].parameter == "baseline") fChannelHist[channel-1][iHist++]->Fill(fEvent.baseline.value());
+                    if (hists[i].parameter == "charge") fChannelHist[channel-1][iHist++]->Fill(fEvent.charge.value());
+                    if (hists[i].parameter == "amplitude") fChannelHist[channel-1][iHist++]->Fill(fEvent.amplitude.value());
+                    if (hists[i].parameter == "scaler") fChannelHist[channel-1][iHist++]->Fill(fEvent.scaler.value());
+                }
             } else {
                 // Error
             }

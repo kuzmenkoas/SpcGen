@@ -2,6 +2,7 @@
 
 #include <mutex>
 #include <fstream>
+#include "TH1.h"
 #include "TTree.h"
 #include "IDevice.h"
 
@@ -23,7 +24,10 @@ namespace Device {
         bool fChannelMap[4] ={0, 0, 0, 1};
         TTree* fChannelEventsTreeMap[4] = {};
         TTree* fChannelTimeTreeMap[4] = {};
+        std::vector<TH1*> fChannelHist[4] = {};
         TDirectory* fDirectoryMap[4] = {};
+
+        TH1* h1 = new TH1D("charge", "charge", 1500, -32, 160);
 
         void ConfigureRoot();
         void ReadFileHeader(std::ifstream* file, std::filesystem::path* path);
