@@ -54,10 +54,10 @@ void Device::DRSDevice::ConfigureRoot() {
                 fChannelTimeTreeMap[ch-1] = fTreeTime;
             }
 
-            if (usedParameters.baseline.has_value() || usedParameters.integral.has_value()) {
+            if (usedParameters.baseline.has_value() || usedParameters.charge.has_value()) {
                 TTree* fTree = new TTree("Events", "Events");
                 if (usedParameters.baseline.has_value()) fTree->Branch("baseline", &fEvent.baseline, "baseline/I");
-                if (usedParameters.integral.has_value()) fTree->Branch("integral", &fEvent.integral, "integral/I");
+                if (usedParameters.charge.has_value()) fTree->Branch("charge", &fEvent.charge, "charge/I");
                 fChannelEventsTreeMap[ch-1] = fTree;
             }
             
