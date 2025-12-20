@@ -142,7 +142,9 @@ void Device::DRSDevice::ReadTimeHeader(std::ifstream* file, std::filesystem::pat
                         std::memcpy(&(*fEvent.time), &tmp, sizeof(tmp));
                         fTimeVector[channel-1].push_back(fEvent.time.value());
                         
-                        if (usedParameters.time.has_value()) fChannelTimeTreeMap[channel-1]->Fill();
+                        for (std::string writer : GetParser()->GetUsedWriterVector()) {
+                            if (writer == "Root") if (usedParameters.time.has_value()) fChannelTimeTreeMap[channel-1]->Fill();
+                        }
                     } else {
                         // Error
                         break;
@@ -223,18 +225,21 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                 CalculateBaseline(waveform);
 
                 if (usedParameters.charge.has_value()) fEvent.charge = CalculateCharge(waveform);
-                if (usedParameters.baseline.has_value() || usedParameters.charge.has_value()) fChannelEventsTreeMap[channel-1]->Fill();
                 // Process event
-                eventCounter++;
-                int iHist = 0;
-                
-                auto& hists = *usedParameters.hist;
-                for (size_t i = 0; i < size(hists); i++) {
-                    if (hists[i].parameter == "baseline") fChannelHist[channel-1][iHist++]->Fill(fEvent.baseline.value());
-                    if (hists[i].parameter == "charge") fChannelHist[channel-1][iHist++]->Fill(fEvent.charge.value());
-                    if (hists[i].parameter == "amplitude") fChannelHist[channel-1][iHist++]->Fill(fEvent.amplitude.value());
-                    if (hists[i].parameter == "scaler") fChannelHist[channel-1][iHist++]->Fill(fEvent.scaler.value());
+
+                for (std::string writer : GetParser()->GetUsedWriterVector()) {
+                    if (writer == "Root") if (usedParameters.time.has_value()) if (usedParameters.baseline.has_value() || usedParameters.charge.has_value()) fChannelEventsTreeMap[channel-1]->Fill();
+                    int iHist = 0;
+                    auto& hists = *usedParameters.hist;
+                    for (size_t i = 0; i < size(hists); i++) {
+                        if (hists[i].parameter == "baseline") fChannelHist[channel-1][iHist++]->Fill(fEvent.baseline.value());
+                        if (hists[i].parameter == "charge") fChannelHist[channel-1][iHist++]->Fill(fEvent.charge.value());
+                        if (hists[i].parameter == "amplitude") fChannelHist[channel-1][iHist++]->Fill(fEvent.amplitude.value());
+                        if (hists[i].parameter == "scaler") fChannelHist[channel-1][iHist++]->Fill(fEvent.scaler.value());
+                    }
                 }
+                
+                eventCounter++;
             } else {
                 // Error
             }
