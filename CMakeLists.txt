@@ -10,7 +10,6 @@ include(${ROOT_USE_FILE})
 add_subdirectory(global)
 add_subdirectory(core)
 add_subdirectory(parser)
-add_subdirectory(plotter)
 add_subdirectory(device)
 
 add_executable(SpcGen SpcGen.cpp)
@@ -19,7 +18,6 @@ target_link_libraries(SpcGen PRIVATE
     global
     core
     parser
-    plotter
     device
     ${ROOT_LIBRARIES}
 )

@@ -13,12 +13,15 @@ namespace Parser {
             usedPar.waveform = {DEFAULT_VALUE};
             usedPar.scaler = DEFAULT_VALUE;
 
-            Global::IHist iHist{"charge", 1000, -2, 10};
+            Global::IHist iHist{"charge", 1000, -10, 60};
             std::vector histVector = {iHist};
             usedPar.hist = histVector;
 
             Global::IDate date;
             usedPar.date = date;
+
+            usedPar.baselineLimits = std::make_pair(16, 400);
+            usedPar.chargeLimits = std::make_pair(420, 1000);
 
             SetUsedParameters(usedPar);
         };

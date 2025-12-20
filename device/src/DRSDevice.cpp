@@ -195,7 +195,7 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                         // std::cout << tmp << std::endl;
                         char* conv3 = &tmp[3];
                         channel = std::atoi(conv3);
-                        int32_t scaler;
+                        uint32_t scaler;
                         file->read((char*) &tmp, sizeof(tmp));
                         std::memcpy(&scaler, &tmp, sizeof(scaler));
                         fEvent.scaler = scaler;
@@ -278,9 +278,10 @@ void Device::DRSDevice::ReadDate(std::ifstream* file, std::filesystem::path* pat
 }
 
 double Device::DRSDevice::CalculateCharge(std::vector<double> eventWaveform) {
+    Global::Parameters usedParameters = GetParser()->GetUsedParameters();
+    int min = usedParameters.chargeLimits.value().first;
+    int max = usedParameters.chargeLimits.value().second;
     double charge = 0;
-    int min = 500;
-    int max = 600;
     int counter = 0;
     for (double waveform : eventWaveform) {
         if ((counter >= min) && (counter <= max)) charge += waveform - fEvent.baseline.value();
@@ -301,8 +302,9 @@ void Device::DRSDevice::InitializeSumWaveform(std::vector<double> eventWaveform)
 }
 
 void Device::DRSDevice::CalculateBaseline(std::vector<double> eventWaveform) {
-    int min = 16;
-    int max = 400;
+    Global::Parameters usedParameters = GetParser()->GetUsedParameters();
+    int min = usedParameters.baselineLimits.value().first;
+    int max = usedParameters.baselineLimits.value().second;
 
     fEvent.baseline = 0;
     double ss = 0;

@@ -17,13 +17,15 @@ namespace Global {
         std::optional<std::vector<double>> waveform;
         std::optional<double> charge;
         std::optional<double> amplitude;
+        std::optional<std::pair<int16_t, int16_t>> baselineLimits;
+        std::optional<std::pair<int16_t, int16_t>> chargeLimits;
 
         // DRS data
         std::optional<int32_t> time;
         std::optional<IDate> date;
         std::optional<int16_t> range;
         std::optional<int16_t> trigger;
-        std::optional<int32_t> scaler;
+        std::optional<uint32_t> scaler;
 
         // Digitizer PSD
         std::optional< int32_t> qShort;
