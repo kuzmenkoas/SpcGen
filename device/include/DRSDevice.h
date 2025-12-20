@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mutex>
 #include <fstream>
 #include "TTree.h"
 #include "IDevice.h"
@@ -30,9 +31,12 @@ namespace Device {
         void ReadEventHeader(std::ifstream* file, std::filesystem::path* path);
         void ReadDate(std::ifstream* file, std::filesystem::path* path);
 
-        int32_t CalculateCharge(std::vector<int16_t> eventWaveform);
+        double CalculateCharge(std::vector<double> eventWaveform);
+        void CalculateWaveform(std::vector<double> eventWaveform);
+        void InitializeSumWaveform(std::vector<double> eventWaveform);
+        mutable std::once_flag initWaveFlag;
 
-        std::vector<float> fTimeVector[4] = {{},{},{},{}};
+        std::vector<int32_t> fTimeVector[4] = {{},{},{},{}};
         Global::Parameters fEvent{};
     };
 }

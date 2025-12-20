@@ -14,10 +14,10 @@ namespace Global {
         // all
         std::optional<int16_t> baseline;
         std::optional<std::vector<IHist>> hist;
-        std::optional<std::vector<double>> signal;
-        std::optional<int32_t> charge;
+        std::optional<std::vector<double>> waveform;
+        std::optional<float> charge;
         std::optional<int16_t> amplitude;
-        
+
         // DRS data
         std::optional<int32_t> time;
         std::optional<IDate> date;

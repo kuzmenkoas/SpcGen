@@ -1,6 +1,7 @@
 #include "DRSDevice.h"
 #include "TString.h"
 #include "TDirectory.h"
+#include "TGraph.h"
 
 Device::DRSDevice::DRSDevice() {
 }
@@ -60,7 +61,7 @@ void Device::DRSDevice::ConfigureRoot() {
                 if (usedParameters.charge.has_value()) fTree->Branch("charge", &fEvent.charge, "charge/I");
                 fChannelEventsTreeMap[ch-1] = fTree;
             }
-            
+
             if (usedParameters.hist.has_value()) {
                 TDirectory* dirHist = dir->mkdir("Histograms");
                 dirHist->cd();
@@ -155,6 +156,11 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                 std::memcpy(&eventNumber, &tmp, sizeof(eventNumber));
                 ReadDate(file, path);
 
+                char tmp2[2];
+                int16_t rangeCenter;
+                file->read((char*) &tmp2, sizeof(tmp2));
+                std::memcpy(&rangeCenter, &tmp2, sizeof(rangeCenter));
+
                 char tmp[4];
                 int16_t version;
                 file->read((char*) &tmp, sizeof(tmp));
@@ -162,7 +168,7 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                 file->read((char*) &tmp, sizeof(tmp));
                 std::memcpy(&version, &tmp, sizeof(version));
 
-                std::vector<int16_t> waveform;
+                std::vector<double> waveform;
                 int16_t channel;
                 while (file->read((char*) &tmp, sizeof(tmp))) {
                     // file->read((char*) &tmp, sizeof(tmp));
@@ -179,11 +185,23 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                         file->seekg(-4, std::ios_base::cur);
                         break;
                     }
-                    int16_t wave1 = static_cast<uint8_t>(tmp[1]) | (static_cast<uint8_t>(tmp[2]) << 8);
-                    int16_t wave2 = static_cast<uint8_t>(tmp[3]) | (static_cast<uint8_t>(tmp[4]) << 8);
+                    int16_t voltage1;
+                    int16_t voltage2;
+                    
+                    file->seekg(-4, std::ios_base::cur);
+                    file->read((char*) &tmp2, sizeof(tmp2));
+                    std::memcpy(&voltage1, &tmp2, sizeof(voltage1));
+
+                    file->read((char*) &tmp2, sizeof(tmp2));
+                    std::memcpy(&voltage2, &tmp2, sizeof(voltage2));
+
+                    double wave1 = voltage1/65536. + rangeCenter/1000. - 0.5;
+                    double wave2 = voltage2/65536. + rangeCenter/1000. - 0.5;
+
                     waveform.push_back(wave1);
                     waveform.push_back(wave2);
                 }
+                CalculateWaveform(waveform);
 
                 if (usedParameters.charge.has_value()) fEvent.charge = CalculateCharge(waveform);
                 if (usedParameters.baseline.has_value() || usedParameters.charge.has_value()) fChannelEventsTreeMap[channel-1]->Fill();
@@ -192,6 +210,13 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                 // Error
             }
         } else {
+            auto& v = *fEvent.waveform;
+            TGraph* gr = new TGraph();
+            int counter = 0;
+            for (auto event : v) {
+                gr->AddPoint(counter++, event);
+            }
+            gr->Write("waveform");
             std::cout << "Reading success!" << "\n";
             break;
         }
@@ -221,19 +246,32 @@ void Device::DRSDevice::ReadDate(std::ifstream* file, std::filesystem::path* pat
 
     file->read((char*) &tmp2, sizeof(tmp2));
     std::memcpy(&tt, &tmp2, sizeof(tt));
-
-    file->read((char*) &tmp2, sizeof(tmp2));
-    std::memcpy(&tt, &tmp2, sizeof(tt));
 }
 
-int32_t Device::DRSDevice::CalculateCharge(std::vector<int16_t> eventWaveform) {
-    int32_t charge = 0;
-    int min = 420;
-    int max = 1000;
+double Device::DRSDevice::CalculateCharge(std::vector<double> eventWaveform) {
+    double charge = 0;
+    int min = 500;
+    int max = 600;
     int counter = 0;
-    for (int16_t waveform : eventWaveform) {
+    for (double waveform : eventWaveform) {
         if ((counter >= min) && (counter <= max)) charge += waveform;
         counter++;
     }
     return charge;
+}
+
+void Device::DRSDevice::CalculateWaveform(std::vector<double> eventWaveform) {
+    std::call_once(initWaveFlag, [this, eventWaveform](){InitializeSumWaveform(eventWaveform);});
+    int counter = 0;
+    auto& v = *fEvent.waveform;
+    for (double waveform : eventWaveform) {
+        v[counter] += waveform;
+        counter++;
+    }
+}
+
+void Device::DRSDevice::InitializeSumWaveform(std::vector<double> eventWaveform) {
+    auto& v = *fEvent.waveform;
+    for (double waveform : eventWaveform) v.push_back(waveform);
+
 }

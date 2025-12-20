@@ -10,7 +10,7 @@ namespace Parser {
             usedPar.baseline = DEFAULT_VALUE;
             usedPar.charge = DEFAULT_VALUE;
             usedPar.time = DEFAULT_VALUE;
-            usedPar.signal = {};
+            usedPar.waveform = {DEFAULT_VALUE};
 
             Global::IHist bHist{"baseline", 1000, 0, 20000};
             Global::IHist iHist{"charge", 1000, 0, 50000};
