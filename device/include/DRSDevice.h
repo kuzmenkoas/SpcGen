@@ -29,6 +29,9 @@ namespace Device {
         void ReadTimeHeader(std::ifstream* file, std::filesystem::path* path);
         void ReadEventHeader(std::ifstream* file, std::filesystem::path* path);
         void ReadDate(std::ifstream* file, std::filesystem::path* path);
+
+        int32_t CalculateCharge(std::vector<int16_t> eventWaveform);
+
         std::vector<float> fTimeVector[4] = {{},{},{},{}};
         Global::Parameters fEvent{};
     };

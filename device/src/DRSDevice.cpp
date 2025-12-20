@@ -145,6 +145,7 @@ void Device::DRSDevice::ReadTimeHeader(std::ifstream* file, std::filesystem::pat
 }
 
 void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::path* path) {
+    Global::Parameters usedParameters = GetParser()->GetUsedParameters();
     while (true) {
         char tmp[4];
         if (file->read((char*) &tmp, sizeof(tmp))) {
@@ -162,15 +163,18 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                 std::memcpy(&version, &tmp, sizeof(version));
 
                 std::vector<int16_t> waveform;
+                int16_t channel;
                 while (file->read((char*) &tmp, sizeof(tmp))) {
                     // file->read((char*) &tmp, sizeof(tmp));
                     if (tmp[0] == fChannelHeader[0] && tmp[1] == fChannelHeader[1] && tmp[2] == fChannelHeader[2]) {
-                        char conv2[3] = {tmp[1], tmp[2], tmp[3]};
-                        int16_t channel = std::atoi(conv2);
+                        // char conv2[3] = {tmp[1], tmp[2], tmp[3]};
+                        // std::cout << tmp << std::endl;
+                        char* conv3 = &tmp[3];
+                        channel = std::atoi(conv3);
                         int32_t scaler;
                         file->read((char*) &tmp, sizeof(tmp));
                         std::memcpy(&scaler, &tmp, sizeof(scaler));
-                    } 
+                    }
                     if (tmp[0] == fEventHeader[0] && tmp[1] == fEventHeader[1] && tmp[2] == fEventHeader[2] && tmp[3] == fEventHeader[3]) {
                         file->seekg(-4, std::ios_base::cur);
                         break;
@@ -180,6 +184,9 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                     waveform.push_back(wave1);
                     waveform.push_back(wave2);
                 }
+
+                if (usedParameters.charge.has_value()) fEvent.charge = CalculateCharge(waveform);
+                if (usedParameters.baseline.has_value() || usedParameters.charge.has_value()) fChannelEventsTreeMap[channel-1]->Fill();
                 // Process event
             } else {
                 // Error
@@ -217,4 +224,16 @@ void Device::DRSDevice::ReadDate(std::ifstream* file, std::filesystem::path* pat
 
     file->read((char*) &tmp2, sizeof(tmp2));
     std::memcpy(&tt, &tmp2, sizeof(tt));
+}
+
+int32_t Device::DRSDevice::CalculateCharge(std::vector<int16_t> eventWaveform) {
+    int32_t charge = 0;
+    int min = 420;
+    int max = 1000;
+    int counter = 0;
+    for (int16_t waveform : eventWaveform) {
+        if ((counter >= min) && (counter <= max)) charge += waveform;
+        counter++;
+    }
+    return charge;
 }
