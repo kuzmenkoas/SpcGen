@@ -12,11 +12,11 @@
 namespace Global {
     struct Parameters {
         // all
-        std::optional<int16_t> baseline;
+        std::optional<double> baseline;
         std::optional<std::vector<IHist>> hist;
         std::optional<std::vector<double>> waveform;
-        std::optional<float> charge;
-        std::optional<int16_t> amplitude;
+        std::optional<double> charge;
+        std::optional<double> amplitude;
 
         // DRS data
         std::optional<int32_t> time;

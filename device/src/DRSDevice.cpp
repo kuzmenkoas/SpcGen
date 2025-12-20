@@ -57,8 +57,8 @@ void Device::DRSDevice::ConfigureRoot() {
 
             if (usedParameters.baseline.has_value() || usedParameters.charge.has_value()) {
                 TTree* fTree = new TTree("Events", "Events");
-                if (usedParameters.baseline.has_value()) fTree->Branch("baseline", &fEvent.baseline, "baseline/I");
-                if (usedParameters.charge.has_value()) fTree->Branch("charge", &fEvent.charge, "charge/I");
+                if (usedParameters.baseline.has_value()) fTree->Branch("baseline", &fEvent.baseline, "baseline/D");
+                if (usedParameters.charge.has_value()) fTree->Branch("charge", &fEvent.charge, "charge/D");
                 fChannelEventsTreeMap[ch-1] = fTree;
             }
 
@@ -188,6 +188,7 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                     int16_t voltage1;
                     int16_t voltage2;
                     
+                    // TODO: change seekg to tmp decode
                     file->seekg(-4, std::ios_base::cur);
                     file->read((char*) &tmp2, sizeof(tmp2));
                     std::memcpy(&voltage1, &tmp2, sizeof(voltage1));
@@ -202,6 +203,7 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                     waveform.push_back(wave2);
                 }
                 CalculateWaveform(waveform);
+                CalculateBaseline(waveform);
 
                 if (usedParameters.charge.has_value()) fEvent.charge = CalculateCharge(waveform);
                 if (usedParameters.baseline.has_value() || usedParameters.charge.has_value()) fChannelEventsTreeMap[channel-1]->Fill();
@@ -272,5 +274,15 @@ void Device::DRSDevice::InitializeSumWaveform(std::vector<double> eventWaveform)
 }
 
 void Device::DRSDevice::CalculateBaseline(std::vector<double> eventWaveform) {
-    
+    int min = 16;
+    int max = 400;
+
+    fEvent.baseline = 0;
+    double ss = 0;
+    for (size_t i = 0; i < size(eventWaveform); i++) {
+        if ((i >= min) && (i <= max)) {
+            ss += eventWaveform[i];
+        }
+    }
+    fEvent.baseline = ss/(max-min+1.);
 }
