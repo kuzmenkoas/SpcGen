@@ -59,6 +59,7 @@ void Device::DRSDevice::ConfigureRoot() {
                 TTree* fTree = new TTree("Events", "Events");
                 if (usedParameters.baseline.has_value()) fTree->Branch("baseline", &fEvent.baseline, "baseline/D");
                 if (usedParameters.charge.has_value()) fTree->Branch("charge", &fEvent.charge, "charge/D");
+                if (usedParameters.scaler.has_value()) fTree->Branch("scaler", &fEvent.scaler, "scaler/I");
                 fChannelEventsTreeMap[ch-1] = fTree;
             }
 
@@ -147,6 +148,7 @@ void Device::DRSDevice::ReadTimeHeader(std::ifstream* file, std::filesystem::pat
 
 void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::path* path) {
     Global::Parameters usedParameters = GetParser()->GetUsedParameters();
+    int eventCounter = 0;
     while (true) {
         char tmp[4];
         if (file->read((char*) &tmp, sizeof(tmp))) {
@@ -180,6 +182,7 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                         int32_t scaler;
                         file->read((char*) &tmp, sizeof(tmp));
                         std::memcpy(&scaler, &tmp, sizeof(scaler));
+                        fEvent.scaler = scaler;
                     }
                     if (tmp[0] == fEventHeader[0] && tmp[1] == fEventHeader[1] && tmp[2] == fEventHeader[2] && tmp[3] == fEventHeader[3]) {
                         file->seekg(-4, std::ios_base::cur);
@@ -208,6 +211,7 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                 if (usedParameters.charge.has_value()) fEvent.charge = CalculateCharge(waveform);
                 if (usedParameters.baseline.has_value() || usedParameters.charge.has_value()) fChannelEventsTreeMap[channel-1]->Fill();
                 // Process event
+                eventCounter++;
             } else {
                 // Error
             }
@@ -216,7 +220,7 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
             TGraph* gr = new TGraph();
             int counter = 0;
             for (auto event : v) {
-                gr->AddPoint(counter++, event);
+                gr->AddPoint(counter++, event/eventCounter);
             }
             gr->Write("waveform");
             std::cout << "Reading success!" << "\n";
@@ -256,7 +260,7 @@ double Device::DRSDevice::CalculateCharge(std::vector<double> eventWaveform) {
     int max = 600;
     int counter = 0;
     for (double waveform : eventWaveform) {
-        if ((counter >= min) && (counter <= max)) charge += waveform;
+        if ((counter >= min) && (counter <= max)) charge += waveform - fEvent.baseline.value();
         counter++;
     }
     return charge;

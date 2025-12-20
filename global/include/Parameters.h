@@ -23,6 +23,7 @@ namespace Global {
         std::optional<IDate> date;
         std::optional<int16_t> range;
         std::optional<int16_t> trigger;
+        std::optional<int32_t> scaler;
 
         // Digitizer PSD
         std::optional< int32_t> qShort;
