@@ -36,10 +36,9 @@ void Device::DRSDevice::Start() {
         }
     }
     for (int i = 0; i < 4; i++) {
-        int k = 0;
-        for (size_t i = 0; i < size(fChannelHist[i]); i++) {
-            TString name = TString(usedParameters.hist.value()[k++].parameter);
-            std::cout << name << std::endl;
+        if (fDirectoryMap[i]) fDirectoryMap[i]->cd();
+        for (size_t k = 0; k < size(fChannelHist[i]); k++) {
+            TString name = TString(usedParameters.hist.value()[k].parameter);
             fChannelHist[i][k]->Write(name);        
         }
     }
@@ -76,7 +75,7 @@ void Device::DRSDevice::ConfigureRoot() {
             if (usedParameters.hist.has_value()) {
                 TDirectory* dirHist = dir->mkdir("Histograms");
                 dirHist->cd();
-
+                fDirectoryMap[ch] = dirHist;
                 for (auto& hist : *usedParameters.hist) {
                     TString name = TString(hist.parameter);
                     TH1* h1 = new TH1D(name, name, hist.Nbins, hist.min, hist.max);
