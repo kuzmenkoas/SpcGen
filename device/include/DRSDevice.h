@@ -32,6 +32,7 @@ namespace Device {
         void ReadDate(std::ifstream* file, std::filesystem::path* path);
 
         double CalculateCharge(std::vector<double> eventWaveform);
+        void CalculateBaseline(std::vector<double> eventWaveform);
         void CalculateWaveform(std::vector<double> eventWaveform);
         void InitializeSumWaveform(std::vector<double> eventWaveform);
         mutable std::once_flag initWaveFlag;

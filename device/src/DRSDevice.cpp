@@ -262,16 +262,15 @@ double Device::DRSDevice::CalculateCharge(std::vector<double> eventWaveform) {
 
 void Device::DRSDevice::CalculateWaveform(std::vector<double> eventWaveform) {
     std::call_once(initWaveFlag, [this, eventWaveform](){InitializeSumWaveform(eventWaveform);});
-    int counter = 0;
     auto& v = *fEvent.waveform;
-    for (double waveform : eventWaveform) {
-        v[counter] += waveform;
-        counter++;
-    }
+    for (size_t i = 1; i < size(eventWaveform); i++) v[i] += eventWaveform[i];
 }
 
 void Device::DRSDevice::InitializeSumWaveform(std::vector<double> eventWaveform) {
     auto& v = *fEvent.waveform;
     for (double waveform : eventWaveform) v.push_back(waveform);
+}
 
+void Device::DRSDevice::CalculateBaseline(std::vector<double> eventWaveform) {
+    
 }
