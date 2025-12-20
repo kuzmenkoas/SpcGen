@@ -190,14 +190,12 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                     }
                     int16_t voltage1;
                     int16_t voltage2;
-                    
-                    // TODO: change seekg to tmp decode
-                    file->seekg(-4, std::ios_base::cur);
-                    file->read((char*) &tmp2, sizeof(tmp2));
-                    std::memcpy(&voltage1, &tmp2, sizeof(voltage1));
 
-                    file->read((char*) &tmp2, sizeof(tmp2));
-                    std::memcpy(&voltage2, &tmp2, sizeof(voltage2));
+                    char mtmp1[2] = {tmp[0], tmp[1]};
+                    char mtmp2[2] = {tmp[2], tmp[3]};
+                    
+                    std::memcpy(&voltage1, mtmp1, sizeof(voltage1));
+                    std::memcpy(&voltage2, mtmp2, sizeof(voltage2));
 
                     double wave1 = voltage1/65536. + rangeCenter/1000. - 0.5;
                     double wave2 = voltage2/65536. + rangeCenter/1000. - 0.5;
