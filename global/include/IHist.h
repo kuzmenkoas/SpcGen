@@ -8,6 +8,6 @@ namespace Global {
         std::string parameter;
         int Nbins;
         double min;
-        int32_t max;
+        double max;
     };
 }
