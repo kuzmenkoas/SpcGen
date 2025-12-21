@@ -30,6 +30,7 @@ namespace Device {
         TH1* h1 = new TH1D("charge", "charge", 1500, -32, 160);
 
         void ConfigureRoot();
+        void ConfigureTxt();
         void ReadFileHeader(std::ifstream* file, std::filesystem::path* path);
         void ReadTimeHeader(std::ifstream* file, std::filesystem::path* path);
         void ReadEventHeader(std::ifstream* file, std::filesystem::path* path);

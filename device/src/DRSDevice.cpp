@@ -14,6 +14,7 @@ void Device::DRSDevice::PrepareDevice() {
     // Make ntuples
     for (std::string writer : GetParser()->GetUsedWriterVector()) {
         if (writer == "Root") ConfigureRoot();
+        if (writer == "Txt") ConfigureTxt();
     }
 
     Global::Parameters usedParameters = GetParser()->GetUsedParameters();
@@ -44,7 +45,9 @@ void Device::DRSDevice::Start() {
         }
     }
 
-    fRootFile->Write();
+    for (std::string writer : GetParser()->GetUsedWriterVector()) {
+        if (writer == "Root") fRootFile->Write();
+    }
 }
 
 void Device::DRSDevice::ConfigureRoot() {
@@ -87,6 +90,10 @@ void Device::DRSDevice::ConfigureRoot() {
         }
         ch++;
     }
+}
+
+void Device::DRSDevice::ConfigureTxt() {
+    
 }
 
 void Device::DRSDevice::ReadFileHeader(std::ifstream* file, std::filesystem::path* path) {
@@ -254,15 +261,19 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                 // Error
             }
         } else {
-            // Plot mean waveform
-            if (usedParameters.waveform.has_value()) {
-                auto& v = *fEvent.waveform;
-                TGraph* gr = new TGraph();
-                int counter = 0;
-                for (auto event : v) {
-                    gr->AddPoint(counter++, event/eventCounter);
+            for (std::string writer : GetParser()->GetUsedWriterVector()) {
+                if (writer == "Root") {
+                    // Plot mean waveform
+                    if (usedParameters.waveform.has_value()) {
+                        auto& v = *fEvent.waveform;
+                        TGraph* gr = new TGraph();
+                        int counter = 0;
+                        for (auto event : v) {
+                            gr->AddPoint(counter++, event/eventCounter);
+                        }
+                        gr->Write("waveform");
+                    }
                 }
-                gr->Write("waveform");
             }
 
             std::cout << "Reading success!" << "\n";

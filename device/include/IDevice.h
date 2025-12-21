@@ -28,6 +28,7 @@ namespace Device {
         TFile* fRootFile = nullptr;
     private:
         void ConfigureRoot();
+        void ConfigureTxt();
         std::filesystem::path fConfigPath;
         std::vector<std::filesystem::path> fBinaryPathVector{};
         std::shared_ptr<Parser::IParser> fParser = nullptr;
