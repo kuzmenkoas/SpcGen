@@ -31,6 +31,7 @@ namespace Device {
 
         void ConfigureRoot();
         void ConfigureTxt();
+        void WriteTxtEvent();
         void ReadFileHeader(std::ifstream* file, std::filesystem::path* path);
         void ReadTimeHeader(std::ifstream* file, std::filesystem::path* path);
         void ReadEventHeader(std::ifstream* file, std::filesystem::path* path);
@@ -45,5 +46,6 @@ namespace Device {
 
         std::vector<int32_t> fTimeVector[4] = {{},{},{},{}};
         Global::Parameters fEvent{};
+        std::ofstream fTxtFile;
     };
 }

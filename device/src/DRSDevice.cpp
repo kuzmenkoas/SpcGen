@@ -47,6 +47,7 @@ void Device::DRSDevice::Start() {
 
     for (std::string writer : GetParser()->GetUsedWriterVector()) {
         if (writer == "Root") fRootFile->Write();
+        if (writer == "Txt") fTxtFile.close();
     }
 }
 
@@ -93,7 +94,22 @@ void Device::DRSDevice::ConfigureRoot() {
 }
 
 void Device::DRSDevice::ConfigureTxt() {
-    
+    Global::Parameters usedParameters = GetParser()->GetUsedParameters();
+    fTxtFile = std::ofstream(GetFileName()+".txt");
+    if (usedParameters.baseline.has_value()) fTxtFile << "baseline ";
+    if (usedParameters.charge.has_value()) fTxtFile << "charge ";
+    if (usedParameters.amplitude.has_value()) fTxtFile << "amplitude ";
+    if (usedParameters.scaler.has_value()) fTxtFile << "scaler ";
+    fTxtFile << "\n";
+}
+
+void Device::DRSDevice::WriteTxtEvent() {
+    Global::Parameters usedParameters = GetParser()->GetUsedParameters();
+    if (usedParameters.baseline.has_value()) fTxtFile << fEvent.baseline.value() << " ";
+    if (usedParameters.charge.has_value()) fTxtFile << fEvent.charge.value() << " ";
+    if (usedParameters.amplitude.has_value()) fTxtFile << fEvent.amplitude.value() << " ";
+    if (usedParameters.scaler.has_value()) fTxtFile << fEvent.scaler.value() << " ";
+    fTxtFile << "\n";
 }
 
 void Device::DRSDevice::ReadFileHeader(std::ifstream* file, std::filesystem::path* path) {
@@ -254,6 +270,7 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                             }
                         }
                     }
+                    if (writer == "Txt") WriteTxtEvent();
                 }
                 
                 eventCounter++;
