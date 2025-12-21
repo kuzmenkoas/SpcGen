@@ -2,6 +2,7 @@
 #include "TString.h"
 #include "TDirectory.h"
 #include "TGraph.h"
+#include <algorithm>
 
 Device::DRSDevice::DRSDevice() {
 }
@@ -68,6 +69,7 @@ void Device::DRSDevice::ConfigureRoot() {
                 TTree* fTree = new TTree("Events", "Events");
                 if (usedParameters.baseline.has_value()) fTree->Branch("baseline", &fEvent.baseline, "baseline/D");
                 if (usedParameters.charge.has_value()) fTree->Branch("charge", &fEvent.charge, "charge/D");
+                if (usedParameters.amplitude.has_value()) fTree->Branch("amplitude", &fEvent.amplitude, "amplitude/D");
                 if (usedParameters.scaler.has_value()) fTree->Branch("scaler", &fEvent.scaler, "scaler/I");
                 fChannelEventsTreeMap[ch-1] = fTree;
             }
@@ -224,6 +226,7 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                 CalculateBaseline(waveform);
 
                 if (usedParameters.charge.has_value()) fEvent.charge = CalculateCharge(waveform);
+                if (usedParameters.amplitude.has_value()) fEvent.amplitude = CalculateAmplitude(waveform);
                 // Process event
 
                 for (std::string writer : GetParser()->GetUsedWriterVector()) {
@@ -318,4 +321,11 @@ void Device::DRSDevice::CalculateBaseline(std::vector<double> eventWaveform) {
         }
     }
     fEvent.baseline = ss/(max-min+1.);
+}
+
+double Device::DRSDevice::CalculateAmplitude(std::vector<double> eventWaveform) {
+    double amplitude = 0;
+    double maxValue = *std::max_element(eventWaveform.begin(), eventWaveform.end());
+    amplitude = maxValue;
+    return amplitude;
 }
