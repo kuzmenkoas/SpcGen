@@ -12,9 +12,6 @@ void Parser::DRSConsoleParser::Start() {
     ReadConfig();
     ReadHistograms();
 
-    Global::IDate date;
-    usedPar.date = date;
-
     SetUsedParameters(usedPar);
 }
 

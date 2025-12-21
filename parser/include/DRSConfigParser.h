@@ -2,6 +2,7 @@
 
 #include "IDRSParser.h"
 #include <filesystem>
+#include <fstream>
 
 namespace Parser {
     class DRSConfigParser : public IDRSParser {
@@ -12,8 +13,11 @@ namespace Parser {
         void Start() final;
     private:
         Global::Parameters usedPar;
-        void ReadData();
-        void ReadConfig();
-        void ReadHistograms();
+        std::filesystem::path fPath;
+        std::ifstream OpenFile();
+        void ReadWriter(std::string key="Output");
+        void ReadData(std::string key="Data");
+        void ReadConfig(std::string key="Config");
+        void ReadHistograms(std::string key="Histogram");
     };
 }
