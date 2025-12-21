@@ -16,8 +16,6 @@ void Device::DRSDevice::PrepareDevice() {
         if (writer == "Root") ConfigureRoot();
         if (writer == "Txt") ConfigureTxt();
     }
-
-    Global::Parameters usedParameters = GetParser()->GetUsedParameters();
 }
 
 void Device::DRSDevice::Start() {
