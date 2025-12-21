@@ -2,6 +2,7 @@
 #include "TString.h"
 #include "TDirectory.h"
 #include "TGraph.h"
+#include <TF1.h>
 #include <algorithm>
 
 Device::DRSDevice::DRSDevice() {
@@ -364,6 +365,13 @@ void Device::DRSDevice::CalculateBaseline(std::vector<double> eventWaveform) {
 double Device::DRSDevice::CalculateAmplitude(std::vector<double> eventWaveform) {
     double amplitude = 0;
     double maxValue = *std::max_element(eventWaveform.begin(), eventWaveform.end());
-    amplitude = maxValue;
+    TF1* parabola = new TF1("parabola", "pol2", 0, eventWaveform.size());
+    TGraph* gr = new TGraph();
+    for (size_t i = 0; i < eventWaveform.size(); i++) {
+        gr->SetPoint(i, i, eventWaveform[i]);
+    }
+    gr->Fit("parabola", "QR");
+    double x = -parabola->GetParameter(1)/(2*parabola->GetParameter(2));
+    amplitude = parabola->GetParameter(2)*x*x+parabola->GetParameter(1)*x+parabola->GetParameter(0);
     return amplitude;
 }
