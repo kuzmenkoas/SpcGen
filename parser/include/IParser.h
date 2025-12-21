@@ -13,13 +13,14 @@ namespace Parser {
         ~IParser() {};
 
         std::vector<std::string> GetUsedWriterVector() {return fUsedWriterVector;};
+        void SetUsedWriterVector(std::vector<std::string> writers) {fUsedWriterVector = writers;};
 
         void SetUsedParameters(Global::Parameters par) {fUsedParameters = par;};
         Global::Parameters GetUsedParameters() {return fUsedParameters;};
 
         virtual void Start() {};
     private:
-        std::vector<std::string> fUsedWriterVector{"Root"};
+        std::vector<std::string> fUsedWriterVector{};
         Global::Parameters fUsedParameters{};
     };
 }
