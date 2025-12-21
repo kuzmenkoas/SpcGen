@@ -7,6 +7,7 @@ Parser::DRSConsoleParser::~DRSConsoleParser() {
 }
 
 void Parser::DRSConsoleParser::Start() {
+    ReadWriter();
     ReadData();
     ReadConfig();
     ReadHistograms();
@@ -17,7 +18,23 @@ void Parser::DRSConsoleParser::Start() {
     SetUsedParameters(usedPar);
 }
 
+void Parser::DRSConsoleParser::ReadWriter() {
+    std::cout << "Choose format to output:" << "\n";
+    int i = 0;
+    std::cout << "(" << i++ << ") Root" << "\n";
+    std::cout << "(" << i++ << ") Txt" << "\n";
+    std::cout << "(" << i++ << ") Root and Txt" << "\n";
+
+    i = 0;
+    int val;
+    std::cin >> val;
+    if (val == i++) SetUsedWriterVector({"Root"});
+    if (val == i++) SetUsedWriterVector({"Txt"});
+    if (val == i++) SetUsedWriterVector({"Root", "Txt"});
+}
+
 void Parser::DRSConsoleParser::ReadData() {
+    std::cout << "\n";
     std::cout << "Enter parameters to use:" << "\n";
     int i = 0;
     std::cout << "(" << i++ << ")" << " all" << "\n";

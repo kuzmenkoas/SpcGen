@@ -11,6 +11,7 @@ namespace Parser {
         void Start() final;
     private:
         Global::Parameters usedPar;
+        void ReadWriter();
         void ReadData();
         void ReadConfig();
         void ReadHistograms();
