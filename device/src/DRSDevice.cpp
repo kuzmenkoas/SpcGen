@@ -211,8 +211,8 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                         file->seekg(-4, std::ios_base::cur);
                         break;
                     }
-                    int16_t voltage1;
-                    int16_t voltage2;
+                    uint16_t voltage1;
+                    uint16_t voltage2;
 
                     char mtmp1[2] = {tmp[0], tmp[1]};
                     char mtmp2[2] = {tmp[2], tmp[3]};
