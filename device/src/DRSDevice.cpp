@@ -235,6 +235,7 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
 
                 for (std::string writer : GetParser()->GetUsedWriterVector()) {
                     if (writer == "Root") if (usedParameters.time.has_value()) if (usedParameters.baseline.has_value() || usedParameters.charge.has_value()) {
+                        fChannelEventsTreeMap[channel-1]->Fill();
                         int iHist = 0;
                         if (usedParameters.hist.has_value()) {
                             auto& hists = *usedParameters.hist;
