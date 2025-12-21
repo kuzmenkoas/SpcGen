@@ -1,7 +1,127 @@
 #include "DRSConsoleParser.h"
 
 Parser::DRSConsoleParser::DRSConsoleParser() {
+    Start();
 }
 
 Parser::DRSConsoleParser::~DRSConsoleParser() {
+}
+
+void Parser::DRSConsoleParser::Start() {
+    ReadData();
+    ReadConfig();
+    ReadHistograms();
+
+    Global::IDate date;
+    usedPar.date = date;
+
+    SetUsedParameters(usedPar);
+}
+
+void Parser::DRSConsoleParser::ReadData() {
+    std::cout << "Enter parameters to use:" << "\n";
+    int i = 0;
+    std::cout << "(" << i++ << ")" << " all" << "\n";
+    std::cout << "(" << i++ << ")" << " baseline" << "\n";
+    std::cout << "(" << i++ << ")" << " charge" << "\n";
+    std::cout << "(" << i++ << ")" << " amplitude" << "\n";
+    std::cout << "(" << i++ << ")" << " waveform" << "\n";
+    std::cout << "(" << i++ << ")" << " scaler" << "\n";
+    std::cout << "(" << i++ << ")" << " time" << "\n";
+
+    std::string val;
+    std::cin >> val;
+    for (int k = 0; k < val.length(); k++) {
+        std::string tmp(1, val[k]);
+        int f = 0;
+        if (tmp == std::to_string(f++)) {
+            usedPar.baseline = DEFAULT_VALUE;
+            usedPar.charge = DEFAULT_VALUE;
+            usedPar.amplitude = DEFAULT_VALUE;
+            usedPar.waveform = {DEFAULT_VALUE};
+            usedPar.scaler = DEFAULT_VALUE;
+            usedPar.time = DEFAULT_VALUE;
+        }
+        if (tmp == std::to_string(f++)) usedPar.baseline = DEFAULT_VALUE;
+        if (tmp == std::to_string(f++)) usedPar.charge = DEFAULT_VALUE;
+        if (tmp == std::to_string(f++)) usedPar.amplitude = DEFAULT_VALUE;
+        if (tmp == std::to_string(f++)) usedPar.waveform = {DEFAULT_VALUE};
+        if (tmp == std::to_string(f++)) usedPar.scaler = DEFAULT_VALUE;
+        if (tmp == std::to_string(f++)) usedPar.time = DEFAULT_VALUE;
+    }
+}
+
+void Parser::DRSConsoleParser::ReadConfig() {
+    if (usedPar.baseline.has_value() || usedPar.charge.has_value()) {
+        std::cout << "\n";
+        std::cout << "Configure limits for charge algorithm" << "\n";
+
+        std::cout << "Enter min value point for baseline" << "\n";
+        int16_t min;
+        std::cin >> min;
+
+        std::cout << "Enter max value point for baseline" << "\n";
+        int16_t max;
+        std::cin >> max;
+
+        usedPar.baselineLimits = std::make_pair(min, max);
+    }
+    if (usedPar.charge.has_value()) {
+        std::cout << "Enter min value point for charge" << "\n";
+        int16_t min;
+        std::cin >> min;
+
+        std::cout << "Enter max value point for charge" << "\n";
+        int16_t max;
+        std::cin >> max;
+
+        usedPar.chargeLimits = std::make_pair(min, max);
+    }
+}
+
+void Parser::DRSConsoleParser::ReadHistograms() {
+    if (usedPar.baseline.has_value() || usedPar.charge.has_value() || 
+        usedPar.amplitude.has_value() || usedPar.scaler.has_value() ) {
+            std::cout << "\n";
+            std::cout << "Choose parameters to configure histogram" << std::endl;
+            int i = 0;
+            if (usedPar.baseline.has_value()) std::cout << "(" << i++ << ") baseline" << "\n";
+            if (usedPar.charge.has_value()) std::cout << "(" << i++ << ") charge" << "\n";
+            if (usedPar.amplitude.has_value()) std::cout << "(" << i++ << ") amplitude" << "\n";
+            if (usedPar.scaler.has_value()) std::cout << "(" << i++ << ") scaler" << "\n";
+
+            std::string val;
+            std::cin >> val;
+
+            for (int k = 0; k < val.length(); k++) {
+                std::string tmp(1, val[k]);
+                int f = 0;
+                if (tmp == std::to_string(f++)) SetHistogramVector("baseline");
+                if (tmp == std::to_string(f++)) SetHistogramVector("charge");
+                if (tmp == std::to_string(f++)) SetHistogramVector("amplitude");
+                if (tmp == std::to_string(f++)) SetHistogramVector("scaler");
+            }
+        }
+}
+
+void Parser::DRSConsoleParser::SetHistogramVector(std::string parameter) {
+    std::cout << "\n";
+    std::cout << "Set number of bins for " << parameter << std::endl;
+    int16_t Nbins;
+    std::cin >> Nbins;
+
+    std::cout << "Set minimal value for " << parameter << std::endl;
+    double min;
+    std::cin >> min;
+    std::cout << "Set maximal value for " << parameter << std::endl;
+    double max;
+    std::cin >> max;
+
+    Global::IHist Hist{parameter, Nbins, min, max};
+    if (!usedPar.hist.has_value()) {
+        usedPar.hist = {Hist};
+    } else {
+        auto& v = *usedPar.hist;
+        v.push_back(Hist);
+    }
 }

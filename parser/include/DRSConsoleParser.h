@@ -7,6 +7,13 @@ namespace Parser {
     public:
         DRSConsoleParser();
         ~DRSConsoleParser();
+
+        void Start() final;
     private:
+        Global::Parameters usedPar;
+        void ReadData();
+        void ReadConfig();
+        void ReadHistograms();
+        void SetHistogramVector(std::string parameter);
     };
 }

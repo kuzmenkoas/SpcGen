@@ -9,7 +9,7 @@
 namespace Parser {
     class IParser {
     public:
-        IParser() {};
+        IParser() {this->Start();};
         ~IParser() {};
 
         std::vector<std::string> GetUsedWriterVector() {return fUsedWriterVector;};
@@ -17,6 +17,7 @@ namespace Parser {
         void SetUsedParameters(Global::Parameters par) {fUsedParameters = par;};
         Global::Parameters GetUsedParameters() {return fUsedParameters;};
 
+        virtual void Start() {};
     private:
         std::vector<std::string> fUsedWriterVector{"Root"};
         Global::Parameters fUsedParameters{};

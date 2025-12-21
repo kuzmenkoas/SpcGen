@@ -20,6 +20,12 @@ std::shared_ptr<Parser::IParser> Parser::ParserFactory::BuildParser(Global::Devi
 
 std::shared_ptr<Parser::IParser> Parser::ParserFactory::BuildParser(Global::DeviceType aType, std::filesystem::path path) {
     std::shared_ptr<Parser::IParser> parser = nullptr;
-
+    switch (aType) {
+        case Global::DeviceType::DRS:
+            parser = std::make_shared<DRSConfigParser>(path);
+            break;
+        case Global::DeviceType::Digitizer:
+            break;
+    }
     return parser;
 }

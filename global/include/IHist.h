@@ -7,7 +7,7 @@ namespace Global {
     struct IHist {
         std::string parameter;
         int Nbins;
-        int32_t min;
+        double min;
         int32_t max;
     };
 }
