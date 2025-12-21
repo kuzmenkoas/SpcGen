@@ -224,7 +224,7 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                 }
                 CalculateWaveform(waveform);
 
-                (usedParameters.charge.has_value() || usedParameters.baseline.has_value()) CalculateBaseline(waveform);
+                if (usedParameters.charge.has_value() || usedParameters.baseline.has_value()) CalculateBaseline(waveform);
                 if (usedParameters.charge.has_value()) fEvent.charge = CalculateCharge(waveform);
                 if (usedParameters.amplitude.has_value()) fEvent.amplitude = CalculateAmplitude(waveform);
                 // Process event
@@ -256,7 +256,7 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                 }
                 gr->Write("waveform");
             }
-            
+
             std::cout << "Reading success!" << "\n";
             break;
         }
