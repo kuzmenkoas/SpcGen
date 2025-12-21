@@ -1,7 +1,6 @@
 #include "DRSConsoleParser.h"
 
 Parser::DRSConsoleParser::DRSConsoleParser() {
-    Start();
 }
 
 Parser::DRSConsoleParser::~DRSConsoleParser() {
@@ -82,26 +81,26 @@ void Parser::DRSConsoleParser::ReadConfig() {
 void Parser::DRSConsoleParser::ReadHistograms() {
     if (usedPar.baseline.has_value() || usedPar.charge.has_value() || 
         usedPar.amplitude.has_value() || usedPar.scaler.has_value() ) {
-            std::cout << "\n";
-            std::cout << "Choose parameters to configure histogram" << std::endl;
-            int i = 0;
-            if (usedPar.baseline.has_value()) std::cout << "(" << i++ << ") baseline" << "\n";
-            if (usedPar.charge.has_value()) std::cout << "(" << i++ << ") charge" << "\n";
-            if (usedPar.amplitude.has_value()) std::cout << "(" << i++ << ") amplitude" << "\n";
-            if (usedPar.scaler.has_value()) std::cout << "(" << i++ << ") scaler" << "\n";
+        std::cout << "\n";
+        std::cout << "Choose parameters to configure histogram" << std::endl;
+        int i = 0;
+        if (usedPar.baseline.has_value()) std::cout << "(" << i++ << ") baseline" << "\n";
+        if (usedPar.charge.has_value()) std::cout << "(" << i++ << ") charge" << "\n";
+        if (usedPar.amplitude.has_value()) std::cout << "(" << i++ << ") amplitude" << "\n";
+        if (usedPar.scaler.has_value()) std::cout << "(" << i++ << ") scaler" << "\n";
 
-            std::string val;
-            std::cin >> val;
+        std::string val;
+        std::cin >> val;
 
-            for (int k = 0; k < val.length(); k++) {
-                std::string tmp(1, val[k]);
-                int f = 0;
-                if (tmp == std::to_string(f++)) SetHistogramVector("baseline");
-                if (tmp == std::to_string(f++)) SetHistogramVector("charge");
-                if (tmp == std::to_string(f++)) SetHistogramVector("amplitude");
-                if (tmp == std::to_string(f++)) SetHistogramVector("scaler");
-            }
+        for (int k = 0; k < val.length(); k++) {
+            std::string tmp(1, val[k]);
+            int f = 0;
+            if (tmp == std::to_string(f++)) SetHistogramVector("baseline");
+            if (tmp == std::to_string(f++)) SetHistogramVector("charge");
+            if (tmp == std::to_string(f++)) SetHistogramVector("amplitude");
+            if (tmp == std::to_string(f++)) SetHistogramVector("scaler");
         }
+    }
 }
 
 void Parser::DRSConsoleParser::SetHistogramVector(std::string parameter) {

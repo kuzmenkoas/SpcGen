@@ -15,6 +15,7 @@ std::shared_ptr<Parser::IParser> Parser::ParserFactory::BuildParser(Global::Devi
         case Global::DeviceType::Digitizer:
             break;
     }
+    if (parser) parser->Start();
     return parser;
 }
 
@@ -27,5 +28,6 @@ std::shared_ptr<Parser::IParser> Parser::ParserFactory::BuildParser(Global::Devi
         case Global::DeviceType::Digitizer:
             break;
     }
+    if (parser) parser->Start();
     return parser;
 }

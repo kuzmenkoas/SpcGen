@@ -9,7 +9,7 @@
 namespace Parser {
     class IParser {
     public:
-        IParser() {this->Start();};
+        IParser() {};
         ~IParser() {};
 
         std::vector<std::string> GetUsedWriterVector() {return fUsedWriterVector;};

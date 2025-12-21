@@ -8,5 +8,12 @@ namespace Parser {
     public:
         DRSConfigParser(std::filesystem::path path);
         ~DRSConfigParser();
+
+        void Start() final;
+    private:
+        Global::Parameters usedPar;
+        void ReadData();
+        void ReadConfig();
+        void ReadHistograms();
     };
 }
