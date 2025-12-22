@@ -4,6 +4,7 @@
 
 #include "ArgReader.h"
 #include "DRSDevice.h"
+#include "DigitizerDevice.h"
 
 namespace Core {
     class ApplicationManager {
