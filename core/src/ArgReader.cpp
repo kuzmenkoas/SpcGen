@@ -4,7 +4,8 @@
 
 Core::ArgReader::ArgReader(int argc, char *argv[]) {
         ParseThreads(argc, argv);
-        ParseDRSBinaryFile(argc, argv);
+        if (ParseDRSBinaryFile(argc, argv)) fDeviceType = Global::DeviceType::DRS;
+        else if (ParseDigitizerBinaryFile(argc, argv)) fDeviceType = Global::DeviceType::Digitizer;
         ParseConfigFile(argc, argv);
 }
 
@@ -27,17 +28,35 @@ void Core::ArgReader::ParseThreads(int argc, char *argv[]) {
     }
 }
 
-void Core::ArgReader::ParseDRSBinaryFile(int argc, char *argv[]) {
+bool Core::ArgReader::ParseDRSBinaryFile(int argc, char *argv[]) {
+    bool is = false;
     for (int i = 1; i < argc; i++) {
         std::string name = argv[i];
         if (name.size() > binaryDRSExtension.size()+1) {
             if (name.substr(name.size()-binaryDRSExtension.size(), name.size()) == binaryDRSExtension) {
                 fBinaryPathVector.push_back(name);
                 SetDRSBinaryFileName(name);
+                is = true;
                 break;
             }
         }
     }
+    return is;
+}
+
+bool Core::ArgReader::ParseDigitizerBinaryFile(int argc, char *argv[]) {
+    bool is = false;
+    for (int i = 1; i < argc; i++) {
+        std::string name = argv[i];
+        if (name.size() > binaryDigitizerExtension.size()+1) {
+            if (name.substr(name.size()-binaryDigitizerExtension.size(), name.size()) == binaryDigitizerExtension) {
+                fBinaryPathVector.push_back(name);
+                std::call_once(initDigitizerFlag, [this, name](){SetDigitizerBinaryFileName(name);});
+                is = true;
+            }
+        }
+    }
+    return is;
 }
 
 void Core::ArgReader::ParseConfigFile(int argc, char *argv[]) {
@@ -55,6 +74,12 @@ void Core::ArgReader::ParseConfigFile(int argc, char *argv[]) {
 void Core::ArgReader::SetDRSBinaryFileName(std::string name) {
     name = GetBinaryFileName(name);
     name = name.substr(0, name.size()-(binaryDRSExtension.size()+1));
+    fFileName = name;
+}
+
+void Core::ArgReader::SetDigitizerBinaryFileName(std::string name) {
+    name = GetBinaryFileName(name);
+    name = name.substr(0, name.size()-(binaryDigitizerExtension.size()+1));
     fFileName = name;
 }
 
