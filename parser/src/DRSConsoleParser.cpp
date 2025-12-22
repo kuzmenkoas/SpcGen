@@ -133,7 +133,7 @@ void Parser::DRSConsoleParser::SetHistogramVector(std::string parameter) {
     double max;
     std::cin >> max;
 
-    Global::IHist Hist{parameter, Nbins, min, max};
+    Global::IHist Hist{"DRS", parameter, Nbins, min, max};
     if (!usedPar.hist.has_value()) {
         usedPar.hist = {Hist};
     } else {

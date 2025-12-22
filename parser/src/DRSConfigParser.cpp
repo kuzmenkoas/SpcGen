@@ -129,10 +129,10 @@ void Parser::DRSConfigParser::ReadHistograms(std::string key) {
                         tmp = tmp.substr(tmp.find_first_of(" ")+1);
                         std::string max = tmp.substr(0, tmp.find_first_of(" "));
 
-                        if (parameter == "baseline") hist.push_back(Global::IHist{parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
-                        if (parameter == "charge") hist.push_back(Global::IHist{parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
-                        if (parameter == "amplitude") hist.push_back(Global::IHist{parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
-                        if (parameter == "scaler") hist.push_back(Global::IHist{parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
+                        if (parameter == "baseline") hist.push_back(Global::IHist{"DRS", parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
+                        if (parameter == "charge") hist.push_back(Global::IHist{"DRS", parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
+                        if (parameter == "amplitude") hist.push_back(Global::IHist{"DRS", parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
+                        if (parameter == "scaler") hist.push_back(Global::IHist{"DRS", parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
                     } else break;
                 }
             }

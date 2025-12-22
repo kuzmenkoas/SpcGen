@@ -5,6 +5,7 @@
 
 namespace Global {
     struct IHist {
+        std::string file;
         std::string parameter;
         int Nbins;
         double min;
