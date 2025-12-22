@@ -110,12 +110,6 @@ void Parser::DigitizerConsoleParser::ReadDataWaveform() {
             usedPar.baseline = DEFAULT_VALUE;
             usedPar.charge = DEFAULT_VALUE;
             usedPar.amplitude = DEFAULT_VALUE;
-            usedPar.cfd_y2 = DEFAULT_VALUE;
-            usedPar.baseline = DEFAULT_VALUE;
-            usedPar.height = DEFAULT_VALUE;
-            usedPar.eventCounter = DEFAULT_VALUE;
-            usedPar.eventCounterPSD = DEFAULT_VALUE;
-            usedPar.psdValue = DEFAULT_VALUE;
         }
         if (tmp == std::to_string(f++)) usedPar.baseline = DEFAULT_VALUE;
         if (tmp == std::to_string(f++)) usedPar.charge = DEFAULT_VALUE;
