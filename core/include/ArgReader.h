@@ -19,6 +19,7 @@ namespace Core {
         std::string GetFileName() {return fFileName;};
 
         Global::DeviceType GetDeviceType() {return fDeviceType;};
+        std::vector<std::string> GetDigitizerTypes() {return fDigitizerTypes;};
     private:
         void ParseThreads(int argc, char *argv[]);
         bool ParseDRSBinaryFile(int argc, char *argv[]);
@@ -39,5 +40,6 @@ namespace Core {
         std::string fFileName = "";
         mutable std::once_flag initDigitizerFlag;
         Global::DeviceType fDeviceType;
+        std::vector<std::string> fDigitizerTypes = {};
     };
 }

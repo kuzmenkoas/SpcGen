@@ -20,10 +20,14 @@ namespace Device {
         void SetFileName(std::string name) {fFileName = name;};
         std::string GetFileName() {return fFileName;};
 
+        void SetDeviceType(Global::DeviceType aType) {fDeviceType = aType;};
+
         std::shared_ptr<Parser::IParser> GetParser() {return fParser;};
         void Prepare();
         virtual void PrepareDevice() {};
         virtual void Start() {};
+
+        void SetDigitizerTypes(std::vector<std::string> aDigitizerTypes) {fDigitizerTypes = aDigitizerTypes;};
 
         TFile* fRootFile = nullptr;
     private:
@@ -33,5 +37,7 @@ namespace Device {
         std::vector<std::filesystem::path> fBinaryPathVector{};
         std::shared_ptr<Parser::IParser> fParser = nullptr;
         std::string fFileName;
+        std::vector<std::string> fDigitizerTypes = {};
+        Global::DeviceType fDeviceType;
     };
 }

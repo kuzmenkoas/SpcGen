@@ -5,7 +5,9 @@
 Core::ArgReader::ArgReader(int argc, char *argv[]) {
         ParseThreads(argc, argv);
         if (ParseDRSBinaryFile(argc, argv)) fDeviceType = Global::DeviceType::DRS;
-        else if (ParseDigitizerBinaryFile(argc, argv)) fDeviceType = Global::DeviceType::Digitizer;
+        else if (ParseDigitizerBinaryFile(argc, argv)) {
+            fDeviceType = Global::DeviceType::Digitizer;
+        }
         ParseConfigFile(argc, argv);
 }
 
@@ -46,6 +48,7 @@ bool Core::ArgReader::ParseDRSBinaryFile(int argc, char *argv[]) {
 
 bool Core::ArgReader::ParseDigitizerBinaryFile(int argc, char *argv[]) {
     bool is = false;
+    int counter = 0;
     for (int i = 1; i < argc; i++) {
         std::string name = argv[i];
         if (name.size() > binaryDigitizerExtension.size()+1) {
@@ -53,9 +56,11 @@ bool Core::ArgReader::ParseDigitizerBinaryFile(int argc, char *argv[]) {
                 fBinaryPathVector.push_back(name);
                 std::call_once(initDigitizerFlag, [this, name](){SetDigitizerBinaryFileName(name);});
                 is = true;
+                counter++;
             }
         }
     }
+    if (counter == 2) fDigitizerTypes = {"PSD", "Waveform"};
     return is;
 }
 

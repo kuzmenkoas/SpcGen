@@ -9,8 +9,9 @@ Device::IDevice::~IDevice() {
 
 void Device::IDevice::Prepare() {
     Parser::ParserFactory parserFactory;
-    if (GetConfigPath().empty()) fParser = parserFactory.BuildParser(Global::DeviceType::DRS);
-    else fParser = parserFactory.BuildParser(Global::DeviceType::DRS, GetConfigPath());
+    parserFactory.SetDigitizerTypes(fDigitizerTypes);
+    if (GetConfigPath().empty()) fParser = parserFactory.BuildParser(fDeviceType);
+    else fParser = parserFactory.BuildParser(fDeviceType, GetConfigPath());
     
     for (std::string writer : fParser->GetUsedWriterVector()) {
         if (writer == "Root") ConfigureRoot();

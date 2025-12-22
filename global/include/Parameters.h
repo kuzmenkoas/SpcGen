@@ -30,13 +30,14 @@ namespace Global {
         std::optional<std::pair<int16_t, int16_t>> signalRange;
 
         // Digitizer PSD
-        std::optional< int32_t> qShort;
-        std::optional< int32_t> qLong;
-        std::optional< int16_t> cfd_y1;
-        std::optional< int16_t> cfd_y2;
-        std::optional< int16_t> height;
-        std::optional< int32_t> eventCounter;
-        std::optional< int32_t> eventCounterPSD;
-        std::optional< int16_t> psdValue;
+        std::optional<int32_t> qShort;
+        std::optional<int32_t> qLong;
+        std::optional<int16_t> cfd_y1;
+        std::optional<int16_t> cfd_y2;
+        std::optional<int16_t> baselinePSD;
+        std::optional<int16_t> height;
+        std::optional<int32_t> eventCounter;
+        std::optional<int32_t> eventCounterPSD;
+        std::optional<int16_t> psdValue;
     };
 }

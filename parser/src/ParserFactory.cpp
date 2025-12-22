@@ -13,6 +13,7 @@ std::shared_ptr<Parser::IParser> Parser::ParserFactory::BuildParser(Global::Devi
             parser = std::make_shared<DRSConsoleParser>();
             break;
         case Global::DeviceType::Digitizer:
+            parser = std::make_shared<DigitizerConsoleParser>(fDigitizerTypes);
             break;
     }
     if (parser) parser->Start();
@@ -26,6 +27,7 @@ std::shared_ptr<Parser::IParser> Parser::ParserFactory::BuildParser(Global::Devi
             parser = std::make_shared<DRSConfigParser>(path);
             break;
         case Global::DeviceType::Digitizer:
+            parser = std::make_shared<DigitizerConfigParser>(path, fDigitizerTypes);
             break;
     }
     if (parser) parser->Start();
