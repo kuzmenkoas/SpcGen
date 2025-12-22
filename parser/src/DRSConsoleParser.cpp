@@ -11,7 +11,7 @@ void Parser::DRSConsoleParser::Start() {
     ReadData();
     ReadConfig();
     ReadHistograms();
-    ReadSignal();
+    if (usedPar.amplitude.has_value()) ReadSignal();
 
     SetUsedParameters(usedPar);
 }
@@ -99,6 +99,7 @@ void Parser::DRSConsoleParser::ReadHistograms() {
         std::cout << "\n";
         std::cout << "Choose parameters to configure histogram" << std::endl;
         int i = 0;
+        std::cout << "(" << i++ << ") without" << "\n";
         if (usedPar.baseline.has_value()) std::cout << "(" << i++ << ") baseline" << "\n";
         if (usedPar.charge.has_value()) std::cout << "(" << i++ << ") charge" << "\n";
         if (usedPar.amplitude.has_value()) std::cout << "(" << i++ << ") amplitude" << "\n";
@@ -110,6 +111,7 @@ void Parser::DRSConsoleParser::ReadHistograms() {
         for (int k = 0; k < val.length(); k++) {
             std::string tmp(1, val[k]);
             int f = 0;
+            if (tmp == std::to_string(f++)) break;
             if (tmp == std::to_string(f++)) SetHistogramVector("baseline");
             if (tmp == std::to_string(f++)) SetHistogramVector("charge");
             if (tmp == std::to_string(f++)) SetHistogramVector("amplitude");
