@@ -11,6 +11,7 @@ void Parser::DRSConsoleParser::Start() {
     ReadData();
     ReadConfig();
     ReadHistograms();
+    ReadSignal();
 
     SetUsedParameters(usedPar);
 }
@@ -137,4 +138,28 @@ void Parser::DRSConsoleParser::SetHistogramVector(std::string parameter) {
         auto& v = *usedPar.hist;
         v.push_back(Hist);
     }
+}
+
+void Parser::DRSConsoleParser::ReadSignal() {
+    std::cout << "\n";
+    std::cout << "Choose which form of signal:" << "\n";
+    int i = 1;
+    std::cout << "(" << i++ << ") up" << "\n";
+    std::cout << "(" << i++ << ") down" << "\n";
+
+    int val;
+    std::cin >> val;
+    i = 1;
+    if (val == i++) usedPar.signal = "up";
+    if (val == i++) usedPar.signal = "down";
+
+    std::cout << "Enter left range for amplitude fit" << "\n";
+    int lRange;
+    std::cin >> lRange;
+
+    std::cout << "Enter right range for amplitude fit" << "\n";
+    int rRange;
+    std::cin >> rRange;
+
+    usedPar.signalRange = std::make_pair(lRange, rRange);
 }
