@@ -11,6 +11,7 @@ void Parser::DRSConfigParser::Start() {
     ReadData();
     ReadConfig();
     ReadHistograms();
+    ReadSignal();
 
     SetUsedParameters(usedPar);
 }
@@ -127,7 +128,6 @@ void Parser::DRSConfigParser::ReadHistograms(std::string key) {
                         std::string min = tmp.substr(0, tmp.find_first_of(" "));
                         tmp = tmp.substr(tmp.find_first_of(" ")+1);
                         std::string max = tmp.substr(0, tmp.find_first_of(" "));
-                        tmp = tmp.substr(tmp.find_first_of(" ")+1);
 
                         if (parameter == "baseline") hist.push_back(Global::IHist{parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
                         if (parameter == "charge") hist.push_back(Global::IHist{parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
@@ -142,5 +142,39 @@ void Parser::DRSConfigParser::ReadHistograms(std::string key) {
       abort();
     }
     if (!hist.empty()) usedPar.hist = hist;
+    file.close();
+}
+
+void Parser::DRSConfigParser::ReadSignal(std::string key) {
+    std::ifstream file = OpenFile();
+    std::string CurStr;
+    try {
+        while(getline (file,CurStr)){
+            if (CurStr.compare(0, key.size(), key) == 0) {
+                while (getline (file, CurStr)) {
+                    if (CurStr.c_str()[0]=='+') {
+                        size_t found = CurStr.find_first_of(" ");
+                        CurStr = CurStr.substr(found+1);
+                        if (CurStr == "up" || CurStr == "down") usedPar.signal = CurStr;
+                        else {
+                            std::string range = CurStr.substr(0, CurStr.find_first_of(" "));
+                            if (range == "range") {
+                                std::string tmp = CurStr.substr(CurStr.find_first_of(" ")+1);
+                                std::string lRange = tmp.substr(0, tmp.find_first_of(" "));
+                                tmp = tmp.substr(tmp.find_first_of(" ")+1);
+                                std::string rRange = tmp.substr(0, tmp.find_first_of(" "));
+                                usedPar.signalRange = std::make_pair(std::stoi(lRange), std::stoi(rRange));
+                            } else {
+                                std::cerr << "Warning" << std::endl;
+                            }
+                        }
+                    } else break;
+                }
+            }
+        }
+    } catch (const std::exception& e) {
+      std::cerr << "Exception: " << e.what() << std::endl;
+      abort();
+    }
     file.close();
 }

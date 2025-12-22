@@ -26,6 +26,8 @@ namespace Global {
         std::optional<int16_t> range;
         std::optional<int16_t> trigger;
         std::optional<uint32_t> scaler;
+        std::optional<std::string> signal;
+        std::optional<std::pair<int16_t, int16_t>> signalRange;
 
         // Digitizer PSD
         std::optional< int32_t> qShort;

@@ -363,9 +363,17 @@ void Device::DRSDevice::CalculateBaseline(std::vector<double> eventWaveform) {
 }
 
 double Device::DRSDevice::CalculateAmplitude(std::vector<double> eventWaveform) {
+    Global::Parameters usedParameters = GetParser()->GetUsedParameters();
     double amplitude = 0;
-    double maxValue = *std::max_element(eventWaveform.begin(), eventWaveform.end());
-    TF1* parabola = new TF1("parabola", "pol2", 0, eventWaveform.size());
+    int index;
+    if (usedParameters.signal.value() == "up") {
+        auto value = std::max_element(eventWaveform.begin(), eventWaveform.end());
+        index = std::distance(eventWaveform.begin(), value);
+    } else if (usedParameters.signal.value() == "down") {
+        auto value = std::min_element(eventWaveform.begin(), eventWaveform.end());
+        index = std::distance(eventWaveform.begin(), value);
+    }
+    TF1* parabola = new TF1("parabola", "pol2", index-usedParameters.signalRange.value().first, index+usedParameters.signalRange.value().second);
     TGraph* gr = new TGraph();
     for (size_t i = 0; i < eventWaveform.size(); i++) {
         gr->SetPoint(i, i, eventWaveform[i]);
