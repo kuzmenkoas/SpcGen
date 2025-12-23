@@ -28,6 +28,7 @@ namespace Device {
         virtual void Start() {};
 
         void SetDigitizerTypes(std::vector<std::string> aDigitizerTypes) {fDigitizerTypes = aDigitizerTypes;};
+        std::vector<std::string> GetDigitizerTypes() {return fDigitizerTypes;};
 
         TFile* fRootFile = nullptr;
     private:
@@ -37,7 +38,7 @@ namespace Device {
         std::vector<std::filesystem::path> fBinaryPathVector{};
         std::shared_ptr<Parser::IParser> fParser = nullptr;
         std::string fFileName;
-        std::vector<std::string> fDigitizerTypes = {};
         Global::DeviceType fDeviceType;
+        std::vector<std::string> fDigitizerTypes = {};
     };
 }

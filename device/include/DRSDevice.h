@@ -38,8 +38,6 @@ namespace Device {
         std::vector<TH1*> fChannelHist[4] = {};
         TDirectory* fDirectoryMap[4] = {};
 
-        TH1* h1 = new TH1D("charge", "charge", 1500, -32, 160);
-
         void ConfigureRoot();
         void ConfigureTxt();
         void WriteTxtEvent();
