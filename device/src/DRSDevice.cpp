@@ -23,7 +23,7 @@ void Device::DRSDevice::Start() {
     Global::Parameters usedParameters = GetParser()->GetUsedParameters();
 
     for (std::filesystem::path path : GetBinaryPathVector()) {
-        std::ifstream file(path.string());
+        std::ifstream file(path.string(), std::ios::binary);
         if (file.is_open()) {
             char tmp[4];
             ReadFileHeader(&file, &path);
@@ -40,7 +40,7 @@ void Device::DRSDevice::Start() {
         for (int i = 0; i < 4; i++) {
             if (fDirectoryMap[i]) fDirectoryMap[i]->cd();
             for (size_t k = 0; k < size(fChannelHist[i]); k++) {
-                TString name = TString(usedParameters.hist.value()[k].parameter);
+                TString name(usedParameters.hist.value()[k].parameter.c_str(), usedParameters.hist.value()[k].parameter.length());
                 fChannelHist[i][k]->Write(name);        
             }
         }
@@ -59,7 +59,7 @@ void Device::DRSDevice::ConfigureRoot() {
     for (bool channel : fChannelMap) {
         if (channel) {
             std::string id = "Channel " + std::to_string(ch);
-            TString idString = TString(id);
+            TString idString = TString(id.c_str(), id.length());
 
             TDirectory* dir = fRootFile->mkdir(idString);
             dir->cd();
@@ -85,7 +85,7 @@ void Device::DRSDevice::ConfigureRoot() {
                 fDirectoryMap[ch] = dirHist;
                 if (usedParameters.hist.has_value()) {
                     for (auto& hist : *usedParameters.hist) {
-                        TString name = TString(hist.parameter);
+                        TString name = TString(hist.parameter.c_str(), hist.parameter.length());
                         TH1* h1 = new TH1D(name, name, hist.Nbins, hist.min, hist.max);
                         fChannelHist[ch-1].push_back(h1);
                     }

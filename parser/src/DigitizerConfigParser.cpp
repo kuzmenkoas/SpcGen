@@ -129,6 +129,14 @@ void Parser::DigitizerConfigParser::ReadHistograms(std::string key) {
                         tmp = tmp.substr(tmp.find_first_of(" ")+1);
                         std::string max = tmp.substr(0, tmp.find_first_of(" "));
 
+                        if (parameter == "qShort") hist.push_back(Global::IHist{file, parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
+                        if (parameter == "qLong") hist.push_back(Global::IHist{file, parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
+                        if (parameter == "cfd_y1") hist.push_back(Global::IHist{file, parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
+                        if (parameter == "cfd_y2") hist.push_back(Global::IHist{file, parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
+                        if (parameter == "height") hist.push_back(Global::IHist{file, parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
+                        if (parameter == "eventCounter") hist.push_back(Global::IHist{file, parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
+                        if (parameter == "eventCounterPSD") hist.push_back(Global::IHist{file, parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
+                        if (parameter == "psdValue") hist.push_back(Global::IHist{file, parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
                         if (parameter == "baseline") hist.push_back(Global::IHist{file, parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
                         if (parameter == "charge") hist.push_back(Global::IHist{file, parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
                         if (parameter == "amplitude") hist.push_back(Global::IHist{file, parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});

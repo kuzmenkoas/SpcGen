@@ -96,6 +96,22 @@ void Device::DigitizerDevice::ProcessPSD(std::filesystem::path path) {
 
         nEvents++;
         fTreePSD->Fill();
+
+        if (usedParameters.hist.has_value()) {
+            auto& hists = *usedParameters.hist;
+            int iHist = 0;
+            for (size_t i = 0; i < size(hists); i++) {
+                if (hists[i].parameter == "qShort" && hists[i].file == "PSD") fHist[iHist++]->Fill(fEvent.qShort);
+                if (hists[i].parameter == "qLong" && hists[i].file == "PSD") fHist[iHist++]->Fill(fEvent.qLong);
+                if (hists[i].parameter == "cfd_y1" && hists[i].file == "PSD") fHist[iHist++]->Fill(fEvent.cfd_y1);
+                if (hists[i].parameter == "cfd_y2" && hists[i].file == "PSD") fHist[iHist++]->Fill(fEvent.cfd_y2);
+                if (hists[i].parameter == "baseline" && hists[i].file == "PSD") fHist[iHist++]->Fill(fEvent.baselinePSD);
+                if (hists[i].parameter == "height" && hists[i].file == "PSD") fHist[iHist++]->Fill(fEvent.height);
+                if (hists[i].parameter == "eventCounter" && hists[i].file == "PSD") fHist[iHist++]->Fill(fEvent.eventCounter);
+                if (hists[i].parameter == "eventCounterPSD" && hists[i].file == "PSD") fHist[iHist++]->Fill(fEvent.eventCounterPSD);
+                if (hists[i].parameter == "psdValue" && hists[i].file == "PSD") fHist[iHist++]->Fill(fEvent.psdValue);
+            }
+        }
     }
     file.close();
 }
@@ -128,6 +144,22 @@ void Device::DigitizerDevice::ProcessWaveform(std::filesystem::path path) {
         gr->AddPoint(counter++, event/eventCounter);
     }
     gr->Write("waveform");
+
+    if (usedParameters.hist.has_value()) {
+        auto& hists = *usedParameters.hist;
+        int iHist = 0;
+        for (size_t i = 0; i < size(hists); i++) {
+            if (hists[i].parameter == "qShort" && hists[i].file == "Waveform") fHist[iHist++]->Fill(fEvent.qShort);
+            if (hists[i].parameter == "qLong" && hists[i].file == "Waveform") fHist[iHist++]->Fill(fEvent.qLong);
+            if (hists[i].parameter == "cfd_y1" && hists[i].file == "Waveform") fHist[iHist++]->Fill(fEvent.cfd_y1);
+            if (hists[i].parameter == "cfd_y2" && hists[i].file == "Waveform") fHist[iHist++]->Fill(fEvent.cfd_y2);
+            if (hists[i].parameter == "baseline" && hists[i].file == "Waveform") fHist[iHist++]->Fill(fEvent.baselinePSD);
+            if (hists[i].parameter == "height" && hists[i].file == "Waveform") fHist[iHist++]->Fill(fEvent.height);
+            if (hists[i].parameter == "eventCounter" && hists[i].file == "Waveform") fHist[iHist++]->Fill(fEvent.eventCounter);
+            if (hists[i].parameter == "eventCounterPSD" && hists[i].file == "Waveform") fHist[iHist++]->Fill(fEvent.eventCounterPSD);
+            if (hists[i].parameter == "psdValue" && hists[i].file == "Waveform") fHist[iHist++]->Fill(fEvent.psdValue);
+        }
+    }
 
     file.close();
 }
@@ -217,6 +249,15 @@ void Device::DigitizerDevice::ConfigureRoot() {
     if (usedParameters.hist.has_value() || usedParameters.waveform.has_value()) {
         TDirectory* dir = fRootFile->mkdir("Histograms");
         dir->cd();
+
+        if (usedParameters.hist.has_value()) {
+            for (auto& hist : *usedParameters.hist) {
+                std::string sName = hist.parameter + hist.file;
+                TString name = TString(sName.c_str(), sName.length());
+                TH1* h1 = new TH1D(name, name, hist.Nbins, hist.min, hist.max);
+                fHist.push_back(h1);
+            }
+        }
     }
     
 }

@@ -4,6 +4,7 @@
 #include <fstream>
 #include "IDevice.h"
 #include "TTree.h"
+#include "TH1.h"
 
 namespace Device {
     struct DigitizerEvent {
@@ -46,6 +47,7 @@ namespace Device {
 
         TTree* fTreePSD = nullptr;
         TTree* fTreeWaveform = nullptr;
+        std::vector<TH1*> fHist = {};
         Global::Parameters usedParameters;
     };
 }

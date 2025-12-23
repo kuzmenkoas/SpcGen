@@ -22,6 +22,6 @@ void Device::IDevice::Prepare() {
 
 void Device::IDevice::ConfigureRoot() {
     std::string fileName = GetFileName()+".root";
-    TString rFileName = TString(fileName);
+    TString rFileName(fileName.c_str(), fileName.length());
     fRootFile = new TFile(rFileName, "recreate");
 }
