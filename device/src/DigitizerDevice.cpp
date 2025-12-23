@@ -1,4 +1,7 @@
 #include "DigitizerDevice.h"
+#include "TGraph.h"
+#include <TF1.h>
+#include <algorithm>
 
 Device::DigitizerDevice::DigitizerDevice() {
 }
@@ -7,6 +10,7 @@ Device::DigitizerDevice::~DigitizerDevice() {
 }
 
 void Device::DigitizerDevice::PrepareDevice() {
+    usedParameters = GetParser()->GetUsedParameters();
     for (std::string writer : GetParser()->GetUsedWriterVector()) {
         if (writer == "Root") ConfigureRoot();
         if (writer == "Txt") ConfigureTxt();
@@ -15,6 +19,7 @@ void Device::DigitizerDevice::PrepareDevice() {
 
 void Device::DigitizerDevice::Start() {
     int i = 0;
+    if (GetDigitizerTypes().size() == 2) PreProcessWaveform(GetBinaryPathVector());
     for (std::string file : GetDigitizerTypes()) {
         if (file == "PSD") ProcessPSD(GetBinaryPathVector()[i++]);
         if (file == "Waveform") ProcessWaveform(GetBinaryPathVector()[i++]);
@@ -26,22 +31,50 @@ void Device::DigitizerDevice::Start() {
     }
 }
 
+void Device::DigitizerDevice::PreProcessWaveform(std::vector<std::filesystem::path> pathVector) {
+    // define wavelength by file size
+    uint32_t psdFileSize = std::filesystem::file_size(pathVector[0].string());
+    uint32_t waveformFileSize = std::filesystem::file_size(pathVector[1].string());
+    int rubbishBytes = 2+2*CountUsedParameters();
+    int dataBytes = CountUsedParametersBytes();
+    usedParameters.wavelength = waveformFileSize/(psdFileSize/(dataBytes+rubbishBytes))/2;
+}
+
+int Device::DigitizerDevice::CountUsedParameters() {
+    int i = 0;
+    if (usedParameters.qShort.has_value()) i++;
+    if (usedParameters.qLong.has_value()) i++;
+    if (usedParameters.cfd_y1.has_value()) i++;
+    if (usedParameters.cfd_y2.has_value()) i++;
+    if (usedParameters.baselinePSD.has_value()) i++;
+    if (usedParameters.height.has_value()) i++;
+    if (usedParameters.eventCounter.has_value()) i++;
+    if (usedParameters.eventCounterPSD.has_value()) i++;
+    if (usedParameters.psdValue.has_value()) i++;
+
+    return i;
+}
+
+int Device::DigitizerDevice::CountUsedParametersBytes() {
+    int i = 0;
+    if (usedParameters.qShort.has_value()) i += sizeof(fEvent.qShort);
+    if (usedParameters.qLong.has_value()) i += sizeof(fEvent.qLong);
+    if (usedParameters.cfd_y1.has_value()) i += sizeof(fEvent.cfd_y1);
+    if (usedParameters.cfd_y2.has_value()) i += sizeof(fEvent.cfd_y2);
+    if (usedParameters.baselinePSD.has_value()) i += sizeof(fEvent.baselinePSD);
+    if (usedParameters.height.has_value()) i += sizeof(fEvent.height);
+    if (usedParameters.eventCounter.has_value()) i += sizeof(fEvent.eventCounter);
+    if (usedParameters.eventCounterPSD.has_value()) i += sizeof(fEvent.eventCounterPSD);
+    if (usedParameters.psdValue.has_value()) i += sizeof(fEvent.psdValue);
+
+    return i;
+}
+
 void Device::DigitizerDevice::ProcessPSD(std::filesystem::path path) {
-    Global::Parameters usedParameters = GetParser()->GetUsedParameters();
     std::ifstream file(path.string(), std::ios::binary | std::ios::ate);
     file.seekg(0, std::ios::beg);
 
-    int parNumber = 0;
-    if (usedParameters.qShort.has_value()) parNumber++;
-    if (usedParameters.qLong.has_value()) parNumber++;
-    if (usedParameters.cfd_y1.has_value()) parNumber++;
-    if (usedParameters.cfd_y2.has_value()) parNumber++;
-    if (usedParameters.baselinePSD.has_value()) parNumber++;
-    if (usedParameters.height.has_value()) parNumber++;
-    if (usedParameters.eventCounter.has_value()) parNumber++;
-    if (usedParameters.eventCounterPSD.has_value()) parNumber++;
-    if (usedParameters.psdValue.has_value()) parNumber++;
-
+    int parNumber = CountUsedParameters();
     int nEvents = 0;
     while (true) {
         // Unused bytes (read and forget)
@@ -68,12 +101,93 @@ void Device::DigitizerDevice::ProcessPSD(std::filesystem::path path) {
 }
 
 void Device::DigitizerDevice::ProcessWaveform(std::filesystem::path path) {
+    std::ifstream file(path.string(), std::ios::binary | std::ios::ate);
+    file.seekg(0, std::ios::beg);
+
+    // Process waveform
+    int eventCounter = 0;
+    while (true) {
+        std::vector<int16_t> eventWaveform;
+        for (int i = 0; i < usedParameters.wavelength; i++) {
+            int16_t wave;
+            file.read(reinterpret_cast<char*>(&wave), sizeof(wave));
+            eventWaveform.push_back(wave);
+        }
+        if (file.eof()) break;
+        if (usedParameters.charge.has_value() || usedParameters.baseline.has_value()) CalculateBaseline(eventWaveform);
+        if (usedParameters.charge.has_value()) CalculateCharge(eventWaveform);
+        if (usedParameters.amplitude.has_value()) CalculateAmplitude(eventWaveform);
+        CalculateWaveform(eventWaveform);
+        fTreeWaveform->Fill();
+        eventCounter++;
+    }
+
+    TGraph* gr = new TGraph();
+    int counter = 0;
+    for (double event : fEvent.waveform) {
+        gr->AddPoint(counter++, event/eventCounter);
+    }
+    gr->Write("waveform");
+
+    file.close();
+}
+
+void Device::DigitizerDevice::CalculateBaseline(std::vector<int16_t> eventWaveform) {
+    int min = usedParameters.baselineLimits.value().first;
+    int max = usedParameters.baselineLimits.value().second;
+
+    fEvent.baseline = 0;
+    double ss = 0;
+    for (size_t i = 0; i < size(eventWaveform); i++) {
+        if ((i >= min) && (i <= max)) {
+            ss += eventWaveform[i];
+        }
+    }
+    fEvent.baseline = ss/(max-min+1.);
+}
+
+void Device::DigitizerDevice::CalculateCharge(std::vector<int16_t> eventWaveform) {
+    int min = usedParameters.chargeLimits.value().first;
+    int max = usedParameters.chargeLimits.value().second;
+    double charge = 0;
+    int counter = 0;
+    for (double waveform : eventWaveform) {
+        if ((counter >= min) && (counter <= max)) charge += waveform - fEvent.baseline;
+        counter++;
+    }
+    fEvent.charge = charge;
+}
+
+void Device::DigitizerDevice::CalculateAmplitude(std::vector<int16_t> eventWaveform) {
+    int index;
+    if (usedParameters.signal.value() == "up") {
+        auto value = std::max_element(eventWaveform.begin(), eventWaveform.end());
+        index = std::distance(eventWaveform.begin(), value);
+    } else if (usedParameters.signal.value() == "down") {
+        auto value = std::min_element(eventWaveform.begin(), eventWaveform.end());
+        index = std::distance(eventWaveform.begin(), value);
+    }
+    TF1* parabola = new TF1("parabola", "pol2", index-usedParameters.signalRange.value().first, index+usedParameters.signalRange.value().second);
+    TGraph* gr = new TGraph();
+    for (size_t i = 0; i < eventWaveform.size(); i++) {
+        gr->SetPoint(i, i, eventWaveform[i]);
+    }
+    gr->Fit("parabola", "QR");
+    double x = -parabola->GetParameter(1)/(2*parabola->GetParameter(2));
+    fEvent.amplitude = parabola->GetParameter(2)*x*x+parabola->GetParameter(1)*x+parabola->GetParameter(0);
+}
+
+void Device::DigitizerDevice::CalculateWaveform(std::vector<int16_t> eventWaveform) {
+    std::call_once(initWaveFlag, [this, eventWaveform](){InitializeSumWaveform(eventWaveform);});
+    for (size_t i = 1; i < size(eventWaveform); i++) fEvent.waveform[i] += eventWaveform[i];
+}
+
+void Device::DigitizerDevice::InitializeSumWaveform(std::vector<int16_t> eventWaveform) {
+    for (double waveform : eventWaveform) fEvent.waveform.push_back(waveform);
 }
 
 void Device::DigitizerDevice::ConfigureRoot() {
     // 1 channel
-    Global::Parameters usedParameters = GetParser()->GetUsedParameters();
-
     // PSD
     if (usedParameters.qShort.has_value() || usedParameters.qLong.has_value() ||
         usedParameters.cfd_y1.has_value() || usedParameters.cfd_y2.has_value() ||
@@ -95,9 +209,9 @@ void Device::DigitizerDevice::ConfigureRoot() {
 
     if (usedParameters.baseline.has_value() || usedParameters.charge.has_value() || usedParameters.amplitude.has_value()) {
         fTreeWaveform = new TTree("Waveform", "Waveform");
-        if (usedParameters.baseline.has_value()) fTreeWaveform->Branch("baseline", &fEvent.baseline, "baseline/I");
-        if (usedParameters.charge.has_value()) fTreeWaveform->Branch("charge", &fEvent.charge, "charge/I");
-        if (usedParameters.amplitude.has_value()) fTreeWaveform->Branch("amplitude", &fEvent.amplitude, "amplitude/I");
+        if (usedParameters.baseline.has_value()) fTreeWaveform->Branch("baseline", &fEvent.baseline);
+        if (usedParameters.charge.has_value()) fTreeWaveform->Branch("charge", &fEvent.charge);
+        if (usedParameters.amplitude.has_value()) fTreeWaveform->Branch("amplitude", &fEvent.amplitude);
     }
 
     if (usedParameters.hist.has_value() || usedParameters.waveform.has_value()) {

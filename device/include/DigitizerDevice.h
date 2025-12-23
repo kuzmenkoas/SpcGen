@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mutex>
+#include <fstream>
 #include "IDevice.h"
 #include "TTree.h"
 
@@ -17,6 +19,7 @@ namespace Device {
         double baseline;
         double charge;
         double amplitude;
+        std::vector<double> waveform;
     };
     class DigitizerDevice : public IDevice {
     public:
@@ -28,12 +31,21 @@ namespace Device {
     private:
         void ProcessPSD(std::filesystem::path path);
         void ProcessWaveform(std::filesystem::path path);
-
+        void PreProcessWaveform(std::vector<std::filesystem::path> pathVector);
+        int CountUsedParametersBytes();
+        int CountUsedParameters();
         void ConfigureRoot();
         void ConfigureTxt();
+        void CalculateBaseline(std::vector<int16_t> eventWaveform);
+        void CalculateCharge(std::vector<int16_t> eventWaveform);
+        void CalculateAmplitude(std::vector<int16_t> eventWaveform);
+        void CalculateWaveform(std::vector<int16_t> eventWaveform);
+        void InitializeSumWaveform(std::vector<int16_t> eventWaveform);
+        mutable std::once_flag initWaveFlag;
         Device::DigitizerEvent fEvent{};
 
         TTree* fTreePSD = nullptr;
         TTree* fTreeWaveform = nullptr;
+        Global::Parameters usedParameters;
     };
 }

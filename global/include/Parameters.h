@@ -39,5 +39,6 @@ namespace Global {
         std::optional<uint32_t> eventCounter;
         std::optional<uint32_t> eventCounterPSD;
         std::optional<int16_t> psdValue;
+        std::optional<int32_t> wavelength;
     };
 }
