@@ -12,6 +12,7 @@ Device::DRSDevice::~DRSDevice() {
 }
 
 void Device::DRSDevice::PrepareDevice() {
+    DefineChannels();
     // Make ntuples
     for (std::string writer : GetParser()->GetUsedWriterVector()) {
         if (writer == "Root") ConfigureRoot();
@@ -113,6 +114,82 @@ void Device::DRSDevice::WriteTxtEvent() {
     if (usedParameters.amplitude.has_value()) fTxtFile << fEvent.amplitude << " ";
     if (usedParameters.scaler.has_value()) fTxtFile << fEvent.scaler << " ";
     fTxtFile << "\n";
+}
+
+void Device::DRSDevice::DefineChannels() {
+    for (std::filesystem::path path : GetBinaryPathVector()) {
+        std::ifstream file(path.string(), std::ios::binary);
+        ReadFileHeader(&file, &path);
+        ReadChannels(&file, &path);
+        file.close();
+    }
+}
+
+void Device::DRSDevice::ReadChannels(std::ifstream* file, std::filesystem::path* path) {
+    Global::Parameters usedParameters = GetParser()->GetUsedParameters();
+    // Read Time header
+    char tmp[4];
+    file->read((char*)&tmp, sizeof(tmp));
+    if (tmp[0] == fTimeHeader[0] && tmp[1] == fTimeHeader[1] && tmp[2] == fTimeHeader[2] && tmp[3] == fTimeHeader[3]) {
+        // Read board id
+        file->read((char*)&tmp, sizeof(tmp));
+        
+        if (tmp[0] == fBoardNumberHeader[0] && tmp[1] == fBoardNumberHeader[1]) {
+            char idConv[2];
+            idConv[0] = tmp[2];
+            idConv[1] = tmp[3];
+
+            int16_t id = static_cast<uint8_t>(tmp[2]) | (static_cast<uint8_t>(tmp[3]) << 8);
+
+            std::cout << "Board serial number: " << id << "\n";
+
+            // Read Channel header
+            file->read((char*)&tmp, sizeof(tmp));
+            if ((tmp[0] == fChannelHeader[0]) && (tmp[1] == fChannelHeader[1]) && (tmp[2] == fChannelHeader[2])) {
+                char conv[3] = { tmp[1], tmp[2], tmp[3] };
+                int16_t channel = std::atoi(conv);
+
+                if (channel == 1) fChannelMap[0] = true;
+                if (channel == 2) fChannelMap[1] = true;
+                if (channel == 3) fChannelMap[2] = true;
+                if (channel == 4) fChannelMap[3] = true;
+
+                while (true) {
+                    if (file->read(reinterpret_cast<char*>(&tmp), sizeof(tmp))) {
+                        if (tmp[0] == fChannelHeader[0] && tmp[1] == fChannelHeader[1] && tmp[2] == fChannelHeader[2]) {
+                            char conv2[3] = { tmp[1], tmp[2], tmp[3] };
+                            int16_t channel = std::atoi(conv2);
+                            if (channel == 1) fChannelMap[0] = true;
+                            if (channel == 2) fChannelMap[1] = true;
+                            if (channel == 3) fChannelMap[2] = true;
+                            if (channel == 4) fChannelMap[3] = true;
+                        }
+
+                        if (tmp[0] == fEventHeader[0] && tmp[1] == fEventHeader[1] && tmp[2] == fEventHeader[2] && tmp[3] == fEventHeader[3]) {
+                            file->seekg(-4, std::ios_base::cur);
+                            break;
+                        }
+                    }
+                    else {
+                        // Error
+                        break;
+                        // exit
+                    }
+                }
+            }
+            else {
+                std::cerr << "Error: Channel header mismatch." << "\n";
+            }
+        }
+        else {
+            std::cerr << "Error: Board number header mismatch." << "\n";
+            std::cerr << "Stop program." << "\n";
+        }
+    }
+    else {
+        std::cerr << "Error: Time header mismatch." << "\n";
+        std::cerr << "Stop program." << "\n";
+    }
 }
 
 void Device::DRSDevice::ReadFileHeader(std::ifstream* file, std::filesystem::path* path) {

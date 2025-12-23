@@ -32,7 +32,7 @@ namespace Device {
         const char fChannelHeader[4] = {'C', '0', '0', ' '};
         const char fEventHeader[4] = {'E', 'H', 'D', 'R'};
 
-        bool fChannelMap[4] ={0, 0, 0, 1};
+        bool fChannelMap[4] ={0, 0, 0, 0};
         TTree* fChannelEventsTreeMap[4] = {};
         TTree* fChannelTimeTreeMap[4] = {};
         std::vector<TH1*> fChannelHist[4] = {};
@@ -41,6 +41,8 @@ namespace Device {
         void ConfigureRoot();
         void ConfigureTxt();
         void WriteTxtEvent();
+        void DefineChannels();
+        void ReadChannels(std::ifstream* file, std::filesystem::path* path);
         void ReadFileHeader(std::ifstream* file, std::filesystem::path* path);
         void ReadTimeHeader(std::ifstream* file, std::filesystem::path* path);
         void ReadEventHeader(std::ifstream* file, std::filesystem::path* path);
