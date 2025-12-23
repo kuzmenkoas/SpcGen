@@ -187,6 +187,11 @@ void Device::DigitizerDevice::CalculateCharge(std::vector<int16_t> eventWaveform
         if ((counter >= min) && (counter <= max)) charge += waveform - fEvent.baseline;
         counter++;
     }
+    double factor = 1;
+    double shift = 0;
+    if (usedParameters.factor.has_value()) factor = usedParameters.factor.value();
+    if (usedParameters.shift.has_value()) shift = usedParameters.shift.value();
+    charge = charge * factor + shift;
     fEvent.charge = charge;
 }
 
