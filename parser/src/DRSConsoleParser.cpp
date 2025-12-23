@@ -90,6 +90,16 @@ void Parser::DRSConsoleParser::ReadConfig() {
         std::cin >> max;
 
         usedPar.chargeLimits = std::make_pair(min, max);
+
+        std::cout << "Enter factor for charge" << "\n";
+        double factor;
+        std::cin >> factor;
+        usedPar.factor = factor;
+
+        std::cout << "Enter shift for charge" << "\n";
+        double shift;
+        std::cin >> shift;
+        usedPar.shift = shift;
     }
 }
 

@@ -413,6 +413,11 @@ double Device::DRSDevice::CalculateCharge(std::vector<double> eventWaveform) {
         if ((counter >= min) && (counter <= max)) charge += waveform - fEvent.baseline;
         counter++;
     }
+    double factor = 1;
+    double shift = 0;
+    if (usedParameters.factor.has_value()) factor = usedParameters.factor.value();
+    if (usedParameters.shift.has_value()) shift = usedParameters.shift.value();
+    charge = charge * factor + shift;
     return charge;
 }
 

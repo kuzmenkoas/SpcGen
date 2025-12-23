@@ -99,6 +99,8 @@ void Parser::DRSConfigParser::ReadConfig(std::string key) {
                         
                         if (parameter == "baseline") usedPar.baselineLimits = std::make_pair(std::stoi(min), std::stoi(max));
                         if (parameter == "charge") usedPar.chargeLimits = std::make_pair(std::stoi(min), std::stoi(max));
+                        if (parameter == "factor") usedPar.factor = std::stod(min);
+                        if (parameter == "shift") usedPar.shift = std::stod(min);
                     } else break;
                 }
             }
