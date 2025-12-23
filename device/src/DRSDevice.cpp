@@ -108,10 +108,10 @@ void Device::DRSDevice::ConfigureTxt() {
 
 void Device::DRSDevice::WriteTxtEvent() {
     Global::Parameters usedParameters = GetParser()->GetUsedParameters();
-    if (usedParameters.baseline.has_value()) fTxtFile << fEvent.baseline.value() << " ";
-    if (usedParameters.charge.has_value()) fTxtFile << fEvent.charge.value() << " ";
-    if (usedParameters.amplitude.has_value()) fTxtFile << fEvent.amplitude.value() << " ";
-    if (usedParameters.scaler.has_value()) fTxtFile << fEvent.scaler.value() << " ";
+    if (usedParameters.baseline.has_value()) fTxtFile << fEvent.baseline << " ";
+    if (usedParameters.charge.has_value()) fTxtFile << fEvent.charge << " ";
+    if (usedParameters.amplitude.has_value()) fTxtFile << fEvent.amplitude << " ";
+    if (usedParameters.scaler.has_value()) fTxtFile << fEvent.scaler << " ";
     fTxtFile << "\n";
 }
 
@@ -166,8 +166,8 @@ void Device::DRSDevice::ReadTimeHeader(std::ifstream* file, std::filesystem::pat
                             break;
                         }
                         fEvent.time = DEFAULT_VALUE;
-                        std::memcpy(&(*fEvent.time), &tmp, sizeof(tmp));
-                        fTimeVector[channel-1].push_back(fEvent.time.value());
+                        std::memcpy(&fEvent.time, &tmp, sizeof(tmp));
+                        fTimeVector[channel-1].push_back(fEvent.time);
                         
                         for (std::string writer : GetParser()->GetUsedWriterVector()) {
                             if (writer == "Root") {
@@ -266,10 +266,10 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                         if (usedParameters.hist.has_value()) {
                             auto& hists = *usedParameters.hist;
                             for (size_t i = 0; i < size(hists); i++) {
-                                if (hists[i].parameter == "baseline") fChannelHist[channel-1][iHist++]->Fill(fEvent.baseline.value());
-                                if (hists[i].parameter == "charge") fChannelHist[channel-1][iHist++]->Fill(fEvent.charge.value());
-                                if (hists[i].parameter == "amplitude") fChannelHist[channel-1][iHist++]->Fill(fEvent.amplitude.value());
-                                if (hists[i].parameter == "scaler") fChannelHist[channel-1][iHist++]->Fill(fEvent.scaler.value());
+                                if (hists[i].parameter == "baseline") fChannelHist[channel-1][iHist++]->Fill(fEvent.baseline);
+                                if (hists[i].parameter == "charge") fChannelHist[channel-1][iHist++]->Fill(fEvent.charge);
+                                if (hists[i].parameter == "amplitude") fChannelHist[channel-1][iHist++]->Fill(fEvent.amplitude);
+                                if (hists[i].parameter == "scaler") fChannelHist[channel-1][iHist++]->Fill(fEvent.scaler);
                             }
                         }
                     }
@@ -285,10 +285,9 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                 if (writer == "Root") {
                     // Plot mean waveform
                     if (usedParameters.waveform.has_value()) {
-                        auto& v = *fEvent.waveform;
                         TGraph* gr = new TGraph();
                         int counter = 0;
-                        for (auto event : v) {
+                        for (double event : fEvent.waveform) {
                             gr->AddPoint(counter++, event/eventCounter);
                         }
                         gr->Write("waveform");
@@ -334,7 +333,7 @@ double Device::DRSDevice::CalculateCharge(std::vector<double> eventWaveform) {
     double charge = 0;
     int counter = 0;
     for (double waveform : eventWaveform) {
-        if ((counter >= min) && (counter <= max)) charge += waveform - fEvent.baseline.value();
+        if ((counter >= min) && (counter <= max)) charge += waveform - fEvent.baseline;
         counter++;
     }
     return charge;
@@ -342,13 +341,11 @@ double Device::DRSDevice::CalculateCharge(std::vector<double> eventWaveform) {
 
 void Device::DRSDevice::CalculateWaveform(std::vector<double> eventWaveform) {
     std::call_once(initWaveFlag, [this, eventWaveform](){InitializeSumWaveform(eventWaveform);});
-    auto& v = *fEvent.waveform;
-    for (size_t i = 1; i < size(eventWaveform); i++) v[i] += eventWaveform[i];
+    for (size_t i = 1; i < size(eventWaveform); i++) fEvent.waveform[i] += eventWaveform[i];
 }
 
 void Device::DRSDevice::InitializeSumWaveform(std::vector<double> eventWaveform) {
-    auto& v = *fEvent.waveform;
-    for (double waveform : eventWaveform) v.push_back(waveform);
+    for (double waveform : eventWaveform) fEvent.waveform.push_back(waveform);
 }
 
 void Device::DRSDevice::CalculateBaseline(std::vector<double> eventWaveform) {

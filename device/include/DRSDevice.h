@@ -7,6 +7,17 @@
 #include "IDevice.h"
 
 namespace Device {
+    struct DRSEvent {
+        int32_t time;
+        double baseline;
+        double charge;
+        double amplitude;
+        int16_t range;
+        int16_t trigger;
+        uint32_t scaler;
+        std::vector<double> waveform;
+    };
+
     class DRSDevice : public IDevice {
     public:
         DRSDevice();
@@ -45,7 +56,7 @@ namespace Device {
         mutable std::once_flag initWaveFlag;
 
         std::vector<int32_t> fTimeVector[4] = {{},{},{},{}};
-        Global::Parameters fEvent{};
+        Device::DRSEvent fEvent{};
         std::ofstream fTxtFile;
     };
 }
