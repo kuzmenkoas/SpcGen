@@ -12,7 +12,7 @@ void Device::IDevice::Prepare() {
     parserFactory.SetDigitizerTypes(fDigitizerTypes);
     if (GetConfigPath().empty()) fParser = parserFactory.BuildParser(fDeviceType);
     else fParser = parserFactory.BuildParser(fDeviceType, GetConfigPath());
-    
+    if (fDigitizerTypes.empty()) fDigitizerTypes = fParser->GetDigitizerTypes();
     for (std::string writer : fParser->GetUsedWriterVector()) {
         if (writer == "Root") ConfigureRoot();
     }

@@ -32,6 +32,7 @@ void Parser::DigitizerConsoleParser::ReadFileType() {
     i = 1;
     if (val == i++) fTypes.push_back("PSD");
     if (val == i++) fTypes.push_back("Waveform");
+    SetDigitizerTypes(fTypes);
 }
 
 void Parser::DigitizerConsoleParser::ReadWriter() {

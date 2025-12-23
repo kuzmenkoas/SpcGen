@@ -19,8 +19,12 @@ namespace Parser {
         Global::Parameters GetUsedParameters() {return fUsedParameters;};
 
         virtual void Start() {};
+
+        void SetDigitizerTypes(std::vector<std::string> types) {fDigitizerTypes = types;};
+        std::vector<std::string> GetDigitizerTypes() {return fDigitizerTypes;};
     private:
         std::vector<std::string> fUsedWriterVector{};
         Global::Parameters fUsedParameters{};
+        std::vector<std::string> fDigitizerTypes = {};
     };
 }

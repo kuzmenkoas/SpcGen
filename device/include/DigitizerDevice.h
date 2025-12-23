@@ -11,8 +11,8 @@ namespace Device {
         int16_t cfd_y2;
         int16_t baselinePSD;
         int16_t height;
-        int16_t eventCounter;
-        int16_t eventCounterPSD;
+        uint32_t eventCounter;
+        uint32_t eventCounterPSD;
         int16_t psdValue;
         double baseline;
         double charge;

@@ -36,8 +36,8 @@ namespace Global {
         std::optional<int16_t> cfd_y2;
         std::optional<int16_t> baselinePSD;
         std::optional<int16_t> height;
-        std::optional<int32_t> eventCounter;
-        std::optional<int32_t> eventCounterPSD;
+        std::optional<uint32_t> eventCounter;
+        std::optional<uint32_t> eventCounterPSD;
         std::optional<int16_t> psdValue;
     };
 }
