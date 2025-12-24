@@ -230,11 +230,22 @@ void Parser::DigitizerConsoleParser::ReadConfig() {
         std::cout << "Enter factor for charge" << "\n";
         double factor;
         std::cin >> factor;
-        usedPar.factor = factor;
+        usedPar.factorCharge = factor;
 
         std::cout << "Enter shift for charge" << "\n";
         double shift;
         std::cin >> shift;
-        usedPar.shift = shift;
+        usedPar.shiftCharge = shift;
+    }
+    if (usedPar.amplitude.has_value()) {
+        std::cout << "Enter factor for amplitude" << "\n";
+        double factor;
+        std::cin >> factor;
+        usedPar.factorAmplitude = factor;
+
+        std::cout << "Enter shift for amplitude" << "\n";
+        double shift;
+        std::cin >> shift;
+        usedPar.shiftAmplitude = shift;
     }
 }

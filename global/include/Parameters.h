@@ -19,8 +19,10 @@ namespace Global {
         std::optional<double> amplitude;
         std::optional<std::pair<int16_t, int16_t>> baselineLimits;
         std::optional<std::pair<int16_t, int16_t>> chargeLimits;
-        std::optional<double> factor;
-        std::optional<double> shift;
+        std::optional<double> factorCharge;
+        std::optional<double> shiftCharge;
+        std::optional<double> factorAmplitude;
+        std::optional<double> shiftAmplitude;
 
         // DRS data
         std::optional<int32_t> time;

@@ -183,8 +183,8 @@ void Device::DigitizerDevice::CalculateCharge(std::vector<int16_t> eventWaveform
     }
     double factor = 1;
     double shift = 0;
-    if (usedParameters.factor.has_value()) factor = usedParameters.factor.value();
-    if (usedParameters.shift.has_value()) shift = usedParameters.shift.value();
+    if (usedParameters.factorCharge.has_value()) factor = usedParameters.factorCharge.value();
+    if (usedParameters.shiftCharge.has_value()) shift = usedParameters.shiftCharge.value();
     charge = charge * factor + shift;
     fEvent.charge = charge;
 }
@@ -205,7 +205,12 @@ void Device::DigitizerDevice::CalculateAmplitude(std::vector<int16_t> eventWavef
     }
     gr->Fit("parabola", "QR");
     double x = -parabola->GetParameter(1)/(2*parabola->GetParameter(2));
+    double factor = 1;
+    double shift = 0;
+    if (usedParameters.factorAmplitude.has_value()) factor = usedParameters.factorAmplitude.value();
+    if (usedParameters.shiftAmplitude.has_value()) shift = usedParameters.shiftAmplitude.value();
     fEvent.amplitude = parabola->GetParameter(2)*x*x+parabola->GetParameter(1)*x+parabola->GetParameter(0);
+    fEvent.amplitude = fEvent.amplitude * factor + shift;
 }
 
 void Device::DigitizerDevice::CalculateWaveform(std::vector<int16_t> eventWaveform) {

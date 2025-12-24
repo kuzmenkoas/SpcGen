@@ -415,8 +415,8 @@ double Device::DRSDevice::CalculateCharge(std::vector<double> eventWaveform) {
     }
     double factor = 1;
     double shift = 0;
-    if (usedParameters.factor.has_value()) factor = usedParameters.factor.value();
-    if (usedParameters.shift.has_value()) shift = usedParameters.shift.value();
+    if (usedParameters.factorCharge.has_value()) factor = usedParameters.factorCharge.value();
+    if (usedParameters.shiftCharge.has_value()) shift = usedParameters.shiftCharge.value();
     charge = charge * factor + shift;
     return charge;
 }
@@ -464,5 +464,10 @@ double Device::DRSDevice::CalculateAmplitude(std::vector<double> eventWaveform) 
     gr->Fit("parabola", "QR");
     double x = -parabola->GetParameter(1)/(2*parabola->GetParameter(2));
     amplitude = parabola->GetParameter(2)*x*x+parabola->GetParameter(1)*x+parabola->GetParameter(0);
+    double factor = 1;
+    double shift = 0;
+    if (usedParameters.factorAmplitude.has_value()) factor = usedParameters.factorAmplitude.value();
+    if (usedParameters.shiftAmplitude.has_value()) shift = usedParameters.shiftAmplitude.value();
+    amplitude = amplitude * factor + shift;
     return amplitude;
 }
