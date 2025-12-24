@@ -27,7 +27,12 @@ void Device::DigitizerDevice::Start() {
 
     for (std::string writer : GetParser()->GetUsedWriterVector()) {
         if (writer == "Root") fRootFile->Write();
-        // if (writer == "Txt") fTxtFile.close();
+        if (writer == "Txt") {
+            for (std::string file : GetDigitizerTypes()) {
+                if (file == "PSD") fTxtFilePSD.close();
+                if (file == "Waveform") fTxtFileWaveform.close();
+            }
+        }
     }
 }
 
@@ -95,7 +100,10 @@ void Device::DigitizerDevice::ProcessPSD(std::filesystem::path path) {
         if (file.eof()) break;
 
         nEvents++;
-        fTreePSD->Fill();
+        for (std::string writer : GetParser()->GetUsedWriterVector()) {
+            if (writer == "Root") fTreePSD->Fill();
+            if (writer == "Txt") WriteTxtEventPSD();
+        }
 
         if (usedParameters.hist.has_value()) {
             auto& hists = *usedParameters.hist;
@@ -134,8 +142,12 @@ void Device::DigitizerDevice::ProcessWaveform(std::filesystem::path path) {
         if (usedParameters.charge.has_value()) CalculateCharge(eventWaveform);
         if (usedParameters.amplitude.has_value()) CalculateAmplitude(eventWaveform);
         CalculateWaveform(eventWaveform);
-        fTreeWaveform->Fill();
 
+        for (std::string writer : GetParser()->GetUsedWriterVector()) {
+            if (writer == "Root") fTreeWaveform->Fill();
+            if (writer == "Txt") WriteTxtEventWaveform();
+        }
+        
         if (usedParameters.hist.has_value()) {
             auto& hists = *usedParameters.hist;
             int iHist = 0;
@@ -267,4 +279,46 @@ void Device::DigitizerDevice::ConfigureRoot() {
 }
 
 void Device::DigitizerDevice::ConfigureTxt() {
+    for (std::string file : GetDigitizerTypes()) {
+        if (file == "PSD") {
+            fTxtFilePSD = std::ofstream(GetFileName()+"_"+file+".txt");
+            if (usedParameters.qShort.has_value()) fTxtFilePSD << "qShort ";
+            if (usedParameters.qLong.has_value()) fTxtFilePSD << "qLong ";
+            if (usedParameters.cfd_y1.has_value()) fTxtFilePSD << "cfd_y1 ";
+            if (usedParameters.cfd_y2.has_value()) fTxtFilePSD << "cfd_y2 ";
+            if (usedParameters.baselinePSD.has_value()) fTxtFilePSD << "baseline ";
+            if (usedParameters.height.has_value()) fTxtFilePSD << "height ";
+            if (usedParameters.eventCounter.has_value()) fTxtFilePSD << "eventCounter ";
+            if (usedParameters.eventCounterPSD.has_value()) fTxtFilePSD << "eventCounterPSD ";
+            if (usedParameters.psdValue.has_value()) fTxtFilePSD << "psdValue ";
+            fTxtFilePSD << "\n";
+        }
+        if (file == "Waveform") {
+            fTxtFilePSD = std::ofstream(GetFileName()+"_"+file+".txt");
+            if (usedParameters.baseline.has_value()) fTxtFilePSD << "baseline ";
+            if (usedParameters.charge.has_value()) fTxtFilePSD << "charge ";
+            if (usedParameters.amplitude.has_value()) fTxtFilePSD << "amplitude ";
+            fTxtFilePSD << "\n";
+        }
+    }
+}
+
+void Device::DigitizerDevice::WriteTxtEventPSD() {
+    if (usedParameters.qShort.has_value()) fTxtFilePSD << fEvent.qShort << " ";
+    if (usedParameters.qLong.has_value()) fTxtFilePSD << fEvent.qLong << " ";
+    if (usedParameters.cfd_y1.has_value()) fTxtFilePSD << fEvent.cfd_y1 << " ";
+    if (usedParameters.cfd_y2.has_value()) fTxtFilePSD << fEvent.cfd_y2 << " ";
+    if (usedParameters.baselinePSD.has_value()) fTxtFilePSD << fEvent.baselinePSD << " ";
+    if (usedParameters.height.has_value()) fTxtFilePSD << fEvent.height << " ";
+    if (usedParameters.eventCounter.has_value()) fTxtFilePSD << fEvent.eventCounter << " ";
+    if (usedParameters.eventCounterPSD.has_value()) fTxtFilePSD << fEvent.eventCounterPSD << " ";
+    if (usedParameters.psdValue.has_value()) fTxtFilePSD << fEvent.psdValue << " ";
+    fTxtFilePSD << "\n";
+}
+
+void Device::DigitizerDevice::WriteTxtEventWaveform() {
+    if (usedParameters.baseline.has_value()) fTxtFileWaveform << fEvent.baseline << " ";
+    if (usedParameters.charge.has_value()) fTxtFileWaveform << fEvent.charge << " ";
+    if (usedParameters.amplitude.has_value()) fTxtFileWaveform << fEvent.amplitude << " ";
+    fTxtFileWaveform << "\n";
 }

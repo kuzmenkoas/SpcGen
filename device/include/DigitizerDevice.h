@@ -37,6 +37,8 @@ namespace Device {
         int CountUsedParameters();
         void ConfigureRoot();
         void ConfigureTxt();
+        void WriteTxtEventPSD();
+        void WriteTxtEventWaveform();
         void CalculateBaseline(std::vector<int16_t> eventWaveform);
         void CalculateCharge(std::vector<int16_t> eventWaveform);
         void CalculateAmplitude(std::vector<int16_t> eventWaveform);
@@ -49,5 +51,7 @@ namespace Device {
         TTree* fTreeWaveform = nullptr;
         std::vector<TH1*> fHist = {};
         Global::Parameters usedParameters;
+        std::ofstream fTxtFilePSD;
+        std::ofstream fTxtFileWaveform;
     };
 }
