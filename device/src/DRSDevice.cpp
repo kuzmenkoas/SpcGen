@@ -332,7 +332,7 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                 CalculateWaveform(waveform);
 
                 if (usedParameters.charge.has_value() || usedParameters.baseline.has_value()) CalculateBaseline(waveform);
-                if (usedParameters.charge.has_value()) fEvent.charge = CalculateCharge(waveform);
+                if (usedParameters.charge.has_value()) fEvent.charge = CalculateCharge(waveform, channel);
                 if (usedParameters.amplitude.has_value()) fEvent.amplitude = CalculateAmplitude(waveform);
                 // Process event
 
@@ -403,14 +403,14 @@ void Device::DRSDevice::ReadDate(std::ifstream* file, std::filesystem::path* pat
     std::memcpy(&tt, &tmp2, sizeof(tt));
 }
 
-double Device::DRSDevice::CalculateCharge(std::vector<double> eventWaveform) {
+double Device::DRSDevice::CalculateCharge(std::vector<double> eventWaveform, int channel) {
     Global::Parameters usedParameters = GetParser()->GetUsedParameters();
     int min = usedParameters.chargeLimits.value().first;
     int max = usedParameters.chargeLimits.value().second;
     double charge = 0;
     int counter = 0;
     for (double waveform : eventWaveform) {
-        if ((counter >= min) && (counter <= max)) charge += waveform - fEvent.baseline;
+        if ((counter >= min) && (counter <= max)) charge += (waveform - fEvent.baseline)*fTimeVector[channel-1][counter]/1e9;
         counter++;
     }
     double factor = 1;

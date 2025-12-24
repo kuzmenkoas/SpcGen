@@ -48,7 +48,7 @@ namespace Device {
         void ReadEventHeader(std::ifstream* file, std::filesystem::path* path);
         void ReadDate(std::ifstream* file, std::filesystem::path* path);
 
-        double CalculateCharge(std::vector<double> eventWaveform);
+        double CalculateCharge(std::vector<double> eventWaveform, int channel);
         double CalculateAmplitude(std::vector<double> eventWaveform);
         void CalculateBaseline(std::vector<double> eventWaveform);
         void CalculateWaveform(std::vector<double> eventWaveform);
