@@ -216,7 +216,7 @@ void Device::DigitizerDevice::CalculateAmplitude(std::vector<int16_t> eventWavef
 
 void Device::DigitizerDevice::CalculateWaveform(std::vector<int16_t> eventWaveform) {
     std::call_once(initWaveFlag, [this, eventWaveform](){InitializeSumWaveform(eventWaveform);});
-    for (size_t i = 1; i < size(eventWaveform); i++) fEvent.waveform[i] += eventWaveform[i];
+    for (size_t i = 0; i < size(eventWaveform); i++) fEvent.waveform[i] += eventWaveform[i];
 }
 
 void Device::DigitizerDevice::InitializeSumWaveform(std::vector<int16_t> eventWaveform) {
