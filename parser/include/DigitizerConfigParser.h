@@ -16,6 +16,7 @@ namespace Parser {
         std::filesystem::path fPath;
         std::vector<std::string> fTypes = {};
         std::ifstream OpenFile();
+        void ReadFileType();
         void ReadWriter(std::string key="Output");
         void ReadDataPSD(std::string key="DataPSD");
         void ReadDataWaveform(std::string key="DataWaveform");
