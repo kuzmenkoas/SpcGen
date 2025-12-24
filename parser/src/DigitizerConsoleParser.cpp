@@ -119,7 +119,86 @@ void Parser::DigitizerConsoleParser::ReadDataWaveform() {
 }
 
 void Parser::DigitizerConsoleParser::ReadHistograms() {
+    for (std::string file : fTypes) {
+        if (usedPar.baseline.has_value() || usedPar.charge.has_value() || 
+            usedPar.amplitude.has_value() || usedPar.scaler.has_value() ) {
+            std::cout << "\n";
+            std::cout << "Choose parameters to configure histogram" << std::endl;
+            int i = 0;
+            std::cout << "(" << i++ << ") without" << "\n";
+            if (file == "PSD") {
+                std::cout << "PSD configuration:" << std::endl;
+                if (usedPar.qShort.has_value()) std::cout << "(" << i++ << ") qShort" << "\n";
+                if (usedPar.qLong.has_value()) std::cout << "(" << i++ << ") qLong" << "\n";
+                if (usedPar.cfd_y1.has_value()) std::cout << "(" << i++ << ") cfd_y1" << "\n";
+                if (usedPar.cfd_y2.has_value()) std::cout << "(" << i++ << ") cfd_y2" << "\n";
+                if (usedPar.baseline.has_value()) std::cout << "(" << i++ << ") baseline" << "\n";
+                if (usedPar.height.has_value()) std::cout << "(" << i++ << ") height" << "\n";
+                if (usedPar.eventCounter.has_value()) std::cout << "(" << i++ << ") eventCounter" << "\n";
+                if (usedPar.eventCounterPSD.has_value()) std::cout << "(" << i++ << ") eventCounterPSD" << "\n";
+                if (usedPar.psdValue.has_value()) std::cout << "(" << i++ << ") psdValue" << "\n";
 
+                std::string val;
+                std::cin >> val;
+
+                for (int k = 0; k < val.length(); k++) {
+                    std::string tmp(1, val[k]);
+                    int f = 0;
+                    if (tmp == std::to_string(f++)) break;
+                    if (tmp == std::to_string(f++)) SetHistogramVector(file, "qShort");
+                    if (tmp == std::to_string(f++)) SetHistogramVector(file, "qLong");
+                    if (tmp == std::to_string(f++)) SetHistogramVector(file, "cfd_y1");
+                    if (tmp == std::to_string(f++)) SetHistogramVector(file, "cfd_y2");
+                    if (tmp == std::to_string(f++)) SetHistogramVector(file, "baseline");
+                    if (tmp == std::to_string(f++)) SetHistogramVector(file, "height");
+                    if (tmp == std::to_string(f++)) SetHistogramVector(file, "eventCounter");
+                    if (tmp == std::to_string(f++)) SetHistogramVector(file, "eventCounterPSD");
+                    if (tmp == std::to_string(f++)) SetHistogramVector(file, "psdValue");
+                }
+            } else if (file == "Waveform") {
+                std::cout << "Waveform configuration:" << std::endl;
+                if (usedPar.baseline.has_value()) std::cout << "(" << i++ << ") baseline" << "\n";
+                if (usedPar.charge.has_value()) std::cout << "(" << i++ << ") charge" << "\n";
+                if (usedPar.amplitude.has_value()) std::cout << "(" << i++ << ") amplitude" << "\n";
+                if (usedPar.scaler.has_value()) std::cout << "(" << i++ << ") scaler" << "\n";
+
+                std::string val;
+                std::cin >> val;
+
+                for (int k = 0; k < val.length(); k++) {
+                    std::string tmp(1, val[k]);
+                    int f = 0;
+                    if (tmp == std::to_string(f++)) break;
+                    if (tmp == std::to_string(f++)) SetHistogramVector(file, "baseline");
+                    if (tmp == std::to_string(f++)) SetHistogramVector(file, "charge");
+                    if (tmp == std::to_string(f++)) SetHistogramVector(file, "amplitude");
+                    if (tmp == std::to_string(f++)) SetHistogramVector(file, "scaler");
+                }
+            }
+        }
+    }
+}
+
+void Parser::DigitizerConsoleParser::SetHistogramVector(std::string file, std::string parameter) {
+    std::cout << "\n";
+    std::cout << "Set number of bins for " << parameter << std::endl;
+    int16_t Nbins;
+    std::cin >> Nbins;
+
+    std::cout << "Set minimal value for " << parameter << std::endl;
+    double min;
+    std::cin >> min;
+    std::cout << "Set maximal value for " << parameter << std::endl;
+    double max;
+    std::cin >> max;
+
+    Global::IHist Hist{file, parameter, Nbins, min, max};
+    if (!usedPar.hist.has_value()) {
+        usedPar.hist = {Hist};
+    } else {
+        auto& v = *usedPar.hist;
+        v.push_back(Hist);
+    }
 }
 
 void Parser::DigitizerConsoleParser::ReadConfig() {
