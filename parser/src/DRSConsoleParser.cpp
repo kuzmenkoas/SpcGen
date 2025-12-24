@@ -10,8 +10,8 @@ void Parser::DRSConsoleParser::Start() {
     ReadWriter();
     ReadData();
     ReadConfig();
-    ReadHistograms();
     if (usedPar.amplitude.has_value()) ReadSignal();
+    ReadHistograms();
 
     SetUsedParameters(usedPar);
 }

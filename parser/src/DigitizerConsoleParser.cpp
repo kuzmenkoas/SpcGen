@@ -14,6 +14,7 @@ void Parser::DigitizerConsoleParser::Start() {
         if (file == "Waveform") {
             ReadDataWaveform();
             ReadConfig();
+            if (usedPar.amplitude.has_value()) ReadSignal();
         }
     }
     ReadHistograms();
@@ -248,4 +249,28 @@ void Parser::DigitizerConsoleParser::ReadConfig() {
         std::cin >> shift;
         usedPar.shiftAmplitude = shift;
     }
+}
+
+void Parser::DigitizerConsoleParser::ReadSignal() {
+    std::cout << "\n";
+    std::cout << "Choose which form of signal:" << "\n";
+    int i = 1;
+    std::cout << "(" << i++ << ") up" << "\n";
+    std::cout << "(" << i++ << ") down" << "\n";
+
+    int val;
+    std::cin >> val;
+    i = 1;
+    if (val == i++) usedPar.signal = "up";
+    if (val == i++) usedPar.signal = "down";
+
+    std::cout << "Enter left range for amplitude fit" << "\n";
+    int lRange;
+    std::cin >> lRange;
+
+    std::cout << "Enter right range for amplitude fit" << "\n";
+    int rRange;
+    std::cin >> rRange;
+
+    usedPar.signalRange = std::make_pair(lRange, rRange);
 }
