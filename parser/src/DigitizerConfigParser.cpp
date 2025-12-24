@@ -32,16 +32,15 @@ void Parser::DigitizerConfigParser::ReadFileType() {
         while(getline (file,CurStr)) {
             if (CurStr.compare(0, keyPSD.size(), keyPSD) == 0) {
                 fTypes.push_back("PSD");
-                break;
             } else if (CurStr.compare(0, keyWaveform.size(), keyWaveform) == 0) {
                 fTypes.push_back("Waveform");
-                break;
             }
         }
     } catch (const std::exception& e) {
         std::cerr << "Exception: " << e.what() << std::endl;
         abort();
     }
+    SetDigitizerTypes(fTypes);
     file.close();
 }
 
