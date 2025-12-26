@@ -101,6 +101,8 @@ void Parser::DRSConfigParser::ReadConfig(std::string key) {
                         if (parameter == "charge") usedPar.chargeLimits = std::make_pair(std::stoi(min), std::stoi(max));
                         if (parameter == "factorCharge") usedPar.factorCharge = std::stod(min);
                         if (parameter == "shiftCharge") usedPar.shiftCharge = std::stod(min);
+                        if (parameter == "factorAmplitude") usedPar.factorAmplitude = std::stod(min);
+                        if (parameter == "shiftAmplitude") usedPar.shiftAmplitude = std::stod(min);
                     } else break;
                 }
             }
