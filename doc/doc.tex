@@ -1,0 +1,409 @@
+\documentclass[12pt,a4paper,openany]{article}
+\usepackage[english,russian]{babel}
+\usepackage{bstyle}
+
+\begin{document}
+\section{Описание}
+Программа decoder декодирует результаты измерений программой Digitizer 1.1.1, сохраненные в бинарном формате. 
+Программа позволяет сохранять результате в формате .root и .txt и гистограммы в формате .root и .png.
+
+Исходный код программы находится в репозитории: \href{https://github.com/kuzmenkoas/SpcGen}{GitHub}.
+
+\section{Зависимости}
+\begin{itemize}
+    \item ROOT
+    \item cmake and make
+    \item C++17
+\end{itemize}
+
+\section{Инструкция по установке}
+\subsection{Linux}
+Установка зависимостей (для Ubuntu/Linux Mint):
+\begin{lstlisting}[language=bash]
+sudo apt install gcc cmake
+\end{lstlisting}
+
+Установка программы:
+\begin{lstlisting}[language=bash]
+git clone https://github.com/kuzmenkoas/decoder
+cd decoder
+mkdir build
+cd build
+cmake ..
+make
+\end{lstlisting}
+
+\subsection{Windows}
+\begin{enumerate}
+    \item Установить \href{https://visualstudio.microsoft.com/downloads/}{Visual Studio}.
+    \item Установить \href{https://cmake.org/download/}{CMake}.
+    \item Скомпилировать проект с помощью утилиты CMake (использовать компилятор MSVC).
+    \item Собрать проект с помощью Visual Studio (кнопка decoder.exe).
+    \item Добавить путь к исполняемому файлу (путь/decoder/out/build/x64-Debug/) в переменную окружения PATH (Win+R, вызвать sysdm.cpl).
+\end{enumerate}
+
+\section{Запуск}
+Для запуска необходимо указать путь к исполняемому файлу (в Linux build/decoder), в Windows, если добавить путь в переменную окружения PATH, то из любой директории можно вызвать decoder.exe.
+
+Программа позволяет использовать два варианта задания конфигурации декодирования (с помощью командной строки и с помощью конфигурационного файла).
+
+Так же у программы предусмотрено различное поведение в зависимости от количества и типа входных бинарных файлов (PSD и Waveform).
+
+Очередность передаваемых аргументов программе строго типизована. 
+Первым, если нужен, передается конфигурационный файл, далее идут бинарные файлы, если передавать два бинарных файла, то сначала PSD, после Waveform.
+
+Далее, для примера будут использованы конфигурационные файлы, которые лежат в директории decoder/cfg и бинарные файлы в директории decoder/data.
+
+Декодировать PSD и Waveform с помощью конфигурационного файла:
+\begin{lstlisting}[language=bash]
+decoder.exe cfg/psdWaveform.cfg data/raw_data_psd_wavetest_2025_11_06__13_28_09.bin data/raw_waveform_psd_wavetest_2025_11_06__13_28_09.bin
+\end{lstlisting}
+
+Декодировать PSD и Waveform с помощью командной строки:
+\begin{lstlisting}[language=bash]
+decoder.exe data/raw_data_psd_wavetest_2025_11_06__13_28_09.bin data/raw_waveform_psd_wavetest_2025_11_06__13_28_09.bin
+\end{lstlisting}
+
+Декодировать PSD с помощью конфигурационного файла:
+\begin{lstlisting}[language=bash]
+decoder.exe cfg/psd.cfg data/raw_data_psd_wavetest_2025_11_06__13_28_09.bin
+\end{lstlisting}
+
+Декодировать PSD с помощью командной строки:
+\begin{lstlisting}[language=bash]
+decoder.exe data/raw_data_psd_wavetest_2025_11_06__13_28_09.bin
+\end{lstlisting}
+
+Декодировать Waveform с помощью конфигурационного файла:
+\begin{lstlisting}[language=bash]
+decoder.exe cfg/waveform.cfg data/raw_waveform_psd_wavetest_2025_11_06__13_28_09.bin
+\end{lstlisting}
+
+Декодировать Waveform с помощью командной строки:
+\begin{lstlisting}[language=bash]
+decoder.exe data/raw_waveform_psd_wavetest_2025_11_06__13_28_09.bin
+\end{lstlisting}
+
+\section{Конфигурация декодера}
+Есть два парсера для конфигурации декодера -- через командную строку и через конфигурационный файл.
+
+\subsection{Командная строка}
+После запуска программы, в зависимости от количества бинарных файлов и их типов, различные конфигурационные модули запустятся.
+
+\textbf{1. Тип бинарного файла}
+
+Если передать 1 бинарный файл в программу, то выведется следующее сообщение:
+\begin{lstlisting}
+What file is it?
+ (1) PSD
+ (2) Waveform
+\end{lstlisting}
+
+Введите 1 для типа PSD и 2, если бинарный файл содержит форму сигнала (waveform).
+Это влияет на алгоритм декодирования.
+
+\textbf{2. Формат сохранения результатов}
+
+Следующий вопрос появится вне зависимости от количества переданных файлов и их типов.
+\begin{lstlisting}
+Choose format to save
+ (1) Root
+ (2) Txt
+ (3) Root and Txt
+\end{lstlisting}
+
+Необходимо ввести 1, 2 или 3 для выбора формата сохранения декодированных данных.
+
+\textbf{3. Какие данные находятся в бинарном файле PSD}
+
+Данный текст появится, если  есть входной бинарный файл PSD. 
+Он говорит программе, какие данные сохранены в бинарном файле (необходимо для корректного декодирования). 
+Зная параметры, программа в определенной последовательности декодирует данные (зная, сколько байт уходит на тот или иной параметр).
+
+\begin{lstlisting}
+What is encode in binary PSD file.
+Choose everything that is stored in bin file 
+(decoder will not be able to work correctly if this parameters will be incorrect)!
+For multiple write as 123 - for qShort, qLong and cfd_y1. 
+If in binary file stored all parameters choose 0 (ALL):
+ (1) qShort
+ (2) qLong
+ (3) cfd_y1
+ (4) cfd_y2
+ (5) baseline
+ (6) height
+ (7) eventCounter
+ (8) eventCounterPSD
+ (9) psdValue
+ (0) ALL
+\end{lstlisting}
+
+Введите цифры выбранных параметров непрерывно. 
+Например, 126 для qShort, qLong и height, 157 для qShort, baseline и eventCounter.
+Если в бинарном файле сохранены все параметры, то достаточно ввести только 0.
+
+\textbf{4. Перевернуть сигнал или нет}
+
+Этот модуль появится если:
+\begin{enumerate}
+    \item бинарный файл PSD содержит qShort, qLong или baseline.
+    \item для переданного бинарного файла waveform модуль появится в любом случае.
+    \item если есть оба бинарных файла -- модуль появится.
+\end{enumerate}
+
+\begin{lstlisting}
+Reverse integral?
+ (1) Yes
+ (2) Not
+\end{lstlisting}
+
+Если введете 1, то результат baseline, qShort и qLong будет перевернут (умножен на -1).
+
+\textbf{5. Конфигурация формы сигнала}
+
+Модуль появится, если в входных файлах есть бинарный файл waveform.
+
+\begin{lstlisting}
+The number of baseline points?
+\end{lstlisting}
+
+\begin{lstlisting}
+The number of qShort points?
+\end{lstlisting}
+
+\begin{lstlisting}
+The number of qLong points?
+\end{lstlisting}
+
+Для всех ним необходимо, чтобы пользователь ввел целое число (integer).
+Для одного события у формы сигнала есть определенная длина (настраивается в программе Digitizer).
+Baseline points необходимо для определения шума (baseline), определяется как среднее значение в диапазоне (первые точки сигнала от 0 до введенного пользователем).
+Далее, от baseline points до qShort points определяется значение интеграла qShort.
+И последнее, от baseline points до qLong points определяется значение интеграла qLong.
+
+Данное сообщение появится, если входным бинарным файлом будет только waveform.
+\begin{lstlisting}
+The number of waveform points?
+\end{lstlisting}
+
+Необходимо ввести целое число, характеризующую длину форму сигнала (задается в программе Digitizer, обязаны совпасть при декодировании, иначе программа некорректно сработает).
+
+\textbf{6. Конфигурация гистограмм}
+
+Данное сообщение появится независимо от входных файлов.
+Здесь настраивается гистограмма по декодированным данным (для PSD и Waveform шаблон одинаковый, количество вариантов данных -- разное).
+\begin{lstlisting}
+Choose parameter to plot (multiply input, example: 123 for 3 parameters to plot)
+ (0) exit
+ (1) qShort
+ (2) qLong
+ (3) cfd_y1
+ (4) cfd_y2
+ (5) baseline
+ (6) height
+ (7) eventCounter
+\end{lstlisting}
+
+Необходимо непрерывно ввести все варианты, для которых необходима гистограмма. 
+Если гистограмма не нужна, то достаточно ввести значение 0.
+
+Далее, если необходима гистограмма для каждого параметра появятся выводы с настройкой.
+\begin{lstlisting}
+Configure a plot from PSD data for parameter qShort
+
+Enter number of bins
+\end{lstlisting}
+
+Настраивается количество бинов -- целое число.
+\begin{lstlisting}
+Enter min value of histogram
+\end{lstlisting}
+
+Необходимо ввести минимальное значение для гистограммы (целое число, может быть отрицательным).
+\begin{lstlisting}
+Enter max value of histogram
+\end{lstlisting}
+
+Необходимо ввести максимальное значение для гистограммы (целое число, может быть отрицательным).
+
+\subsection{Конфигурационный файл}
+Можно все настройки для декодера написать в конфигурационном файле и скормить программе.
+
+Структура файла:
+\begin{lstlisting}
+Output
+Reverse
+DataPSD
+DataWaveform
+WaveformConfig
+Histogram
+\end{lstlisting}
+
+Для любого файла обязательными полями являются: Output.
+
+Необязательные: Reverse, Histogram.
+
+Для PSD бинарного файла необходимо заполнить поле DataPSD.
+
+Для Waveform бинарного файла необходимо запонить поля DataWaveform и\\ 
+WaveformConfig.
+
+В Output настраивается формат вывода (txt и root): RootNtuple и TxtNtuple.
+
+Выглядит как:
+\begin{lstlisting}
+Output
++ RootNtuple
++ TxtNtuple
+\end{lstlisting}
+
+В результате все выведется в root файл и txt файлы.
+
+Если необходимо сохранить только в root файле (т.к. стоит учитывать, что вывод в txt формате долгий), то:
+\begin{lstlisting}
+Output
++ RootNtuple
+\end{lstlisting}
+
+Значения baseline, qShort и qLong (интегралы) можно реверсировать (умножить на -1). Делается с помощью параметра Reverse:
+\begin{lstlisting}
+Reverse true
+\end{lstlisting}
+
+или
+\begin{lstlisting}
+Reverse false
+\end{lstlisting}
+
+При значении true -- умножит эти значения (для PSD и Waveform данных) на -1, при значении false -- не будет умножать.
+
+В DataPSD необходимо указать все переменные, которые закодированы в бинарном файле (если некорректно указать, то результат декодирования будет неверным).
+
+Все возможные перменные указаны ниже:
+\begin{lstlisting}
+DataPSD
++ qShort
++ qLong
++ cfd_y1
++ cfd_y2
++ baseline
++ height
++ eventCounter
++ eventCounterPSD
++ psdValue
+\end{lstlisting}
+
+В DataWaveform указывается, какие переменные необходимо получить. Есть 4 параметра:
+\begin{lstlisting}
+DataWaveform
++ qShort
++ qLong
++ baseline
++ entries
+\end{lstlisting}
+
+Из нового тут только параметр $entries$ -- сохраняет в отдельном ntuple значения формы сигнала как по одному событию.
+Есть значения $id$ -- номер события, $t$ -- момент времени, когда получено значение сигнала, $wave$ -- значение сигнала.
+
+Далее, в WaveformConfig задаются значения для декодирования: точки отсчета для baseline, qShort и qLong (как в программе Digitizer, при этом необязательно задавать такие же) и длина сигнала (wavelength).
+\begin{lstlisting}
+WaveformConfig
++ baseline 100
++ qShort 120
++ qLong 380
++ wavelength 1000
+\end{lstlisting}
+
+При этом, значение wavelength обязано быть таким же, как при измерениях, и его необязательно указывать, если программа получает два входных бинарных файла -- PSD и Waveform.
+
+Для настройки гистограмм необходимо указать: тип файла, параметр, количество бинов, минимальное значение, максимальное значение. Именно в такой последовательности!
+
+Пример:
+\begin{lstlisting}
+Histogram
++ PSD qShort 1000 -20000 200000
++ Waveform qShort 1000 -20000 200000
+\end{lstlisting}
+
+Пример конфигурационного файла для декодирования PSD и Waveform:
+\begin{lstlisting}
+Output
++ RootNtuple
++ TxtNtuple
+
+Reverse false
+
+DataPSD
++ qShort
++ qLong
++ cfd_y1
++ cfd_y2
++ baseline
++ height
++ eventCounter
++ eventCounterPSD
++ psdValue
+
+DataWaveform
++ qShort
++ qLong
++ baseline
++ entries
+
+WaveformConfig
++ baseline 100
++ qShort 120
++ qLong 380
+
+Histogram
++ PSD qShort 1000 -20000 200000
++ Waveform qShort 1000 -20000 200000
+\end{lstlisting}
+
+Пример конфигурационного файла для декодирования только PSD:
+\begin{lstlisting}
+Output
++ RootNtuple
++ TxtNtuple
+
+Reverse false
+
+DataPSD
++ qShort
++ qLong
++ cfd_y1
++ cfd_y2
++ baseline
++ height
++ eventCounter
++ eventCounterPSD
++ psdValue
+
+Histogram
++ PSD qShort 1000 -20000 200000
+\end{lstlisting}
+
+Пример конфигурационного файла для декодирования только Waveform:
+\begin{lstlisting}
+Output
++ RootNtuple
+
+Reverse false
+
+DataWaveform
++ qShort
++ qLong
++ baseline
++ entries
+
+WaveformConfig
++ baseline 100
++ qShort 120
++ qLong 380
++ wavelength 1000
+
+Histogram
++ Waveform qShort 1000 -20000 200000
+\end{lstlisting}
+
+\end{document}
