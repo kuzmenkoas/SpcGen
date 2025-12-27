@@ -409,9 +409,8 @@ double Device::DRSDevice::CalculateCharge(std::vector<double> eventWaveform, int
     int max = usedParameters.chargeLimits.value().second;
     double charge = 0;
     int counter = 0;
-    for (double waveform : eventWaveform) {
-        if ((counter >= min) && (counter <= max)) charge += (waveform - fEvent.baseline)*fTimeVector[channel-1][counter]/1e9;
-        counter++;
+    for (size_t i = 0; i < eventWaveform.size(); i++) {
+        if ((i >= min) && (i <= max)) charge += (eventWaveform[i]/2.+eventWaveform[i+1]/2. - fEvent.baseline)*fTimeVector[channel-1][i]/1e9;
     }
     double factor = 1;
     double shift = 0;
@@ -449,23 +448,27 @@ double Device::DRSDevice::CalculateAmplitude(std::vector<double> eventWaveform) 
     Global::Parameters usedParameters = GetParser()->GetUsedParameters();
     double amplitude = 0;
     int index;
+    double valuePeak = 0;
     if (usedParameters.signal.value() == "up") {
         auto value = std::max_element(eventWaveform.begin(), eventWaveform.end());
         index = std::distance(eventWaveform.begin(), value);
+        valuePeak = *value;
     } else if (usedParameters.signal.value() == "down") {
         auto value = std::min_element(eventWaveform.begin(), eventWaveform.end());
         index = std::distance(eventWaveform.begin(), value);
+        valuePeak = *value;
     }
-    TF1* parabola = new TF1("parabola", "pol2", index-usedParameters.signalRange.value().first, index+usedParameters.signalRange.value().second);
-    TGraph* gr = new TGraph();
-    for (size_t i = 0; i < eventWaveform.size(); i++) {
-        gr->SetPoint(i, i, eventWaveform[i]);
-    }
-    gr->Fit("parabola", "QR");
-    double x = -parabola->GetParameter(1)/(2*parabola->GetParameter(2));
-    amplitude = parabola->GetParameter(2)*x*x+parabola->GetParameter(1)*x+parabola->GetParameter(0);
+    // TF1* parabola = new TF1("parabola", "pol2", index-usedParameters.signalRange.value().first, index+usedParameters.signalRange.value().second);
+    // TGraph* gr = new TGraph();
+    // for (size_t i = 0; i < eventWaveform.size(); i++) {
+        // gr->SetPoint(i, i, eventWaveform[i]);
+    // }
+    // gr->Fit("parabola", "QR");
+    // double x = -parabola->GetParameter(1)/(2*parabola->GetParameter(2));
+    // amplitude = parabola->GetParameter(2)*x*x+parabola->GetParameter(1)*x+parabola->GetParameter(0);
     double factor = 1;
     double shift = 0;
+    amplitude = valuePeak;
     if (usedParameters.factorAmplitude.has_value()) factor = usedParameters.factorAmplitude.value();
     if (usedParameters.shiftAmplitude.has_value()) shift = usedParameters.shiftAmplitude.value();
     amplitude = amplitude * factor + shift;
