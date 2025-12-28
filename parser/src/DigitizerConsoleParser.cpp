@@ -238,17 +238,6 @@ void Parser::DigitizerConsoleParser::ReadConfig() {
         std::cin >> shift;
         usedPar.shiftCharge = shift;
     }
-    if (usedPar.amplitude.has_value()) {
-        std::cout << "Enter factor for amplitude" << "\n";
-        double factor;
-        std::cin >> factor;
-        usedPar.factorAmplitude = factor;
-
-        std::cout << "Enter shift for amplitude" << "\n";
-        double shift;
-        std::cin >> shift;
-        usedPar.shiftAmplitude = shift;
-    }
 }
 
 void Parser::DigitizerConsoleParser::ReadSignal() {
@@ -273,4 +262,16 @@ void Parser::DigitizerConsoleParser::ReadSignal() {
     std::cin >> rRange;
 
     usedPar.signalRange = std::make_pair(lRange, rRange);
+
+    if (usedPar.amplitude.has_value()) {
+        std::cout << "Enter factor for amplitude" << "\n";
+        double factor;
+        std::cin >> factor;
+        usedPar.factorAmplitude = factor;
+
+        std::cout << "Enter shift for amplitude" << "\n";
+        double shift;
+        std::cin >> shift;
+        usedPar.shiftAmplitude = shift;
+    }
 }

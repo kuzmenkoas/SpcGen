@@ -101,17 +101,6 @@ void Parser::DRSConsoleParser::ReadConfig() {
         std::cin >> shift;
         usedPar.shiftCharge = shift;
     }
-    if (usedPar.amplitude.has_value()) {
-        std::cout << "Enter factor for amplitude" << "\n";
-        double factor;
-        std::cin >> factor;
-        usedPar.factorAmplitude = factor;
-
-        std::cout << "Enter shift for amplitude" << "\n";
-        double shift;
-        std::cin >> shift;
-        usedPar.shiftAmplitude = shift;
-    }
 }
 
 void Parser::DRSConsoleParser::ReadHistograms() {
@@ -185,4 +174,16 @@ void Parser::DRSConsoleParser::ReadSignal() {
     std::cin >> rRange;
 
     usedPar.signalRange = std::make_pair(lRange, rRange);
+
+    if (usedPar.amplitude.has_value()) {
+        std::cout << "Enter factor for amplitude" << "\n";
+        double factor;
+        std::cin >> factor;
+        usedPar.factorAmplitude = factor;
+
+        std::cout << "Enter shift for amplitude" << "\n";
+        double shift;
+        std::cin >> shift;
+        usedPar.shiftAmplitude = shift;
+    }
 }

@@ -202,8 +202,6 @@ void Parser::DigitizerConfigParser::ReadConfig(std::string key) {
                         if (parameter == "wavelength") usedPar.wavelength = std::stoi(min);
                         if (parameter == "factorCharge") usedPar.factorCharge = std::stod(min);
                         if (parameter == "shiftCharge") usedPar.shiftCharge = std::stod(min);
-                        if (parameter == "factorAmplitude") usedPar.factorAmplitude = std::stod(min);
-                        if (parameter == "shiftAmplitude") usedPar.shiftAmplitude = std::stod(min);
                     } else break;
                 }
             }
@@ -225,19 +223,16 @@ void Parser::DigitizerConfigParser::ReadSignal(std::string key) {
                     if (CurStr.c_str()[0]=='+') {
                         size_t found = CurStr.find_first_of(" ");
                         CurStr = CurStr.substr(found+1);
-                        if (CurStr == "up" || CurStr == "down") usedPar.signal = CurStr;
-                        else {
-                            std::string range = CurStr.substr(0, CurStr.find_first_of(" "));
-                            if (range == "range") {
-                                std::string tmp = CurStr.substr(CurStr.find_first_of(" ")+1);
-                                std::string lRange = tmp.substr(0, tmp.find_first_of(" "));
-                                tmp = tmp.substr(tmp.find_first_of(" ")+1);
-                                std::string rRange = tmp.substr(0, tmp.find_first_of(" "));
-                                usedPar.signalRange = std::make_pair(std::stoi(lRange), std::stoi(rRange));
-                            } else {
-                                std::cerr << "Warning" << std::endl;
-                            }
-                        }
+                        std::string range = CurStr.substr(0, CurStr.find_first_of(" "));
+                        std::string tmp = CurStr.substr(CurStr.find_first_of(" ")+1);
+                        std::string lRange = tmp.substr(0, tmp.find_first_of(" "));
+                        tmp = tmp.substr(tmp.find_first_of(" ")+1);
+                        std::string rRange = tmp.substr(0, tmp.find_first_of(" "));
+
+                        if (range == "up" || range == "down") usedPar.signal = CurStr;
+                        if (range == "range") usedPar.signalRange = std::make_pair(std::stoi(lRange), std::stoi(rRange));
+                        if (range == "factorAmplitude") usedPar.factorAmplitude = std::stod(lRange);
+                        if (range == "shiftAmplitude") usedPar.shiftAmplitude = std::stod(lRange);
                     } else break;
                 }
             }
