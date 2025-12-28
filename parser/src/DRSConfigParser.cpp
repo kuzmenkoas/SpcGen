@@ -99,8 +99,8 @@ void Parser::DRSConfigParser::ReadConfig(std::string key) {
                         
                         if (parameter == "baseline") usedPar.baselineLimits = std::make_pair(std::stoi(min), std::stoi(max));
                         if (parameter == "charge") usedPar.chargeLimits = std::make_pair(std::stoi(min), std::stoi(max));
-                        if (parameter == "factorCharge") usedPar.factorCharge = std::stod(min);
-                        if (parameter == "shiftCharge") usedPar.shiftCharge = std::stod(min);
+                        if (parameter == "factor") usedPar.factorCharge = std::stod(min);
+                        if (parameter == "shift") usedPar.shiftCharge = std::stod(min);
                     } else break;
                 }
             }
@@ -165,8 +165,8 @@ void Parser::DRSConfigParser::ReadSignal(std::string key) {
                         std::cout << CurStr << std::endl;
                         if (range == "up" || range == "down") usedPar.signal = CurStr;
                         if (range == "range") usedPar.signalRange = std::make_pair(std::stoi(lRange), std::stoi(rRange));
-                        if (range == "factorAmplitude") usedPar.factorAmplitude = std::stod(lRange);
-                        if (range == "shiftAmplitude") usedPar.shiftAmplitude = std::stod(lRange);
+                        if (range == "factor") usedPar.factorAmplitude = std::stod(lRange);
+                        if (range == "shift") usedPar.shiftAmplitude = std::stod(lRange);
                     } else break;
                 }
             }

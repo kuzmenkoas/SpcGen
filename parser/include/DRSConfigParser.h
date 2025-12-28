@@ -17,8 +17,8 @@ namespace Parser {
         std::ifstream OpenFile();
         void ReadWriter(std::string key="Output");
         void ReadData(std::string key="Data");
-        void ReadConfig(std::string key="Config");
+        void ReadConfig(std::string key="Charge");
         void ReadHistograms(std::string key="Histogram");
-        void ReadSignal(std::string key="Signal");
+        void ReadSignal(std::string key="Amplitude");
     };
 }
