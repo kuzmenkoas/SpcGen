@@ -118,15 +118,18 @@ Output
 \end{lstlisting}
 
 \subsection{Настройка обработки амплитудным методом}
-Заголовком для амплитудного метода является Signal.
-Далее параметрами являются: up (down) и range.
+Заголовком для амплитудного метода является Amplitude.
+Далее параметрами являются: up (down), range, factor и shift.
 Параметр вида сигнала (Пик сигнала внизу (down), или наверху (up)) настраивает алгоритм так, чтобы искал минимальное (максимальное) значение как базовую точку для фитирования.
 Далее, параметр range настраивает область фитирования, передается количество бинов слева и справа, где фитировать от базовой точки.
+Параметр factor -- множитель для амплитуды, параметр shift -- значение сдвига.
 Пример:
 \begin{lstlisting}
 Signal
 + up
 + range 100 100
++ factor 1
++ shift 0
 \end{lstlisting}
 
 \subsection{Гистограммы}
@@ -166,5 +169,91 @@ Histogram
 
 \subsection{Данные для обработки и декодирования}
 Тут заголовочные файлы отличаются.
+
+Рассмотрим конфигурацию АЦП DRS4.
+
+Заголовком для настройки параметров, которые необходимо получить, является Data. Есть следующие параметры:
+\begin{enumerate}
+    \item baseline -- среднее значение шума в установленных пределах;
+    \item charge -- значение интеграла в установленных пределах;
+    \item amplitude -- амплитуда.
+    \item waveform -- график среднего сигнала;
+    \item scaler;
+    \item time;
+\end{enumerate}
+
+Пример конфигурации:
+\begin{lstlisting}
+Data
++ baseline
++ charge
++ amplitude
++ waveform
++ scaler
++ time
+\end{lstlisting}
+
+Рассмотрим АЦП digitizer.
+
+Поскольку бинарный файл psd может содержать различные параметры (может записать их, а может и нет), то для работы программы необходимо указать, какие именно параметры были записаны.
+Для этого в заголовке DataPSD перечисляются записанные параметры.
+
+Пример:
+\begin{lstlisting}
+DataPSD
++ qShort
++ qLong
++ cfd_y1
++ cfd_y2
++ baseline
++ height
++ eventCounter
++ eventCounterPSD
++ psdValue
+\end{lstlisting}
+
+Настройка бинарного файла типа waveform проводится под заголовком DataWaveform.
+Доступны следующие параметры:
+\begin{enumerate}
+    \item baseline;
+    \item charge;
+    \item amplitude;
+    \item waveform.
+\end{enumerate}
+
+Пример:
+\begin{lstlisting}
+DataWaveform
++ baseline
++ charge
++ amplitude
++ waveform
+\end{lstlisting}
+
+\subsection{Конфигурация интегрального метода}
+Для работы интегрального метода необходимо указать пределы вычисления шума (baseline) и интеграла (charge).
+Помимо этого, можно указать множитель (factor) и слагаемое (shift) для результата интегрирования.
+
+Пример:
+\begin{lstlisting}
+Charge
++ baseline 20 400
++ charge 420 600
++ factor 1
++ shift 0
+\end{lstlisting}
+
+В случае АЦП digitizer, если входным файлом является только waveform, также необходимо указать размер сигнала (количество бинов).
+В будущем надо изменить расположение.
+
+Пример:
+\begin{lstlisting}
+Charge
++ baseline 0 100
++ charge 101 221
++ wavelength 1000
++ factor 1
++ shift 0
+\end{lstlisting}
 
 \end{document}
