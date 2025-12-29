@@ -162,7 +162,6 @@ void Parser::DRSConfigParser::ReadSignal(std::string key) {
                         std::string lRange = tmp.substr(0, tmp.find_first_of(" "));
                         tmp = tmp.substr(tmp.find_first_of(" ")+1);
                         std::string rRange = tmp.substr(0, tmp.find_first_of(" "));
-                        std::cout << CurStr << std::endl;
                         if (range == "up" || range == "down") usedPar.signal = CurStr;
                         if (range == "range") usedPar.signalRange = std::make_pair(std::stoi(lRange), std::stoi(rRange));
                         if (range == "factor") usedPar.factorAmplitude = std::stod(lRange);
