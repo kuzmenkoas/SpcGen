@@ -311,13 +311,20 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                         file->seekg(-4, std::ios_base::cur);
                         break;
                     }
-                    std::vector<uint16_t> voltageVector;
-                    voltageVector.resize(fTimeVector[channel-1].size());
-
-                    file->seekg(-4, std::ios_base::cur);
-                    file->read(reinterpret_cast<char*>(voltageVector.data()), voltageVector.size()*sizeof(uint16_t));
+                    uint16_t voltage1;
+                    uint16_t voltage2;
                     
-                    for (double vol : voltageVector) waveform.push_back(vol/65536. + rangeCenter/1000. - 0.5);
+                    char mtmp1[2] = {tmp[0], tmp[1]};
+                    char mtmp2[2] = {tmp[2], tmp[3]};
+
+                    std::memcpy(&voltage1, mtmp1, sizeof(voltage1));
+                    std::memcpy(&voltage2, mtmp2, sizeof(voltage2));
+                    
+                    double wave1 = voltage1/65536. + rangeCenter/1000. - 0.5;
+                    double wave2 = voltage2/65536. + rangeCenter/1000. - 0.5;
+
+                    waveform.push_back(wave1);
+                    waveform.push_back(wave2);
                 }
                 CalculateWaveform(waveform);
 
