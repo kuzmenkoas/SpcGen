@@ -21,7 +21,8 @@ namespace Parser {
         void ReadDataPSD(std::string key="DataPSD");
         void ReadDataWaveform(std::string key="DataWaveform");
         void ReadHistograms(std::string key="Histogram");
-        void ReadConfig(std::string key="Charge");
+        void ReadCharge(std::string key="Charge");
+        void ReadConfig(std::string key="Config");
         void ReadSignal(std::string key="Amplitude");
     };
 }

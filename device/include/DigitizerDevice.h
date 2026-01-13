@@ -31,7 +31,7 @@ namespace Device {
         void Start() final;
     private:
         void ProcessPSD(std::filesystem::path path);
-        void ProcessWaveform(std::filesystem::path path);
+        void ProcessWaveform(std::filesystem::path path, bool save);
         void PreProcessWaveform(std::vector<std::filesystem::path> pathVector);
         int CountUsedParametersBytes();
         int CountUsedParameters();
@@ -39,6 +39,9 @@ namespace Device {
         void ConfigureTxt();
         void WriteTxtEventPSD();
         void WriteTxtEventWaveform();
+
+        bool IsWaveformHasSignal(std::vector<int16_t> eventWaveform);
+
         void CalculateBaseline(std::vector<int16_t> eventWaveform);
         void CalculateCharge(std::vector<int16_t> eventWaveform);
         void CalculateAmplitude(std::vector<int16_t> eventWaveform);

@@ -22,7 +22,10 @@ void Device::DigitizerDevice::Start() {
     if (GetDigitizerTypes().size() == 2) PreProcessWaveform(GetBinaryPathVector());
     for (std::string file : GetDigitizerTypes()) {
         if (file == "PSD") ProcessPSD(GetBinaryPathVector()[i++]);
-        if (file == "Waveform") ProcessWaveform(GetBinaryPathVector()[i++]);
+        if (file == "Waveform") {
+            if (this->GetIsCut()) ProcessWaveform(GetBinaryPathVector()[i], false);
+            ProcessWaveform(GetBinaryPathVector()[i++], true);
+        }
     }
 
     for (std::string writer : GetParser()->GetUsedWriterVector()) {
@@ -124,7 +127,7 @@ void Device::DigitizerDevice::ProcessPSD(std::filesystem::path path) {
     file.close();
 }
 
-void Device::DigitizerDevice::ProcessWaveform(std::filesystem::path path) {
+void Device::DigitizerDevice::ProcessWaveform(std::filesystem::path path, bool save) {
     std::ifstream file(path.string(), std::ios::binary | std::ios::ate);
     file.seekg(0, std::ios::beg);
 
@@ -138,34 +141,38 @@ void Device::DigitizerDevice::ProcessWaveform(std::filesystem::path path) {
             eventWaveform.push_back(wave);
         }
         if (file.eof()) break;
-        if (usedParameters.charge.has_value() || usedParameters.baseline.has_value()) CalculateBaseline(eventWaveform);
-        if (usedParameters.charge.has_value()) CalculateCharge(eventWaveform);
-        if (usedParameters.amplitude.has_value()) CalculateAmplitude(eventWaveform);
-        CalculateWaveform(eventWaveform);
+        if ((usedParameters.charge.has_value() || usedParameters.baseline.has_value()) && save) CalculateBaseline(eventWaveform);
+        if ((usedParameters.charge.has_value()) && save) CalculateCharge(eventWaveform);
+        if ((usedParameters.amplitude.has_value()) && save) CalculateAmplitude(eventWaveform);
+        if ((!this->GetIsCut()) || ((this->GetIsCut()) && (!save))) CalculateWaveform(eventWaveform);
 
-        for (std::string writer : GetParser()->GetUsedWriterVector()) {
-            if (writer == "Root") fTreeWaveform->Fill();
-            if (writer == "Txt") WriteTxtEventWaveform();
-        }
+        if (save && ((!this->GetIsCut()) || ((this->GetIsCut()) && (IsWaveformHasSignal(eventWaveform))))) {
+            for (std::string writer : GetParser()->GetUsedWriterVector()) {
+                if (writer == "Root") fTreeWaveform->Fill();
+                if (writer == "Txt") WriteTxtEventWaveform();
+            }
         
-        if (usedParameters.hist.has_value()) {
-            auto& hists = *usedParameters.hist;
-            int iHist = 0;
-            for (size_t i = 0; i < size(hists); i++) {
-                if (hists[i].parameter == "baseline" && hists[i].file == "Waveform") fHist[i]->Fill(fEvent.baseline);
-                if (hists[i].parameter == "charge" && hists[i].file == "Waveform") fHist[i]->Fill(fEvent.charge);
-                if (hists[i].parameter == "amplitude" && hists[i].file == "Waveform") fHist[i]->Fill(fEvent.amplitude);
+            if (usedParameters.hist.has_value()) {
+                auto& hists = *usedParameters.hist;
+                int iHist = 0;
+                for (size_t i = 0; i < size(hists); i++) {
+                    if (hists[i].parameter == "baseline" && hists[i].file == "Waveform") fHist[i]->Fill(fEvent.baseline);
+                    if (hists[i].parameter == "charge" && hists[i].file == "Waveform") fHist[i]->Fill(fEvent.charge);
+                    if (hists[i].parameter == "amplitude" && hists[i].file == "Waveform") fHist[i]->Fill(fEvent.amplitude);
+                }
             }
         }
         eventCounter++;
     }
 
-    TGraph* gr = new TGraph();
-    int counter = 0;
-    for (double event : fEvent.waveform) {
-        gr->AddPoint(counter++, event/eventCounter);
+    if (save) {
+        TGraph* gr = new TGraph();
+        int counter = 0;
+        for (double event : fEvent.waveform) {
+            gr->AddPoint(counter++, event/eventCounter);
+        }
+        gr->Write("waveform");
     }
-    gr->Write("waveform");
 
     file.close();
 }
@@ -321,4 +328,18 @@ void Device::DigitizerDevice::WriteTxtEventWaveform() {
     if (usedParameters.charge.has_value()) fTxtFileWaveform << fEvent.charge << " ";
     if (usedParameters.amplitude.has_value()) fTxtFileWaveform << fEvent.amplitude << " ";
     fTxtFileWaveform << "\n";
+}
+
+bool Device::DigitizerDevice::IsWaveformHasSignal(std::vector<int16_t> eventWaveform) {
+    double sigma = 0;
+    for (int i = 0; i < eventWaveform.size(); i++) {
+        sigma += (eventWaveform[i]-fEvent.waveform[i])*(eventWaveform[i]-fEvent.waveform[i]);
+    }
+    sigma = std::sqrt(sigma/eventWaveform.size());
+    double average = std::accumulate(fEvent.waveform.begin(), fEvent.waveform.end(), 0.0) / fEvent.waveform.size();
+    auto val = std::min_element(fEvent.waveform.begin(), fEvent.waveform.end());
+    auto val2 = std::max_element(fEvent.waveform.begin(), fEvent.waveform.end());
+    if (std::abs(*val) < std::abs(*val2)) val = val2;
+    if (sigma/std::abs(*val)*100 > usedParameters.cut.value()) return false;
+    return true;
 }
