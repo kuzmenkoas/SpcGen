@@ -31,6 +31,11 @@ namespace Device {
         std::vector<std::string> GetDigitizerTypes() {return fDigitizerTypes;};
 
         TFile* fRootFile = nullptr;
+
+        void SetIsCut(bool val) {bCut = val;};
+        bool GetIsCut() {return bCut;};
+        void SetIsDebug(bool val) {bDebug = val;};
+        bool GetIsDebug() {return bDebug;};
     private:
         void ConfigureRoot();
         void ConfigureTxt();
@@ -40,5 +45,8 @@ namespace Device {
         std::string fFileName;
         Global::DeviceType fDeviceType;
         std::vector<std::string> fDigitizerTypes = {};
+
+        bool bCut = false;
+        bool bDebug = false;
     };
 }

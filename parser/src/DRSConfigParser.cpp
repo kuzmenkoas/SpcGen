@@ -9,9 +9,10 @@ Parser::DRSConfigParser::~DRSConfigParser() {
 void Parser::DRSConfigParser::Start() {
     ReadWriter();
     ReadData();
-    ReadConfig();
+    ReadCharge();
     ReadHistograms();
     ReadSignal();
+    ReadConfig();
 
     SetUsedParameters(usedPar);
 }
@@ -80,7 +81,7 @@ void Parser::DRSConfigParser::ReadData(std::string key) {
     file.close();
 }
 
-void Parser::DRSConfigParser::ReadConfig(std::string key) {
+void Parser::DRSConfigParser::ReadCharge(std::string key) {
     std::ifstream file = OpenFile();
     std::string CurStr;
     try {
@@ -101,6 +102,31 @@ void Parser::DRSConfigParser::ReadConfig(std::string key) {
                         if (parameter == "charge") usedPar.chargeLimits = std::make_pair(std::stoi(min), std::stoi(max));
                         if (parameter == "factor") usedPar.factorCharge = std::stod(min);
                         if (parameter == "shift") usedPar.shiftCharge = std::stod(min);
+                    } else break;
+                }
+            }
+        }
+    } catch (const std::exception& e) {
+      std::cerr << "Exception: " << e.what() << std::endl;
+      abort();
+    }
+    file.close();
+}
+
+void Parser::DRSConfigParser::ReadConfig(std::string key) {
+    std::ifstream file = OpenFile();
+    std::string CurStr;
+    try {
+        while(getline (file,CurStr)){
+            if (CurStr.compare(0, key.size(), key) == 0) {
+                while (getline (file, CurStr)) {
+                    if (CurStr.c_str()[0]=='+') {
+                        size_t found = CurStr.find_first_of(" ");
+                        CurStr = CurStr.substr(found+1);
+                        std::string parameter = CurStr.substr(0, CurStr.find_first_of(" "));
+                        std::string tmp = CurStr.substr(CurStr.find_first_of(" ")+1);
+                        std::string val = tmp.substr(0, tmp.find_first_of(" "));
+                        if (parameter == "cut") usedPar.cut = std::stod(val);
                     } else break;
                 }
             }

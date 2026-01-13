@@ -9,6 +9,8 @@ Core::ArgReader::ArgReader(int argc, char *argv[]) {
             fDeviceType = Global::DeviceType::Digitizer;
         }
         ParseConfigFile(argc, argv);
+        ParseCut(argc, argv);
+        ParseDebug(argc, argv);
 }
 
 Core::ArgReader::~ArgReader() {
@@ -91,4 +93,24 @@ void Core::ArgReader::SetDigitizerBinaryFileName(std::string name) {
 std::string Core::ArgReader::GetBinaryFileName(std::string name) {
     std::filesystem::path path(name);
     return path.filename().string();
+}
+
+void Core::ArgReader::ParseCut(int argc, char *argv[]) {
+    for (int i = 0; i < argc; i++) {
+        std::string name = argv[i];
+        if ((name == cutKey)) {
+            isCut = true;
+            break;
+        }
+    }
+}
+
+void Core::ArgReader::ParseDebug(int argc, char *argv[]) {
+    for (int i = 0; i < argc; i++) {
+        std::string name = argv[i];
+        if ((name == debugKey)) {
+            isDebug = true;
+            break;
+        }
+    }
 }

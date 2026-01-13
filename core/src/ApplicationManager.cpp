@@ -18,6 +18,9 @@ void Core::ApplicationManager::Run() {
     device->SetConfigPath(fArgReader->GetConfigPath());
     device->SetBinaryPathVector(fArgReader->GetBinaryPathVector());
     device->SetFileName(fArgReader->GetFileName());
+
+    device->SetIsCut(fArgReader->IsCut());
+    device->SetIsDebug(fArgReader->IsDebug());
     
     device->Prepare();
     device->Start();

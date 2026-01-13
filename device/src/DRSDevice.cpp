@@ -13,6 +13,8 @@ Device::DRSDevice::~DRSDevice() {
 
 void Device::DRSDevice::PrepareDevice() {
     DefineChannels();
+    if (this->GetIsCut()) ReadPreAverageWaveform();
+
     // Make ntuples
     for (std::string writer : GetParser()->GetUsedWriterVector()) {
         if (writer == "Root") ConfigureRoot();
@@ -26,12 +28,12 @@ void Device::DRSDevice::Start() {
     for (std::filesystem::path path : GetBinaryPathVector()) {
         std::ifstream file(path.string(), std::ios::binary);
         if (file.is_open()) {
-            char tmp[4];
-            ReadFileHeader(&file, &path);
+            // char tmp[4];
+            ReadFileHeader(&file, &path, true);
             // Read Time header
-            ReadTimeHeader(&file, &path);
+            ReadTimeHeader(&file, &path, true);
             // Read Events
-            ReadEventHeader(&file, &path);
+            ReadEventHeader(&file, &path, true);
         } else {
             std::cerr << "Error: File not found: " << path.string() << "\n";
             std::cerr << "Stop program." << "\n";
@@ -119,7 +121,7 @@ void Device::DRSDevice::WriteTxtEvent() {
 void Device::DRSDevice::DefineChannels() {
     for (std::filesystem::path path : GetBinaryPathVector()) {
         std::ifstream file(path.string(), std::ios::binary);
-        ReadFileHeader(&file, &path);
+        ReadFileHeader(&file, &path, false);
         ReadChannels(&file, &path);
         file.close();
     }
@@ -192,23 +194,27 @@ void Device::DRSDevice::ReadChannels(std::ifstream* file, std::filesystem::path*
     }
 }
 
-void Device::DRSDevice::ReadFileHeader(std::ifstream* file, std::filesystem::path* path) {
+void Device::DRSDevice::ReadFileHeader(std::ifstream* file, std::filesystem::path* path, bool save) {
     // Read File header
     char tmp[4];
     file->read((char*) &tmp, sizeof(tmp));
     if (tmp[0] == fFileHeader[0] && tmp[1] == fFileHeader[1] && tmp[2] == fFileHeader[2]) {
-        std::cout << "Reading file: " << path->string() << "\n";
-        int16_t version;
-        std::memcpy(&version, &tmp[3], sizeof(version));
-        std::cout << "DRS version: " << version << "\n";
+        if (save) {
+            std::cout << "Reading file: " << path->string() << "\n";
+            int16_t version;
+            std::memcpy(&version, &tmp[3], sizeof(version));
+            std::cout << "DRS version: " << version << "\n";
+        }
     } else {
-        std::cerr << "Warning: File header mismatch." << "\n";
-        std::cerr << "Read without File header." << "\n";
+        if (save) {
+            std::cerr << "Warning: File header mismatch." << "\n";
+            std::cerr << "Read without File header." << "\n";
+        }
         file->seekg(0);
     }
 }
 
-void Device::DRSDevice::ReadTimeHeader(std::ifstream* file, std::filesystem::path* path) {
+void Device::DRSDevice::ReadTimeHeader(std::ifstream* file, std::filesystem::path* path, bool save) {
     Global::Parameters usedParameters = GetParser()->GetUsedParameters();
     // Read Time header
     char tmp[4];
@@ -242,14 +248,16 @@ void Device::DRSDevice::ReadTimeHeader(std::ifstream* file, std::filesystem::pat
                             file->seekg(-4, std::ios_base::cur);
                             break;
                         }
-                        fEvent.time = DEFAULT_VALUE;
-                        std::memcpy(&fEvent.time, &tmp, sizeof(tmp));
-                        fTimeVector[channel-1].push_back(fEvent.time);
-                        
-                        for (std::string writer : GetParser()->GetUsedWriterVector()) {
-                            if (writer == "Root") {
-                                if (usedParameters.time.has_value()) {
-                                    fChannelTimeTreeMap[channel-1]->Fill();
+                        if (save) {
+                            fEvent.time = DEFAULT_VALUE;
+                            std::memcpy(&fEvent.time, &tmp, sizeof(tmp));
+                            fTimeVector[channel-1].push_back(fEvent.time);
+                            
+                            for (std::string writer : GetParser()->GetUsedWriterVector()) {
+                                if (writer == "Root") {
+                                    if (usedParameters.time.has_value()) {
+                                        fChannelTimeTreeMap[channel-1]->Fill();
+                                    }
                                 }
                             }
                         }
@@ -272,7 +280,7 @@ void Device::DRSDevice::ReadTimeHeader(std::ifstream* file, std::filesystem::pat
     }
 }
 
-void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::path* path) {
+void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::path* path, bool save) {
     Global::Parameters usedParameters = GetParser()->GetUsedParameters();
     int eventCounter = 0;
     while (true) {
@@ -305,7 +313,7 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                         uint32_t scaler;
                         file->read((char*) &tmp, sizeof(tmp));
                         std::memcpy(&scaler, &tmp, sizeof(scaler));
-                        fEvent.scaler = scaler;
+                        if (save) fEvent.scaler = scaler;
                     }
                     if (tmp[0] == fEventHeader[0] && tmp[1] == fEventHeader[1] && tmp[2] == fEventHeader[2] && tmp[3] == fEventHeader[3]) {
                         file->seekg(-4, std::ios_base::cur);
@@ -326,50 +334,68 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                     waveform.push_back(wave1);
                     waveform.push_back(wave2);
                 }
-                CalculateWaveform(waveform);
-
-                if (usedParameters.charge.has_value() || usedParameters.baseline.has_value()) CalculateBaseline(waveform);
-                if (usedParameters.charge.has_value()) fEvent.charge = CalculateCharge(waveform, channel);
-                if (usedParameters.amplitude.has_value()) fEvent.amplitude = CalculateAmplitude(waveform);
-                // Process event
-
-                for (std::string writer : GetParser()->GetUsedWriterVector()) {
-                    if (writer == "Root") if (usedParameters.time.has_value()) if (usedParameters.baseline.has_value() || usedParameters.charge.has_value()) {
-                        fChannelEventsTreeMap[channel-1]->Fill();
-                        int iHist = 0;
-                        if (usedParameters.hist.has_value()) {
-                            auto& hists = *usedParameters.hist;
-                            for (size_t i = 0; i < size(hists); i++) {
-                                if (hists[i].parameter == "baseline") fChannelHist[channel-1][iHist++]->Fill(fEvent.baseline);
-                                if (hists[i].parameter == "charge") fChannelHist[channel-1][iHist++]->Fill(fEvent.charge);
-                                if (hists[i].parameter == "amplitude") fChannelHist[channel-1][iHist++]->Fill(fEvent.amplitude);
-                                if (hists[i].parameter == "scaler") fChannelHist[channel-1][iHist++]->Fill(fEvent.scaler);
-                            }
-                        }
-                    }
-                    if (writer == "Txt") WriteTxtEvent();
-                }
-                
                 eventCounter++;
+                if (usedParameters.waveform.has_value() && ((!this->GetIsCut()) || ((this->GetIsCut()) && (!save)))) {
+                    CalculateWaveform(waveform);
+                }
+
+                if (save) {
+                    if (IsWaveformHasSignal(waveform)) {
+                        if (usedParameters.charge.has_value() || usedParameters.baseline.has_value()) CalculateBaseline(waveform);
+                        if (usedParameters.charge.has_value()) fEvent.charge = CalculateCharge(waveform, channel);
+                        if (usedParameters.amplitude.has_value()) fEvent.amplitude = CalculateAmplitude(waveform);
+                        // Process event
+
+                        for (std::string writer : GetParser()->GetUsedWriterVector()) {
+                            if (writer == "Root") if (usedParameters.time.has_value()) if (usedParameters.baseline.has_value() || usedParameters.charge.has_value()) {
+                                fChannelEventsTreeMap[channel-1]->Fill();
+                                int iHist = 0;
+                                if (usedParameters.hist.has_value()) {
+                                    auto& hists = *usedParameters.hist;
+                                    for (size_t i = 0; i < size(hists); i++) {
+                                        if (hists[i].parameter == "baseline") fChannelHist[channel-1][iHist++]->Fill(fEvent.baseline);
+                                        if (hists[i].parameter == "charge") fChannelHist[channel-1][iHist++]->Fill(fEvent.charge);
+                                        if (hists[i].parameter == "amplitude") fChannelHist[channel-1][iHist++]->Fill(fEvent.amplitude);
+                                        if (hists[i].parameter == "scaler") fChannelHist[channel-1][iHist++]->Fill(fEvent.scaler);
+                                    }
+                                }
+                            }
+                            if (writer == "Txt") WriteTxtEvent();
+                        }
+                    } else if (this->GetIsDebug()) {
+                        // add plotting waveform
+                        TGraph* gr = new TGraph();
+                        int counter = 0;
+                        for (double event : waveform) {
+                            gr->AddPoint(counter++, event);
+                        }
+                        std::string nametmp = "waveform"+std::to_string(eventCounter);
+                        TString name = TString(nametmp.c_str(), nametmp.length());
+                        gr->Write(name);
+                    }
+                }
             } else {
                 // Error
             }
         } else {
-            for (std::string writer : GetParser()->GetUsedWriterVector()) {
-                if (writer == "Root") {
-                    // Plot mean waveform
-                    if (usedParameters.waveform.has_value()) {
-                        TGraph* gr = new TGraph();
-                        int counter = 0;
-                        for (double event : fEvent.waveform) {
-                            gr->AddPoint(counter++, event/eventCounter);
+            if (!save) for (int i = 0; i < fEvent.waveform.size(); i++) fEvent.waveform[i] /= eventCounter;
+            if (save) {
+                for (std::string writer : GetParser()->GetUsedWriterVector()) {
+                    if (writer == "Root") {
+                        // Plot mean waveform
+                        if (usedParameters.waveform.has_value()) {
+                            TGraph* gr = new TGraph();
+                            int counter = 0;
+                            for (double event : fEvent.waveform) {
+                                gr->AddPoint(counter++, event);
+                            }
+                            gr->Write("waveform");
                         }
-                        gr->Write("waveform");
                     }
                 }
-            }
 
-            std::cout << "Reading success!" << "\n";
+                std::cout << "Reading success!" << "\n";
+            }
             break;
         }
     }
@@ -398,6 +424,19 @@ void Device::DRSDevice::ReadDate(std::ifstream* file, std::filesystem::path* pat
 
     file->read((char*) &tmp2, sizeof(tmp2));
     std::memcpy(&tt, &tmp2, sizeof(tt));
+}
+
+void Device::DRSDevice::ReadPreAverageWaveform() {
+    // read and return counter of file
+    // need to fill fEvent.waveform
+    for (std::filesystem::path path : GetBinaryPathVector()) {
+        std::ifstream file(path.string(), std::ios::binary);
+        ReadFileHeader(&file, &path, false);
+        ReadTimeHeader(&file, &path, false);
+        ReadEventHeader(&file, &path, false);
+
+        file.close();
+    }
 }
 
 double Device::DRSDevice::CalculateCharge(std::vector<double> eventWaveform, int channel) {
@@ -443,6 +482,20 @@ void Device::DRSDevice::CalculateBaseline(std::vector<double> eventWaveform) {
 
 double Device::DRSDevice::CalculateAmplitude(std::vector<double> eventWaveform) {
     Global::Parameters usedParameters = GetParser()->GetUsedParameters();
+    // const int Nbins = 50;
+    // double avg[Nbins] = {0};
+    // int nums[Nbins] = {0};
+
+    // for (int i = usedParameters.signalRange.value().first; i < usedParameters.signalRange.value().second; i++) {
+    //     int idx = Nbins*(i-usedParameters.signalRange.value().first)/(usedParameters.signalRange.value().second-usedParameters.signalRange.value().first);
+    //     avg[idx] += eventWaveform[i];
+    //     nums[idx] += 1;
+    // }
+    // for (int i = 0; i < Nbins; i++) {
+    //     avg[i] /= nums[i];
+    // }
+
+
     double amplitude = 0;
     int index;
     double valuePeak = 0;
@@ -455,14 +508,14 @@ double Device::DRSDevice::CalculateAmplitude(std::vector<double> eventWaveform) 
         index = std::distance(eventWaveform.begin(), value);
         valuePeak = *value;
     }
-    // TF1* parabola = new TF1("parabola", "pol2", index-usedParameters.signalRange.value().first, index+usedParameters.signalRange.value().second);
-    // TGraph* gr = new TGraph();
-    // for (size_t i = 0; i < eventWaveform.size(); i++) {
-        // gr->SetPoint(i, i, eventWaveform[i]);
-    // }
-    // gr->Fit("parabola", "QR");
-    // double x = -parabola->GetParameter(1)/(2*parabola->GetParameter(2));
-    // amplitude = parabola->GetParameter(2)*x*x+parabola->GetParameter(1)*x+parabola->GetParameter(0);
+    TF1* parabola = new TF1("parabola", "pol2", index-usedParameters.signalRange.value().first, index+usedParameters.signalRange.value().second);
+    TGraph* gr = new TGraph();
+    for (size_t i = 0; i < eventWaveform.size(); i++) {
+        gr->SetPoint(i, i, eventWaveform[i]);
+    }
+    gr->Fit("parabola", "QR");
+    double x = -parabola->GetParameter(1)/(2*parabola->GetParameter(2));
+    amplitude = parabola->GetParameter(2)*x*x+parabola->GetParameter(1)*x+parabola->GetParameter(0);
     double factor = 1;
     double shift = 0;
     amplitude = valuePeak;
@@ -470,4 +523,19 @@ double Device::DRSDevice::CalculateAmplitude(std::vector<double> eventWaveform) 
     if (usedParameters.shiftAmplitude.has_value()) shift = usedParameters.shiftAmplitude.value();
     amplitude = amplitude * factor + shift;
     return amplitude;
+}
+
+bool Device::DRSDevice::IsWaveformHasSignal(std::vector<double> eventWaveform) {
+    Global::Parameters usedParameters = GetParser()->GetUsedParameters();
+    double sigma = 0;
+    for (int i = 0; i < eventWaveform.size(); i++) {
+        sigma += (eventWaveform[i]-fEvent.waveform[i])*(eventWaveform[i]-fEvent.waveform[i]);
+    }
+    sigma = std::sqrt(sigma/eventWaveform.size());
+    double average = std::accumulate(fEvent.waveform.begin(), fEvent.waveform.end(), 0.0) / fEvent.waveform.size();
+    auto val = std::min_element(fEvent.waveform.begin(), fEvent.waveform.end());
+    auto val2 = std::max_element(fEvent.waveform.begin(), fEvent.waveform.end());
+    if (std::abs(*val) < std::abs(*val2)) val = val2;
+    if (sigma/std::abs(*val)*100 > usedParameters.cut.value()) return false;
+    return true;
 }

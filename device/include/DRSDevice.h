@@ -43,10 +43,13 @@ namespace Device {
         void WriteTxtEvent();
         void DefineChannels();
         void ReadChannels(std::ifstream* file, std::filesystem::path* path);
-        void ReadFileHeader(std::ifstream* file, std::filesystem::path* path);
-        void ReadTimeHeader(std::ifstream* file, std::filesystem::path* path);
-        void ReadEventHeader(std::ifstream* file, std::filesystem::path* path);
+        void ReadFileHeader(std::ifstream* file, std::filesystem::path* path, bool save);
+        void ReadTimeHeader(std::ifstream* file, std::filesystem::path* path, bool save);
+        void ReadEventHeader(std::ifstream* file, std::filesystem::path* path, bool save);
         void ReadDate(std::ifstream* file, std::filesystem::path* path);
+
+        void ReadPreAverageWaveform();
+        bool IsWaveformHasSignal(std::vector<double> eventWaveform);
 
         double CalculateCharge(std::vector<double> eventWaveform, int channel);
         double CalculateAmplitude(std::vector<double> eventWaveform);

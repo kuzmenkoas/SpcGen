@@ -20,6 +20,9 @@ namespace Core {
 
         Global::DeviceType GetDeviceType() {return fDeviceType;};
         std::vector<std::string> GetDigitizerTypes() {return fDigitizerTypes;};
+
+        bool IsCut() {return isCut;};
+        bool IsDebug() {return isDebug;};
     private:
         void ParseThreads(int argc, char *argv[]);
         bool ParseDRSBinaryFile(int argc, char *argv[]);
@@ -30,7 +33,12 @@ namespace Core {
         void SetDigitizerBinaryFileName(std::string name);
         std::string GetBinaryFileName(std::string name);
 
+        void ParseCut(int argc, char *argv[]);
+        void ParseDebug(int argc, char *argv[]);
+
         std::string threadKey = "-j";
+        std::string cutKey = "-cut";
+        std::string debugKey = "-debug";
         std::string binaryDRSExtension = "dat";
         std::string binaryDigitizerExtension = "bin";
         std::string configExtension = "cfg";
@@ -41,5 +49,8 @@ namespace Core {
         mutable std::once_flag initDigitizerFlag;
         Global::DeviceType fDeviceType;
         std::vector<std::string> fDigitizerTypes = {};
+
+        bool isCut = false;
+        bool isDebug = false;
     };
 }

@@ -23,6 +23,7 @@ namespace Global {
         std::optional<double> shiftCharge;
         std::optional<double> factorAmplitude;
         std::optional<double> shiftAmplitude;
+        std::optional<double> cut;
 
         // DRS data
         std::optional<int32_t> time;
