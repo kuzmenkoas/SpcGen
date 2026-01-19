@@ -527,19 +527,10 @@ double Device::DRSDevice::CalculateAmplitude(std::vector<double> eventWaveform) 
 
 bool Device::DRSDevice::IsWaveformHasSignal(std::vector<double> eventWaveform) {
     std::vector<double> fEventWaveformN = NormalizeWaveform(fEvent.waveform);
-    double r = MaxCCF(CCF(fEventWaveformN, NormalizeWaveform(eventWaveform)))/Integrate(fEventWaveformN);
-    
+    // double r = MaxCCF(CCF(fEventWaveformN, NormalizeWaveform(eventWaveform)))/Integrate(fEventWaveformN);
+    double r = MaxCCF(CCF(fEventWaveformN, NormalizeWaveform(eventWaveform)))/MaxCCF(CCF(fEventWaveformN, fEventWaveformN));
+    // if (r < 0.2) std::cout << r*100 << std::endl;
     Global::Parameters usedParameters = GetParser()->GetUsedParameters();
-    // double sigma = 0;
-    // for (int i = 0; i < eventWaveform.size(); i++) {
-    //     sigma += (eventWaveform[i]-fEvent.waveform[i])*(eventWaveform[i]-fEvent.waveform[i]);
-    // }
-    // sigma = std::sqrt(sigma/eventWaveform.size());
-    // double average = std::accumulate(fEvent.waveform.begin(), fEvent.waveform.end(), 0.0) / fEvent.waveform.size();
-    // auto val = std::min_element(fEvent.waveform.begin(), fEvent.waveform.end());
-    // auto val2 = std::max_element(fEvent.waveform.begin(), fEvent.waveform.end());
-    // if (std::abs(*val) < std::abs(*val2)) val = val2;
-    // if (sigma/std::abs(*val)*100 > usedParameters.cut.value()) return false;
     if (r*100 < usedParameters.cut.value()) return false;
     return true;
 }

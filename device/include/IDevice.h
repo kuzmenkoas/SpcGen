@@ -46,19 +46,30 @@ namespace Device {
             std::vector<double> nWaveform = {};
             for (auto &val : waveform) nWaveform.push_back(val/(*valMax));
 
-            return waveform;
+            return nWaveform;
         };
 
         template<typename T> std::vector<double> CCF(std::vector<T> w1, std::vector<T> w2) {
             std::vector<double> res = {};
-            for (int i = 0; i < w1.size(); i++) {
-                double s = 0;
-                for (int k = 0; k < w1.size(); k++) {
-                    int idx = i+k;
-                    if (idx >= w1.size()) idx -= w1.size();
-                    s += w1[k]*w2[idx];
-                }
-                res.push_back(s);
+            // for (int i = 0; i < w1.size(); i++) {
+                // double s = 0;
+                // for (int k = 0; k < w1.size(); k++) {
+                //     int idx = i+k;
+                //     if (idx >= w1.size()) idx -= w1.size();
+                //     s += w1[k]*w2[idx];
+                // }
+                int n = w1.size();
+                int m = w2.size();
+                for (int shift = -m+1; shift < n; shift++) {
+                    double s = 0.0;
+                    int result_idx = shift+m-1;
+                    for (int i = 0; i < n; i++) {
+                        int j = i-shift;
+                        if (j >= 0 && j < m) s += w1[i]*w2[j];
+                    }
+                    // std::cout << s << std::endl;
+                    res.push_back(s);
+                // }
             }
             return res;
         };
@@ -67,7 +78,7 @@ namespace Device {
         template<typename T> double Integrate(std::vector<T> waveform) {
             double s = 0;
             for (int i = 0; i < waveform.size(); i++) {
-                s += waveform[i]/2.;
+                s += std::abs(waveform[i]/2.);
             }
             return std::abs(s);
         };
