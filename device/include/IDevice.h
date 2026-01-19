@@ -4,6 +4,7 @@
 #include <vector>
 #include "TFile.h"
 #include "ParserFactory.h"
+#include <algorithm>
 
 namespace Device {
     class IDevice {
@@ -36,6 +37,42 @@ namespace Device {
         bool GetIsCut() {return bCut;};
         void SetIsDebug(bool val) {bDebug = val;};
         bool GetIsDebug() {return bDebug;};
+
+        template<typename T> std::vector<double> NormalizeWaveform(std::vector<T> waveform) {
+            auto valMax = std::max_element(waveform.begin(), waveform.end());
+            auto valMin = std::min_element(waveform.begin(), waveform.end());
+
+            if (std::abs(*valMax) < std::abs(*valMin)) valMax = valMin;
+            std::vector<double> nWaveform = {};
+            for (auto &val : waveform) nWaveform.push_back(val/(*valMax));
+
+            return waveform;
+        };
+
+        template<typename T> std::vector<double> CCF(std::vector<T> w1, std::vector<T> w2) {
+            std::vector<double> res = {};
+            for (int i = 0; i < w1.size(); i++) {
+                double s = 0;
+                for (int k = 0; k < w1.size(); k++) {
+                    int idx = i+k;
+                    if (idx >= w1.size()) idx -= w1.size();
+                    s += w1[k]*w2[idx];
+                }
+                res.push_back(s);
+            }
+            return res;
+        };
+
+        // TODO
+        template<typename T> double Integrate(std::vector<T> waveform) {
+            double s = 0;
+            for (int i = 0; i < waveform.size(); i++) {
+                s += waveform[i]/2.;
+            }
+            return std::abs(s);
+        };
+
+        double MaxCCF(std::vector<double> ccfvector);
     private:
         void ConfigureRoot();
         void ConfigureTxt();

@@ -25,3 +25,10 @@ void Device::IDevice::ConfigureRoot() {
     TString rFileName(fileName.c_str(), fileName.length());
     fRootFile = new TFile(rFileName, "recreate");
 }
+
+double Device::IDevice::MaxCCF(std::vector<double> ccfvector) {
+    auto val = std::min_element(ccfvector.begin(), ccfvector.end());
+    auto val2 = std::max_element(ccfvector.begin(), ccfvector.end());
+    if (std::abs(*val2) > std::abs(*val)) val = val2;
+    return std::abs(*val);
+}
