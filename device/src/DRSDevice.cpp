@@ -527,9 +527,7 @@ double Device::DRSDevice::CalculateAmplitude(std::vector<double> eventWaveform) 
 
 bool Device::DRSDevice::IsWaveformHasSignal(std::vector<double> eventWaveform) {
     std::vector<double> fEventWaveformN = NormalizeWaveform(fEvent.waveform);
-    // double r = MaxCCF(CCF(fEventWaveformN, NormalizeWaveform(eventWaveform)))/Integrate(fEventWaveformN);
     double r = MaxCCF(CCF(fEventWaveformN, NormalizeWaveform(eventWaveform)))/MaxCCF(CCF(fEventWaveformN, fEventWaveformN));
-    // if (r < 0.2) std::cout << r*100 << std::endl;
     Global::Parameters usedParameters = GetParser()->GetUsedParameters();
     if (r*100 < usedParameters.cut.value()) return false;
     return true;

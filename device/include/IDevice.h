@@ -5,6 +5,7 @@
 #include "TFile.h"
 #include "ParserFactory.h"
 #include <algorithm>
+#include "TSpectrumTransform.h"
 
 namespace Device {
     class IDevice {
@@ -50,28 +51,22 @@ namespace Device {
         };
 
         template<typename T> std::vector<double> CCF(std::vector<T> w1, std::vector<T> w2) {
-            std::vector<double> res = {};
-            // for (int i = 0; i < w1.size(); i++) {
-                // double s = 0;
-                // for (int k = 0; k < w1.size(); k++) {
-                //     int idx = i+k;
-                //     if (idx >= w1.size()) idx -= w1.size();
-                //     s += w1[k]*w2[idx];
-                // }
-                int n = w1.size();
-                int m = w2.size();
-                for (int shift = -m+1; shift < n; shift++) {
-                    double s = 0.0;
-                    int result_idx = shift+m-1;
-                    for (int i = 0; i < n; i++) {
-                        int j = i-shift;
-                        if (j >= 0 && j < m) s += w1[i]*w2[j];
-                    }
-                    // std::cout << s << std::endl;
-                    res.push_back(s);
-                // }
-            }
-            return res;
+            TSpectrumTransform* tspct = new TSpectrumTransform(w1.size());
+            tspct->SetTransformType(TSpectrumTransform::kTransformFourier, 0);
+            tspct->SetDirection(TSpectrumTransform::kTransformForward);
+            std::vector<T> lvalue;
+            std::vector<T> rvalue;
+            lvalue.resize(2*w1.size());
+            rvalue.resize(2*w1.size());
+            tspct->Transform(w1.data(), lvalue.data());
+            tspct->Transform(w2.data(), rvalue.data());
+            for (int i = 0; i < lvalue.size(); i++) lvalue[i] *= rvalue[i];
+            rvalue.clear();
+            rvalue.resize(w1.size());
+            tspct->SetDirection(TSpectrumTransform::kTransformInverse);
+            tspct->Transform(lvalue.data(), rvalue.data());
+            for (int i = 0; i < rvalue.size(); i++) rvalue[i] /= lvalue[i];
+            return rvalue;
         };
 
         // TODO

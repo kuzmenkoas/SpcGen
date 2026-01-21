@@ -20,4 +20,5 @@ target_link_libraries(SpcGen PRIVATE
     parser
     device
     ${ROOT_LIBRARIES}
+    -lSpectrum
 )
