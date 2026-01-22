@@ -482,19 +482,6 @@ void Device::DRSDevice::CalculateBaseline(std::vector<double> eventWaveform) {
 
 double Device::DRSDevice::CalculateAmplitude(std::vector<double> eventWaveform) {
     Global::Parameters usedParameters = GetParser()->GetUsedParameters();
-    // const int Nbins = 50;
-    // double avg[Nbins] = {0};
-    // int nums[Nbins] = {0};
-
-    // for (int i = usedParameters.signalRange.value().first; i < usedParameters.signalRange.value().second; i++) {
-    //     int idx = Nbins*(i-usedParameters.signalRange.value().first)/(usedParameters.signalRange.value().second-usedParameters.signalRange.value().first);
-    //     avg[idx] += eventWaveform[i];
-    //     nums[idx] += 1;
-    // }
-    // for (int i = 0; i < Nbins; i++) {
-    //     avg[i] /= nums[i];
-    // }
-
 
     double amplitude = 0;
     int index;

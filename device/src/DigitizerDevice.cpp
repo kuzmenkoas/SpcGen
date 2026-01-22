@@ -334,7 +334,6 @@ bool Device::DigitizerDevice::IsWaveformHasSignal(std::vector<int16_t> eventWave
     std::vector<double> fEventWaveformN = NormalizeWaveform(fEvent.waveform);
     double r = MaxCCF(CCF(fEventWaveformN, NormalizeWaveform(eventWaveform)))/MaxCCF(CCF(fEventWaveformN, fEventWaveformN));
     Global::Parameters usedParameters = GetParser()->GetUsedParameters();
-    if (r > 0.5) std::cout << r*100 << std::endl;
     if (r*100 < usedParameters.cut.value()) return false;
     return true;
 }
