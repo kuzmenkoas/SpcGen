@@ -135,7 +135,7 @@ void Device::DigitizerDevice::ProcessWaveform(std::filesystem::path path, bool s
     int eventCounter = 0;
     while (true) {
         std::vector<int16_t> eventWaveform;
-        for (int i = 0; i < usedParameters.wavelength; i++) {
+        for (int i = 0; i < usedParameters.wavelength.value(); i++) {
             int16_t wave;
             file.read(reinterpret_cast<char*>(&wave), sizeof(wave));
             eventWaveform.push_back(wave);
@@ -192,8 +192,8 @@ void Device::DigitizerDevice::CalculateBaseline(std::vector<int16_t> eventWavefo
 }
 
 void Device::DigitizerDevice::CalculateCharge(std::vector<int16_t> eventWaveform) {
-    int min = usedParameters.chargeLimits.value().first;
-    int max = usedParameters.chargeLimits.value().second;
+    int min = usedParameters.signalRange.value().first;
+    int max = usedParameters.signalRange.value().second;
     double charge = 0;
     int counter = 0;
     for (double waveform : eventWaveform) {
@@ -209,15 +209,7 @@ void Device::DigitizerDevice::CalculateCharge(std::vector<int16_t> eventWaveform
 }
 
 void Device::DigitizerDevice::CalculateAmplitude(std::vector<int16_t> eventWaveform) {
-    int index;
-    if (usedParameters.signal.value() == "up") {
-        auto value = std::max_element(eventWaveform.begin(), eventWaveform.end());
-        index = std::distance(eventWaveform.begin(), value);
-    } else if (usedParameters.signal.value() == "down") {
-        auto value = std::min_element(eventWaveform.begin(), eventWaveform.end());
-        index = std::distance(eventWaveform.begin(), value);
-    }
-    TF1* parabola = new TF1("parabola", "pol2", index-usedParameters.signalRange.value().first, index+usedParameters.signalRange.value().second);
+    TF1* parabola = new TF1("parabola", "pol2", usedParameters.signalRange.value().first, usedParameters.signalRange.value().second);
     TGraph* gr = new TGraph();
     for (size_t i = 0; i < eventWaveform.size(); i++) {
         gr->SetPoint(i, i, eventWaveform[i]);
@@ -228,7 +220,7 @@ void Device::DigitizerDevice::CalculateAmplitude(std::vector<int16_t> eventWavef
     double shift = 0;
     if (usedParameters.factorAmplitude.has_value()) factor = usedParameters.factorAmplitude.value();
     if (usedParameters.shiftAmplitude.has_value()) shift = usedParameters.shiftAmplitude.value();
-    fEvent.amplitude = parabola->GetParameter(2)*x*x+parabola->GetParameter(1)*x+parabola->GetParameter(0);
+    fEvent.amplitude = parabola->GetParameter(2)*x*x+parabola->GetParameter(1)*x+parabola->GetParameter(0)-fEvent.baseline;
     fEvent.amplitude = fEvent.amplitude * factor + shift;
 }
 

@@ -198,9 +198,9 @@ void Parser::DigitizerConfigParser::ReadCharge(std::string key) {
                         std::string max = tmp.substr(0, tmp.find_first_of(" "));
                         tmp = tmp.substr(tmp.find_first_of(" ")+1);
                         
-                        if (parameter == "baseline") usedPar.baselineLimits = std::make_pair(std::stoi(min), std::stoi(max));
-                        if (parameter == "charge") usedPar.chargeLimits = std::make_pair(std::stoi(min), std::stoi(max));
-                        if (parameter == "wavelength") usedPar.wavelength = std::stoi(min);
+                        // if (parameter == "baseline") usedPar.baselineLimits = std::make_pair(std::stoi(min), std::stoi(max));
+                        // if (parameter == "charge") usedPar.chargeLimits = std::make_pair(std::stoi(min), std::stoi(max));
+                        // if (parameter == "wavelength") usedPar.wavelength = std::stoi(min);
                         if (parameter == "factor") usedPar.factorCharge = std::stod(min);
                         if (parameter == "shift") usedPar.shiftCharge = std::stod(min);
                     } else break;
@@ -227,8 +227,13 @@ void Parser::DigitizerConfigParser::ReadConfig(std::string key) {
                         std::string parameter = CurStr.substr(0, CurStr.find_first_of(" "));
                         std::string tmp = CurStr.substr(CurStr.find_first_of(" ")+1);
                         std::string val = tmp.substr(0, tmp.find_first_of(" "));
+                        tmp = tmp.substr(tmp.find_first_of(" ")+1);
+                        std::string val2 = tmp.substr(0, tmp.find_first_of(" "));
 
                         if (parameter == "cut") usedPar.cut = std::stod(val);
+                        if (parameter == "range") usedPar.signalRange = std::make_pair(std::stoi(val), std::stoi(val2));
+                        if (parameter == "baseline") usedPar.baselineLimits = std::make_pair(std::stoi(val), std::stoi(val2));
+                        if (parameter == "wavelength") usedPar.wavelength = std::stod(val);
                     } else break;
                 }
             }
@@ -257,7 +262,7 @@ void Parser::DigitizerConfigParser::ReadSignal(std::string key) {
                         std::string rRange = tmp.substr(0, tmp.find_first_of(" "));
 
                         if (range == "up" || range == "down") usedPar.signal = CurStr;
-                        if (range == "range") usedPar.signalRange = std::make_pair(std::stoi(lRange), std::stoi(rRange));
+                        // if (range == "range") usedPar.signalRange = std::make_pair(std::stoi(lRange), std::stoi(rRange));
                         if (range == "factor") usedPar.factorAmplitude = std::stod(lRange);
                         if (range == "shift") usedPar.shiftAmplitude = std::stod(lRange);
                     } else break;

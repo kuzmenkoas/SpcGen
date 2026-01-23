@@ -441,8 +441,8 @@ void Device::DRSDevice::ReadPreAverageWaveform() {
 
 double Device::DRSDevice::CalculateCharge(std::vector<double> eventWaveform, int channel) {
     Global::Parameters usedParameters = GetParser()->GetUsedParameters();
-    int min = usedParameters.chargeLimits.value().first;
-    int max = usedParameters.chargeLimits.value().second;
+    int min = usedParameters.signalRange.value().first;
+    int max = usedParameters.signalRange.value().second;
     double charge = 0;
     int counter = 0;
     for (size_t i = 0; i < eventWaveform.size(); i++) {
@@ -484,28 +484,16 @@ double Device::DRSDevice::CalculateAmplitude(std::vector<double> eventWaveform) 
     Global::Parameters usedParameters = GetParser()->GetUsedParameters();
 
     double amplitude = 0;
-    int index;
-    double valuePeak = 0;
-    if (usedParameters.signal.value() == "up") {
-        auto value = std::max_element(eventWaveform.begin(), eventWaveform.end());
-        index = std::distance(eventWaveform.begin(), value);
-        valuePeak = *value;
-    } else if (usedParameters.signal.value() == "down") {
-        auto value = std::min_element(eventWaveform.begin(), eventWaveform.end());
-        index = std::distance(eventWaveform.begin(), value);
-        valuePeak = *value;
-    }
-    TF1* parabola = new TF1("parabola", "pol2", index-usedParameters.signalRange.value().first, index+usedParameters.signalRange.value().second);
+    TF1* parabola = new TF1("parabola", "pol2", usedParameters.signalRange.value().first, usedParameters.signalRange.value().second);
     TGraph* gr = new TGraph();
     for (size_t i = 0; i < eventWaveform.size(); i++) {
         gr->SetPoint(i, i, eventWaveform[i]);
     }
     gr->Fit("parabola", "QR");
     double x = -parabola->GetParameter(1)/(2*parabola->GetParameter(2));
-    amplitude = parabola->GetParameter(2)*x*x+parabola->GetParameter(1)*x+parabola->GetParameter(0);
+    amplitude = parabola->GetParameter(2)*x*x+parabola->GetParameter(1)*x+parabola->GetParameter(0)-fEvent.baseline;
     double factor = 1;
     double shift = 0;
-    amplitude = valuePeak;
     if (usedParameters.factorAmplitude.has_value()) factor = usedParameters.factorAmplitude.value();
     if (usedParameters.shiftAmplitude.has_value()) shift = usedParameters.shiftAmplitude.value();
     amplitude = amplitude * factor + shift;
