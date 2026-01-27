@@ -22,9 +22,13 @@ namespace Parser {
 
         void SetDigitizerTypes(std::vector<std::string> types) {fDigitizerTypes = types;};
         std::vector<std::string> GetDigitizerTypes() {return fDigitizerTypes;};
+
+        void SetCutFlag(bool flag) {fCutFlag = flag;};
+        bool GetCutFlag() {return fCutFlag;};
     private:
         std::vector<std::string> fUsedWriterVector{};
         Global::Parameters fUsedParameters{};
         std::vector<std::string> fDigitizerTypes = {};
+        bool fCutFlag = false;    
     };
 }

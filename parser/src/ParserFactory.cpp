@@ -16,7 +16,10 @@ std::shared_ptr<Parser::IParser> Parser::ParserFactory::BuildParser(Global::Devi
             parser = std::make_shared<DigitizerConsoleParser>(fDigitizerTypes);
             break;
     }
-    if (parser) parser->Start();
+    if (parser) {
+        parser->SetCutFlag(fCutFlag);
+        parser->Start();
+    }
     return parser;
 }
 
@@ -30,6 +33,9 @@ std::shared_ptr<Parser::IParser> Parser::ParserFactory::BuildParser(Global::Devi
             parser = std::make_shared<DigitizerConfigParser>(path, fDigitizerTypes);
             break;
     }
-    if (parser) parser->Start();
+    if (parser) {
+        parser->SetCutFlag(fCutFlag);
+        parser->Start();
+    }
     return parser;
 }

@@ -19,6 +19,7 @@ namespace Parser {
         void ReadHistograms();
         void ReadConfig();
         void SetHistogramVector(std::string file, std::string parameter);
-        void ReadSignal();
+        void ReadAmplitude();
+        void ReadCharge();
     };
 }

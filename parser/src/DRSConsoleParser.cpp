@@ -10,7 +10,8 @@ void Parser::DRSConsoleParser::Start() {
     ReadWriter();
     ReadData();
     ReadConfig();
-    if (usedPar.amplitude.has_value()) ReadSignal();
+    if (usedPar.amplitude.has_value()) ReadAmplitude();
+    if (usedPar.charge.has_value()) ReadCharge();
     ReadHistograms();
 
     SetUsedParameters(usedPar);
@@ -66,9 +67,9 @@ void Parser::DRSConsoleParser::ReadData() {
 }
 
 void Parser::DRSConsoleParser::ReadConfig() {
-    if (usedPar.baseline.has_value() || usedPar.charge.has_value()) {
+    if (usedPar.baseline.has_value() || usedPar.charge.has_value() || usedPar.amplitude.has_value()) {
         std::cout << "\n";
-        std::cout << "Configure limits for charge algorithm" << "\n";
+        std::cout << "Configure limits for signal processing" << "\n";
 
         std::cout << "Enter min value point for baseline" << "\n";
         int16_t min;
@@ -80,26 +81,24 @@ void Parser::DRSConsoleParser::ReadConfig() {
 
         usedPar.baselineLimits = std::make_pair(min, max);
     }
-    if (usedPar.charge.has_value()) {
-        std::cout << "Enter min value point for charge" << "\n";
+    if (usedPar.charge.has_value() || usedPar.amplitude.has_value()) {
+        std::cout << "Enter min value point for signal" << "\n";
         int16_t min;
         std::cin >> min;
 
-        std::cout << "Enter max value point for charge" << "\n";
+        std::cout << "Enter max value point for signal" << "\n";
         int16_t max;
         std::cin >> max;
 
-        usedPar.chargeLimits = std::make_pair(min, max);
-
-        std::cout << "Enter factor for charge" << "\n";
-        double factor;
-        std::cin >> factor;
-        usedPar.factorCharge = factor;
-
-        std::cout << "Enter shift for charge" << "\n";
-        double shift;
-        std::cin >> shift;
-        usedPar.shiftCharge = shift;
+        usedPar.signalRange = std::make_pair(min, max);
+    }
+    if (usedPar.baseline.has_value() || usedPar.charge.has_value() || usedPar.amplitude.has_value()) {
+        if (this->GetCutFlag()) {
+            std::cout << "Enter percents to cut signal" << "\n";
+            int val;
+            std::cin >> val;
+            usedPar.cut = val;
+        }
     }
 }
 
@@ -152,7 +151,7 @@ void Parser::DRSConsoleParser::SetHistogramVector(std::string parameter) {
     }
 }
 
-void Parser::DRSConsoleParser::ReadSignal() {
+void Parser::DRSConsoleParser::ReadAmplitude() {
     std::cout << "\n";
     std::cout << "Choose which form of signal:" << "\n";
     int i = 1;
@@ -165,25 +164,27 @@ void Parser::DRSConsoleParser::ReadSignal() {
     if (val == i++) usedPar.signal = "up";
     if (val == i++) usedPar.signal = "down";
 
-    std::cout << "Enter left range for amplitude fit" << "\n";
-    int lRange;
-    std::cin >> lRange;
+    std::cout << "Enter factor for amplitude" << "\n";
+    double factor;
+    std::cin >> factor;
+    usedPar.factorAmplitude = factor;
 
-    std::cout << "Enter right range for amplitude fit" << "\n";
-    int rRange;
-    std::cin >> rRange;
+    std::cout << "Enter shift for amplitude" << "\n";
+    double shift;
+    std::cin >> shift;
+    usedPar.shiftAmplitude = shift;
+}
 
-    usedPar.signalRange = std::make_pair(lRange, rRange);
+void Parser::DRSConsoleParser::ReadCharge() {
+    std::cout << "\n";
+    std::cout << "Configure the results of charge algorithm" << "\n";
 
-    if (usedPar.amplitude.has_value()) {
-        std::cout << "Enter factor for amplitude" << "\n";
-        double factor;
-        std::cin >> factor;
-        usedPar.factorAmplitude = factor;
+    double val;
+    std::cout << "Enter factor for charge: ";
+    std::cin >> val;
+    usedPar.factorCharge = val;
 
-        std::cout << "Enter shift for amplitude" << "\n";
-        double shift;
-        std::cin >> shift;
-        usedPar.shiftAmplitude = shift;
-    }
+    std::cout << "Enter shift for charge: ";
+    std::cin >> val;
+    usedPar.shiftCharge = val;
 }

@@ -14,10 +14,14 @@ namespace Parser {
         ~ParserFactory();
 
         void SetDigitizerTypes(std::vector<std::string> aTypes) {fDigitizerTypes = aTypes;};
+        
+        void SetCutFlag(bool flag) {fCutFlag = flag;};
+        bool GetCutFlag() {return fCutFlag;};
 
         std::shared_ptr<IParser> BuildParser(Global::DeviceType aType);
         std::shared_ptr<IParser> BuildParser(Global::DeviceType aType, std::filesystem::path path);
     private:
         std::vector<std::string> fDigitizerTypes = {};
+        bool fCutFlag = false;
     };
 }
