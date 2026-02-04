@@ -24,6 +24,7 @@ namespace Global {
         std::optional<double> factorAmplitude;
         std::optional<double> shiftAmplitude;
         std::optional<double> cut;
+        std::optional<double> threshold;
 
         // DRS data
         std::optional<int32_t> time;
