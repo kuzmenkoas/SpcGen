@@ -387,7 +387,7 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                             TGraph* gr = new TGraph();
                             int counter = 0;
                             for (double event : fEvent.waveform) {
-                                gr->AddPoint(counter++, event);
+                                gr->AddPoint(counter++, event/eventCounter);
                             }
                             gr->Write("waveform");
                         }
