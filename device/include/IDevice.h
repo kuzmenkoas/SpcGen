@@ -93,6 +93,37 @@ namespace Device {
             return amplitude;
         };
 
+        template<typename T> double TemplateCalculateBaseline(std::vector<T> eventWaveform) {
+            Global::Parameters usedParameters = GetParser()->GetUsedParameters();
+            int min = usedParameters.baselineLimits.value().first;
+            int max = usedParameters.baselineLimits.value().second;
+
+            double ss = 0;
+            for (size_t i = 0; i < size(eventWaveform); i++) {
+                if ((i >= min) && (i <= max)) {
+                    ss += eventWaveform[i];
+                }
+            }
+            return ss/(max-min+1.);
+        };
+
+        template<typename T> double TemplateCalculateCharge(std::vector<T> eventWaveform, double baseline) {
+            Global::Parameters usedParameters = GetParser()->GetUsedParameters();
+            int min = usedParameters.signalRange.value().first;
+            int max = usedParameters.signalRange.value().second;
+            double charge = 0;
+            int counter = 0;
+            for (double waveform : eventWaveform) {
+                if ((counter >= min) && (counter <= max)) charge += waveform - baseline;
+                counter++;
+            }
+            double factor = 1;
+            double shift = 0;
+            if (usedParameters.factorCharge.has_value()) factor = usedParameters.factorCharge.value();
+            if (usedParameters.shiftCharge.has_value()) shift = usedParameters.shiftCharge.value();
+            return charge * factor + shift;
+        };
+
         // TODO
         template<typename T> double Integrate(std::vector<T> waveform) {
             double s = 0;
