@@ -343,7 +343,7 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                     if ((!this->GetIsCut()) || ((this->GetIsCut()) & (IsWaveformHasSignal(waveform)))) {
                         if (usedParameters.charge.has_value() || usedParameters.baseline.has_value()) CalculateBaseline(waveform);
                         if (usedParameters.charge.has_value()) fEvent.charge = CalculateCharge(waveform, channel);
-                        if (usedParameters.amplitude.has_value()) fEvent.amplitude = CalculateAmplitude(waveform);
+                        if (usedParameters.amplitude.has_value()) fEvent.amplitude = TemplateCalculateAmplitude(waveform, fEvent.baseline);
                         // Process event
 
                         for (std::string writer : GetParser()->GetUsedWriterVector()) {

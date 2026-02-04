@@ -23,6 +23,7 @@ namespace Core {
 
         bool IsCut() {return isCut;};
         bool IsDebug() {return isDebug;};
+        bool IsThreshold() {return isThreshold;};
     private:
         void ParseThreads(int argc, char *argv[]);
         bool ParseDRSBinaryFile(int argc, char *argv[]);
@@ -33,12 +34,16 @@ namespace Core {
         void SetDigitizerBinaryFileName(std::string name);
         std::string GetBinaryFileName(std::string name);
 
+        void ParseKeys(int argc, char *argv[]);
         void ParseCut(int argc, char *argv[]);
         void ParseDebug(int argc, char *argv[]);
+        void ParseThreshold(int argc, char *argv[]);
+        bool ParserKeys(int argc, char *argv[], std::string key);
 
         std::string threadKey = "-j";
         std::string cutKey = "-cut";
         std::string debugKey = "-debug";
+        std::string thresholdKey = "-threshold";
         std::string binaryDRSExtension = "dat";
         std::string binaryDigitizerExtension = "bin";
         std::string configExtension = "cfg";
@@ -52,5 +57,6 @@ namespace Core {
 
         bool isCut = false;
         bool isDebug = false;
+        bool isThreshold = false;
     };
 }

@@ -6,6 +6,8 @@
 #include "ParserFactory.h"
 #include <algorithm>
 #include "TSpectrumTransform.h"
+#include "TGraph.h"
+#include <TF1.h>
 
 namespace Device {
     class IDevice {
@@ -38,6 +40,8 @@ namespace Device {
         bool GetIsCut() {return bCut;};
         void SetIsDebug(bool val) {bDebug = val;};
         bool GetIsDebug() {return bDebug;};
+        void SetIsThreshold(bool val) {bThreshold = val;};
+        bool GetIsThreshold() {return bThreshold;};
 
         template<typename T> std::vector<double> NormalizeWaveform(std::vector<T> waveform) {
             auto valMax = std::max_element(waveform.begin(), waveform.end());
@@ -69,6 +73,26 @@ namespace Device {
             return rvalue;
         };
 
+        template<typename T> double TemplateCalculateAmplitude(std::vector<T> eventWaveform, double baseline) {
+            Global::Parameters usedParameters = GetParser()->GetUsedParameters();
+
+            double amplitude = 0;
+            TF1* parabola = new TF1("parabola", "pol2", usedParameters.signalRange.value().first, usedParameters.signalRange.value().second);
+            TGraph* gr = new TGraph();
+            for (size_t i = 0; i < eventWaveform.size(); i++) {
+                gr->SetPoint(i, i, eventWaveform[i]);
+            }
+            gr->Fit("parabola", "QR");
+            double x = -parabola->GetParameter(1)/(2*parabola->GetParameter(2));
+            amplitude = parabola->GetParameter(2)*x*x+parabola->GetParameter(1)*x+parabola->GetParameter(0)-baseline;
+            double factor = 1;
+            double shift = 0;
+            if (usedParameters.factorAmplitude.has_value()) factor = usedParameters.factorAmplitude.value();
+            if (usedParameters.shiftAmplitude.has_value()) shift = usedParameters.shiftAmplitude.value();
+            amplitude = amplitude * factor + shift;
+            return amplitude;
+        };
+
         // TODO
         template<typename T> double Integrate(std::vector<T> waveform) {
             double s = 0;
@@ -91,5 +115,6 @@ namespace Device {
 
         bool bCut = false;
         bool bDebug = false;
+        bool bThreshold = false;
     };
 }

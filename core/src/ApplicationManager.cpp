@@ -21,6 +21,7 @@ void Core::ApplicationManager::Run() {
 
     device->SetIsCut(fArgReader->IsCut());
     device->SetIsDebug(fArgReader->IsDebug());
+    device->SetIsThreshold(fArgReader->IsThreshold());
     
     device->Prepare();
     device->Start();

@@ -9,8 +9,7 @@ Core::ArgReader::ArgReader(int argc, char *argv[]) {
             fDeviceType = Global::DeviceType::Digitizer;
         }
         ParseConfigFile(argc, argv);
-        ParseCut(argc, argv);
-        ParseDebug(argc, argv);
+        ParseKeys(argc, argv);
 }
 
 Core::ArgReader::~ArgReader() {
@@ -96,21 +95,27 @@ std::string Core::ArgReader::GetBinaryFileName(std::string name) {
 }
 
 void Core::ArgReader::ParseCut(int argc, char *argv[]) {
-    for (int i = 0; i < argc; i++) {
-        std::string name = argv[i];
-        if ((name == cutKey)) {
-            isCut = true;
-            break;
-        }
-    }
+    isCut = ParserKeys(argc, argv, cutKey);
 }
 
 void Core::ArgReader::ParseDebug(int argc, char *argv[]) {
+    isDebug = ParserKeys(argc, argv, debugKey);
+}
+
+void Core::ArgReader::ParseThreshold(int argc, char *argv[]) {
+    isThreshold = ParserKeys(argc, argv, thresholdKey);
+}
+
+bool Core::ArgReader::ParserKeys(int argc, char *argv[], std::string key) {
     for (int i = 0; i < argc; i++) {
         std::string name = argv[i];
-        if ((name == debugKey)) {
-            isDebug = true;
-            break;
-        }
+        if (name == key) return true;
     }
+    return false;
+}
+
+void Core::ArgReader::ParseKeys(int argc, char *argv[]) {
+    ParseCut(argc, argv);
+    ParseDebug(argc, argv);
+    ParseThreshold(argc, argv);
 }

@@ -143,7 +143,7 @@ void Device::DigitizerDevice::ProcessWaveform(std::filesystem::path path, bool s
         if (file.eof()) break;
         if ((usedParameters.charge.has_value() || usedParameters.baseline.has_value()) && save) CalculateBaseline(eventWaveform);
         if ((usedParameters.charge.has_value()) && save) CalculateCharge(eventWaveform);
-        if ((usedParameters.amplitude.has_value()) && save) CalculateAmplitude(eventWaveform);
+        if ((usedParameters.amplitude.has_value()) && save) fEvent.amplitude = TemplateCalculateAmplitude(eventWaveform, fEvent.baseline);
         if ((!this->GetIsCut()) || ((this->GetIsCut()) && (!save))) CalculateWaveform(eventWaveform);
 
         if (save && ((!this->GetIsCut()) || ((this->GetIsCut()) && (IsWaveformHasSignal(eventWaveform))))) {
