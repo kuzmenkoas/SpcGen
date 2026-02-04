@@ -234,6 +234,7 @@ void Parser::DigitizerConfigParser::ReadConfig(std::string key) {
                         if (parameter == "range") usedPar.signalRange = std::make_pair(std::stoi(val), std::stoi(val2));
                         if (parameter == "baseline") usedPar.baselineLimits = std::make_pair(std::stoi(val), std::stoi(val2));
                         if (parameter == "wavelength") usedPar.wavelength = std::stod(val);
+                        if (parameter == "threshold") usedPar.threshold = std::stod(val);
                     } else break;
                 }
             }

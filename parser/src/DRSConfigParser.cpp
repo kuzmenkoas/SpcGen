@@ -131,6 +131,7 @@ void Parser::DRSConfigParser::ReadConfig(std::string key) {
                         if (parameter == "cut") usedPar.cut = std::stod(val);
                         if (parameter == "range") usedPar.signalRange = std::make_pair(std::stoi(val), std::stoi(val2));
                         if (parameter == "baseline") usedPar.baselineLimits = std::make_pair(std::stoi(val), std::stoi(val2));
+                        if (parameter == "threshold") usedPar.threshold = std::stod(val);
                     } else break;
                 }
             }
