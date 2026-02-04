@@ -23,6 +23,6 @@ namespace Parser {
         void ReadHistograms(std::string key="Histogram");
         void ReadCharge(std::string key="Charge");
         void ReadConfig(std::string key="Config");
-        void ReadSignal(std::string key="Amplitude");
+        void ReadAmplitude(std::string key="Amplitude");
     };
 }

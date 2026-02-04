@@ -14,7 +14,7 @@ void Parser::DigitizerConfigParser::Start() {
         if (file == "Waveform") {
             ReadDataWaveform();
             ReadCharge();
-            ReadSignal();
+            ReadAmplitude();
             ReadConfig();
         }
     }
@@ -246,7 +246,7 @@ void Parser::DigitizerConfigParser::ReadConfig(std::string key) {
     file.close();
 }
 
-void Parser::DigitizerConfigParser::ReadSignal(std::string key) {
+void Parser::DigitizerConfigParser::ReadAmplitude(std::string key) {
     std::ifstream file = OpenFile();
     std::string CurStr;
     try {

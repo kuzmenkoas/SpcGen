@@ -11,7 +11,7 @@ void Parser::DRSConfigParser::Start() {
     ReadData();
     ReadCharge();
     ReadHistograms();
-    ReadSignal();
+    ReadAmplitude();
     ReadConfig();
 
     SetUsedParameters(usedPar);
@@ -178,7 +178,7 @@ void Parser::DRSConfigParser::ReadHistograms(std::string key) {
     file.close();
 }
 
-void Parser::DRSConfigParser::ReadSignal(std::string key) {
+void Parser::DRSConfigParser::ReadAmplitude(std::string key) {
     std::ifstream file = OpenFile();
     std::string CurStr;
     try {
