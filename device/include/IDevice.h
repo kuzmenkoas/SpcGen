@@ -124,15 +124,6 @@ namespace Device {
             return charge * factor + shift;
         };
 
-        // TODO
-        template<typename T> double Integrate(std::vector<T> waveform) {
-            double s = 0;
-            for (int i = 0; i < waveform.size(); i++) {
-                s += std::abs(waveform[i]/2.);
-            }
-            return std::abs(s);
-        };
-
         double MaxCCF(std::vector<double> ccfvector);
     private:
         void ConfigureRoot();
