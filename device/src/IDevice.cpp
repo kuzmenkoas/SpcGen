@@ -33,3 +33,11 @@ double Device::IDevice::MaxCCF(std::vector<double> ccfvector) {
     if (std::abs(*val2) > std::abs(*val)) val = val2;
     return std::abs(*val);
 }
+
+void Device::IDevice::DefineSignalDirection(std::vector<double> averageWaveform) {
+    Global::Parameters usedParameters = GetParser()->GetUsedParameters();
+    double baseline = Device::IDevice::TemplateCalculateBaseline(averageWaveform);
+    double amplitude = Device::IDevice::TemplateCalculateAmplitude(averageWaveform, 0);
+    if (amplitude > baseline) usedParameters.signal = "up";
+    else usedParameters.signal = "down";
+}

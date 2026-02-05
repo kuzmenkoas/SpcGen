@@ -144,7 +144,7 @@ void Device::DigitizerDevice::ProcessWaveform(std::filesystem::path path, bool s
         if ((usedParameters.charge.has_value() || usedParameters.baseline.has_value()) && save) fEvent.baseline = TemplateCalculateBaseline(eventWaveform);
         if ((usedParameters.charge.has_value()) && save) fEvent.charge = TemplateCalculateCharge(eventWaveform, fEvent.baseline);
         if ((usedParameters.amplitude.has_value()) && save) fEvent.amplitude = TemplateCalculateAmplitude(eventWaveform, fEvent.baseline);
-        if ((!this->GetIsCut()) || ((this->GetIsCut()) && (!save))) CalculateWaveform(eventWaveform);
+        if ((!this->GetIsCut()) || ((this->GetIsCut()) && (!save))) TemplateCalculateWaveform(eventWaveform, &(fEvent.waveform));
 
         if (save && SignalFilter(eventWaveform, fEvent.waveform, fEvent.baseline)) {
             for (std::string writer : GetParser()->GetUsedWriterVector()) {
@@ -175,15 +175,6 @@ void Device::DigitizerDevice::ProcessWaveform(std::filesystem::path path, bool s
     }
 
     file.close();
-}
-
-void Device::DigitizerDevice::CalculateWaveform(std::vector<int16_t> eventWaveform) {
-    std::call_once(initWaveFlag, [this, eventWaveform](){InitializeSumWaveform(eventWaveform);});
-    for (size_t i = 0; i < size(eventWaveform); i++) fEvent.waveform[i] += eventWaveform[i];
-}
-
-void Device::DigitizerDevice::InitializeSumWaveform(std::vector<int16_t> eventWaveform) {
-    for (double waveform : eventWaveform) fEvent.waveform.push_back(waveform);
 }
 
 void Device::DigitizerDevice::ConfigureRoot() {

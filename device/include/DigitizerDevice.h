@@ -40,9 +40,6 @@ namespace Device {
         void WriteTxtEventPSD();
         void WriteTxtEventWaveform();
 
-        void CalculateWaveform(std::vector<int16_t> eventWaveform);
-        void InitializeSumWaveform(std::vector<int16_t> eventWaveform);
-        mutable std::once_flag initWaveFlag;
         Device::DigitizerEvent fEvent{};
 
         TTree* fTreePSD = nullptr;

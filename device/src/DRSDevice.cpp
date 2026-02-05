@@ -336,7 +336,7 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                 }
                 eventCounter++;
                 if (usedParameters.waveform.has_value() && ((!this->GetIsCut()) || ((this->GetIsCut()) && (!save)))) {
-                    CalculateWaveform(waveform);
+                    TemplateCalculateWaveform(waveform, &(fEvent.waveform));
                 }
 
                 if (save) {
@@ -378,6 +378,7 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                 // Error
             }
         } else {
+            if (!usedParameters.signal.has_value()) DefineSignalDirection(fEvent.waveform);
             if (!save) {
                 for (int i = 0; i < fEvent.waveform.size(); i++) fEvent.waveform[i] /= eventCounter;
                 eventCounter = 1;
@@ -440,13 +441,4 @@ void Device::DRSDevice::ReadPreAverageWaveform() {
 
         file.close();
     }
-}
-
-void Device::DRSDevice::CalculateWaveform(std::vector<double> eventWaveform) {
-    std::call_once(initWaveFlag, [this, eventWaveform](){InitializeSumWaveform(eventWaveform);});
-    for (size_t i = 0; i < size(eventWaveform); i++) fEvent.waveform[i] += eventWaveform[i];
-}
-
-void Device::DRSDevice::InitializeSumWaveform(std::vector<double> eventWaveform) {
-    for (double waveform : eventWaveform) fEvent.waveform.push_back(waveform);
 }

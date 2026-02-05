@@ -111,7 +111,8 @@ std::vector<double> Device::IDevice::CCF(std::vector<T> w1, std::vector<T> w2) {
     return rvalue;
 };
 
-template<typename T> std::vector<double> Device::IDevice::NormalizeWaveform(std::vector<T> waveform) {
+template<typename T> 
+std::vector<double> Device::IDevice::NormalizeWaveform(std::vector<T> waveform) {
     auto valMax = std::max_element(waveform.begin(), waveform.end());
     auto valMin = std::min_element(waveform.begin(), waveform.end());
 
@@ -121,3 +122,14 @@ template<typename T> std::vector<double> Device::IDevice::NormalizeWaveform(std:
 
     return nWaveform;
 };
+
+template<typename T> 
+void Device::IDevice::TemplateInitializeSumWaveform(std::vector<T> eventWaveform, std::vector<double> *averageWaveform) {
+    for (double waveform : eventWaveform) averageWaveform->push_back(waveform);
+}
+
+template<typename T>
+void Device::IDevice::TemplateCalculateWaveform(std::vector<T> eventWaveform, std::vector<double> *averageWaveform) {
+    std::call_once(initWaveFlag, [this, eventWaveform, averageWaveform](){TemplateInitializeSumWaveform(eventWaveform, averageWaveform);});
+    for (size_t i = 0; i < size(eventWaveform); i++) (*averageWaveform)[i] += eventWaveform[i];
+}

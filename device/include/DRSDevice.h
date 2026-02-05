@@ -50,10 +50,6 @@ namespace Device {
 
         void ReadPreAverageWaveform();
 
-        void CalculateWaveform(std::vector<double> eventWaveform);
-        void InitializeSumWaveform(std::vector<double> eventWaveform);
-        mutable std::once_flag initWaveFlag;
-
         std::vector<int32_t> fTimeVector[4] = {{},{},{},{}};
         Device::DRSEvent fEvent{};
         std::ofstream fTxtFile;
