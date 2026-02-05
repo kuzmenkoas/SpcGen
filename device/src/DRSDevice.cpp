@@ -442,23 +442,6 @@ void Device::DRSDevice::ReadPreAverageWaveform() {
     }
 }
 
-double Device::DRSDevice::CalculateCharge(std::vector<double> eventWaveform, int channel) {
-    Global::Parameters usedParameters = GetParser()->GetUsedParameters();
-    int min = usedParameters.signalRange.value().first;
-    int max = usedParameters.signalRange.value().second;
-    double charge = 0;
-    int counter = 0;
-    for (size_t i = 0; i < eventWaveform.size(); i++) {
-        if ((i >= min) && (i <= max)) charge += (eventWaveform[i]/2.+eventWaveform[i+1]/2. - fEvent.baseline)*fTimeVector[channel-1][i]/1e9;
-    }
-    double factor = 1;
-    double shift = 0;
-    if (usedParameters.factorCharge.has_value()) factor = usedParameters.factorCharge.value();
-    if (usedParameters.shiftCharge.has_value()) shift = usedParameters.shiftCharge.value();
-    charge = charge * factor + shift;
-    return charge;
-}
-
 void Device::DRSDevice::CalculateWaveform(std::vector<double> eventWaveform) {
     std::call_once(initWaveFlag, [this, eventWaveform](){InitializeSumWaveform(eventWaveform);});
     for (size_t i = 0; i < size(eventWaveform); i++) fEvent.waveform[i] += eventWaveform[i];
@@ -466,47 +449,4 @@ void Device::DRSDevice::CalculateWaveform(std::vector<double> eventWaveform) {
 
 void Device::DRSDevice::InitializeSumWaveform(std::vector<double> eventWaveform) {
     for (double waveform : eventWaveform) fEvent.waveform.push_back(waveform);
-}
-
-void Device::DRSDevice::CalculateBaseline(std::vector<double> eventWaveform) {
-    Global::Parameters usedParameters = GetParser()->GetUsedParameters();
-    int min = usedParameters.baselineLimits.value().first;
-    int max = usedParameters.baselineLimits.value().second;
-
-    fEvent.baseline = 0;
-    double ss = 0;
-    for (size_t i = 0; i < size(eventWaveform); i++) {
-        if ((i >= min) && (i <= max)) {
-            ss += eventWaveform[i];
-        }
-    }
-    fEvent.baseline = ss/(max-min+1.);
-}
-
-double Device::DRSDevice::CalculateAmplitude(std::vector<double> eventWaveform) {
-    Global::Parameters usedParameters = GetParser()->GetUsedParameters();
-
-    double amplitude = 0;
-    TF1* parabola = new TF1("parabola", "pol2", usedParameters.signalRange.value().first, usedParameters.signalRange.value().second);
-    TGraph* gr = new TGraph();
-    for (size_t i = 0; i < eventWaveform.size(); i++) {
-        gr->SetPoint(i, i, eventWaveform[i]);
-    }
-    gr->Fit("parabola", "QR");
-    double x = -parabola->GetParameter(1)/(2*parabola->GetParameter(2));
-    amplitude = parabola->GetParameter(2)*x*x+parabola->GetParameter(1)*x+parabola->GetParameter(0)-fEvent.baseline;
-    double factor = 1;
-    double shift = 0;
-    if (usedParameters.factorAmplitude.has_value()) factor = usedParameters.factorAmplitude.value();
-    if (usedParameters.shiftAmplitude.has_value()) shift = usedParameters.shiftAmplitude.value();
-    amplitude = amplitude * factor + shift;
-    return amplitude;
-}
-
-bool Device::DRSDevice::IsWaveformHasSignal(std::vector<double> eventWaveform) {
-    std::vector<double> fEventWaveformN = NormalizeWaveform(fEvent.waveform);
-    double r = MaxCCF(CCF(fEventWaveformN, NormalizeWaveform(eventWaveform)))/MaxCCF(CCF(fEventWaveformN, fEventWaveformN));
-    Global::Parameters usedParameters = GetParser()->GetUsedParameters();
-    if (r*100 < usedParameters.cut.value()) return false;
-    return true;
 }

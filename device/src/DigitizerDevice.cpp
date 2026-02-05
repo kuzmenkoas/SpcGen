@@ -177,53 +177,6 @@ void Device::DigitizerDevice::ProcessWaveform(std::filesystem::path path, bool s
     file.close();
 }
 
-void Device::DigitizerDevice::CalculateBaseline(std::vector<int16_t> eventWaveform) {
-    int min = usedParameters.baselineLimits.value().first;
-    int max = usedParameters.baselineLimits.value().second;
-
-    fEvent.baseline = 0;
-    double ss = 0;
-    for (size_t i = 0; i < size(eventWaveform); i++) {
-        if ((i >= min) && (i <= max)) {
-            ss += eventWaveform[i];
-        }
-    }
-    fEvent.baseline = ss/(max-min+1.);
-}
-
-void Device::DigitizerDevice::CalculateCharge(std::vector<int16_t> eventWaveform) {
-    int min = usedParameters.signalRange.value().first;
-    int max = usedParameters.signalRange.value().second;
-    double charge = 0;
-    int counter = 0;
-    for (double waveform : eventWaveform) {
-        if ((counter >= min) && (counter <= max)) charge += waveform - fEvent.baseline;
-        counter++;
-    }
-    double factor = 1;
-    double shift = 0;
-    if (usedParameters.factorCharge.has_value()) factor = usedParameters.factorCharge.value();
-    if (usedParameters.shiftCharge.has_value()) shift = usedParameters.shiftCharge.value();
-    charge = charge * factor + shift;
-    fEvent.charge = charge;
-}
-
-void Device::DigitizerDevice::CalculateAmplitude(std::vector<int16_t> eventWaveform) {
-    TF1* parabola = new TF1("parabola", "pol2", usedParameters.signalRange.value().first, usedParameters.signalRange.value().second);
-    TGraph* gr = new TGraph();
-    for (size_t i = 0; i < eventWaveform.size(); i++) {
-        gr->SetPoint(i, i, eventWaveform[i]);
-    }
-    gr->Fit("parabola", "QR");
-    double x = -parabola->GetParameter(1)/(2*parabola->GetParameter(2));
-    double factor = 1;
-    double shift = 0;
-    if (usedParameters.factorAmplitude.has_value()) factor = usedParameters.factorAmplitude.value();
-    if (usedParameters.shiftAmplitude.has_value()) shift = usedParameters.shiftAmplitude.value();
-    fEvent.amplitude = parabola->GetParameter(2)*x*x+parabola->GetParameter(1)*x+parabola->GetParameter(0)-fEvent.baseline;
-    fEvent.amplitude = fEvent.amplitude * factor + shift;
-}
-
 void Device::DigitizerDevice::CalculateWaveform(std::vector<int16_t> eventWaveform) {
     std::call_once(initWaveFlag, [this, eventWaveform](){InitializeSumWaveform(eventWaveform);});
     for (size_t i = 0; i < size(eventWaveform); i++) fEvent.waveform[i] += eventWaveform[i];
@@ -320,12 +273,4 @@ void Device::DigitizerDevice::WriteTxtEventWaveform() {
     if (usedParameters.charge.has_value()) fTxtFileWaveform << fEvent.charge << " ";
     if (usedParameters.amplitude.has_value()) fTxtFileWaveform << fEvent.amplitude << " ";
     fTxtFileWaveform << "\n";
-}
-
-bool Device::DigitizerDevice::IsWaveformHasSignal(std::vector<int16_t> eventWaveform) {
-    std::vector<double> fEventWaveformN = NormalizeWaveform(fEvent.waveform);
-    double r = MaxCCF(CCF(fEventWaveformN, NormalizeWaveform(eventWaveform)))/MaxCCF(CCF(fEventWaveformN, fEventWaveformN));
-    Global::Parameters usedParameters = GetParser()->GetUsedParameters();
-    if (r*100 < usedParameters.cut.value()) return false;
-    return true;
 }

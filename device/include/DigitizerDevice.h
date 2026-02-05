@@ -40,11 +40,6 @@ namespace Device {
         void WriteTxtEventPSD();
         void WriteTxtEventWaveform();
 
-        bool IsWaveformHasSignal(std::vector<int16_t> eventWaveform);
-
-        void CalculateBaseline(std::vector<int16_t> eventWaveform);
-        void CalculateCharge(std::vector<int16_t> eventWaveform);
-        void CalculateAmplitude(std::vector<int16_t> eventWaveform);
         void CalculateWaveform(std::vector<int16_t> eventWaveform);
         void InitializeSumWaveform(std::vector<int16_t> eventWaveform);
         mutable std::once_flag initWaveFlag;

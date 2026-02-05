@@ -49,11 +49,7 @@ namespace Device {
         void ReadDate(std::ifstream* file, std::filesystem::path* path);
 
         void ReadPreAverageWaveform();
-        bool IsWaveformHasSignal(std::vector<double> eventWaveform);
 
-        double CalculateCharge(std::vector<double> eventWaveform, int channel);
-        double CalculateAmplitude(std::vector<double> eventWaveform);
-        void CalculateBaseline(std::vector<double> eventWaveform);
         void CalculateWaveform(std::vector<double> eventWaveform);
         void InitializeSumWaveform(std::vector<double> eventWaveform);
         mutable std::once_flag initWaveFlag;
