@@ -71,6 +71,7 @@ namespace Device {
         bool bThreshold = false;
 
         mutable std::once_flag initWaveFlag;
+        bool isInitialized = false;
     };
 }
 
