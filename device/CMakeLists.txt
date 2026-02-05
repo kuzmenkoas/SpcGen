@@ -1,5 +1,6 @@
 file(GLOB SOURCES src/*.cpp)
 file(GLOB HEADERS include/*.h)
+file(GLOB REALIZATION include/*.icpp)
 
 if (NOT SOURCES)
 	message(WARNING "No source files found in device/src/")
@@ -7,6 +8,6 @@ if (NOT SOURCES)
 	file(WRITE ${SOURCES} "// Empty source file\n")
 endif()
 
-add_library(device STATIC ${SOURCES} ${HEADERS})
+add_library(device STATIC ${SOURCES} ${HEADERS} ${REALIZATION})
 target_include_directories(device PUBLIC include)
 target_link_libraries(device PUBLIC parser)
