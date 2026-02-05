@@ -67,6 +67,6 @@ namespace Device {
         bool bDebug = false;
         bool bThreshold = false;
     };
-
-    #include "IDevice.icpp"
 }
+
+#include "IDevice.icpp"
