@@ -124,6 +124,40 @@ namespace Device {
             return charge * factor + shift;
         };
 
+        template<typename T> bool ThresholdSignalFilter(std::vector<T> eventWaveform, double baseline) {
+            Global::Parameters usedParameters = GetParser()->GetUsedParameters();
+            double amplitude = TemplateCalculateAmplitude(eventWaveform, baseline);
+
+            if ((!usedParameters.signal.has_value()) || (!usedParameters.threshold.has_value())) {
+                if (!usedParameters.signal.has_value()) throw std::runtime_error("Signal form is not defined");
+                else throw std::runtime_error("Threshold is not defined");
+            }
+
+            if ((usedParameters.signal.value() == "up") && (amplitude > usedParameters.threshold.value())) return true;
+            if ((usedParameters.signal.value() == "down") && (amplitude < usedParameters.threshold.value())) return true;
+
+            return false;
+        };
+
+        template<typename T1, typename T2> bool CCFSignalFilter(std::vector<T1> eventWaveform, std::vector<T2> averageWaveform) {
+            std::vector<double> fEventWaveformN = NormalizeWaveform(averageWaveform);
+            double r = MaxCCF(CCF(fEventWaveformN, NormalizeWaveform(eventWaveform)))/MaxCCF(CCF(fEventWaveformN, fEventWaveformN));
+            Global::Parameters usedParameters = GetParser()->GetUsedParameters();
+
+            if (!usedParameters.cut.has_value()) throw std::runtime_error("Cut is not defined");
+            
+            if (r*100 < usedParameters.cut.value()) return false;
+            return true;
+        };
+
+        template<typename T1, typename T2> bool SignalFilter(std::vector<T1> eventWaveform, std::vector<T2> averageWaveform, double baseline) {
+            if ((!GetIsCut()) && (!GetIsThreshold())) return true;
+            if ((GetIsCut()) && (!GetIsThreshold()) && (CCFSignalFilter(eventWaveform, averageWaveform))) return true;
+            if ((!GetIsCut()) && (GetIsThreshold()) && (ThresholdSignalFilter(eventWaveform, baseline))) return true;
+            if ((GetIsCut()) && (GetIsThreshold()) && (CCFSignalFilter(eventWaveform, averageWaveform)) && (ThresholdSignalFilter(eventWaveform, baseline))) return true;
+            return false;
+        };
+
         double MaxCCF(std::vector<double> ccfvector);
     private:
         void ConfigureRoot();

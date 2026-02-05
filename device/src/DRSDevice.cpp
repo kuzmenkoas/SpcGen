@@ -340,7 +340,7 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                 }
 
                 if (save) {
-                    if ((!this->GetIsCut()) || ((this->GetIsCut()) & (IsWaveformHasSignal(waveform)))) {
+                    if (SignalFilter(waveform, fEvent.waveform, fEvent.baseline)) {
                         if (usedParameters.charge.has_value() || usedParameters.baseline.has_value()) fEvent.baseline = TemplateCalculateBaseline(waveform);
                         if (usedParameters.charge.has_value()) fEvent.charge = TemplateCalculateCharge(waveform, fEvent.baseline);
                         if (usedParameters.amplitude.has_value()) fEvent.amplitude = TemplateCalculateAmplitude(waveform, fEvent.baseline);
@@ -378,7 +378,10 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                 // Error
             }
         } else {
-            if (!save) for (int i = 0; i < fEvent.waveform.size(); i++) fEvent.waveform[i] /= eventCounter;
+            if (!save) {
+                for (int i = 0; i < fEvent.waveform.size(); i++) fEvent.waveform[i] /= eventCounter;
+                eventCounter = 1;
+            }
             if (save) {
                 for (std::string writer : GetParser()->GetUsedWriterVector()) {
                     if (writer == "Root") {
