@@ -15,10 +15,10 @@ void Core::ApplicationManager::Run() {
     if (device) {
         device->SetDeviceType(fArgReader->GetDeviceType());
     
-        ce->SetDigitizerTypes(fArgReader->GetDigitizerTypes());
-        ce->SetConfigPath(fArgReader->GetConfigPath());
-        ce->SetBinaryPathVector(fArgReader->GetBinaryPathVector());
-        ce->SetFileName(fArgReader->GetFileName());
+        device->SetDigitizerTypes(fArgReader->GetDigitizerTypes());
+        device->SetConfigPath(fArgReader->GetConfigPath());
+        device->SetBinaryPathVector(fArgReader->GetBinaryPathVector());
+        device->SetFileName(fArgReader->GetFileName());
 
         device->SetIsCut(fArgReader->IsCut());
         device->SetIsDebug(fArgReader->IsDebug());
