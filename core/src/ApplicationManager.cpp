@@ -12,17 +12,19 @@ void Core::ApplicationManager::Run() {
     Device::IDevice* device;
     if (fArgReader->GetDeviceType() == Global::DeviceType::DRS) device = new Device::DRSDevice();
     if (fArgReader->GetDeviceType() == Global::DeviceType::Digitizer) device = new Device::DigitizerDevice();
-    device->SetDeviceType(fArgReader->GetDeviceType());
+    if (device) {
+        device->SetDeviceType(fArgReader->GetDeviceType());
     
-    device->SetDigitizerTypes(fArgReader->GetDigitizerTypes());
-    device->SetConfigPath(fArgReader->GetConfigPath());
-    device->SetBinaryPathVector(fArgReader->GetBinaryPathVector());
-    device->SetFileName(fArgReader->GetFileName());
+        ce->SetDigitizerTypes(fArgReader->GetDigitizerTypes());
+        ce->SetConfigPath(fArgReader->GetConfigPath());
+        ce->SetBinaryPathVector(fArgReader->GetBinaryPathVector());
+        ce->SetFileName(fArgReader->GetFileName());
 
-    device->SetIsCut(fArgReader->IsCut());
-    device->SetIsDebug(fArgReader->IsDebug());
-    device->SetIsThreshold(fArgReader->IsThreshold());
+        device->SetIsCut(fArgReader->IsCut());
+        device->SetIsDebug(fArgReader->IsDebug());
+        device->SetIsThreshold(fArgReader->IsThreshold());
     
-    device->Prepare();
-    device->Start();
+        device->Prepare();
+        device->Start();
+    }
 }

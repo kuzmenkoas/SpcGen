@@ -25,10 +25,14 @@ namespace Parser {
 
         void SetCutFlag(bool flag) {fCutFlag = flag;};
         bool GetCutFlag() {return fCutFlag;};
+
+        void SetThresholdFlag(bool flag) {fThresholdFlag = flag;};
+        bool GetThresholdFlag() {return fThresholdFlag;};
     private:
         std::vector<std::string> fUsedWriterVector{};
         Global::Parameters fUsedParameters{};
         std::vector<std::string> fDigitizerTypes = {};
-        bool fCutFlag = false;    
+        bool fCutFlag = false;
+        bool fThresholdFlag = false;
     };
 }

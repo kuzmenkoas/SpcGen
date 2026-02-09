@@ -11,6 +11,7 @@ void Device::IDevice::Prepare() {
     Parser::ParserFactory parserFactory;
     parserFactory.SetDigitizerTypes(fDigitizerTypes);
     parserFactory.SetCutFlag(bCut);
+    parserFactory.SetThresholdFlag(bThreshold);
     if (GetConfigPath().empty()) fParser = parserFactory.BuildParser(fDeviceType);
     else fParser = parserFactory.BuildParser(fDeviceType, GetConfigPath());
     if (fDigitizerTypes.empty()) fDigitizerTypes = fParser->GetDigitizerTypes();

@@ -95,9 +95,15 @@ void Parser::DRSConsoleParser::ReadConfig() {
     if (usedPar.baseline.has_value() || usedPar.charge.has_value() || usedPar.amplitude.has_value()) {
         if (this->GetCutFlag()) {
             std::cout << "Enter percents to cut signal" << "\n";
-            int val;
+            double val;
             std::cin >> val;
             usedPar.cut = val;
+        }
+        if (this->GetThresholdFlag()) {
+            std::cout << "Enter threshold in mV to cut signal" << "\n";
+            double val;
+            std::cin >> val;
+            usedPar.threshold = val;
         }
     }
 }

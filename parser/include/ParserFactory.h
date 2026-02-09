@@ -18,10 +18,14 @@ namespace Parser {
         void SetCutFlag(bool flag) {fCutFlag = flag;};
         bool GetCutFlag() {return fCutFlag;};
 
+        void SetThresholdFlag(bool flag) {fThresholdFlag = flag;};
+        bool GetThresholdFlag() {return fThresholdFlag;};
+
         std::shared_ptr<IParser> BuildParser(Global::DeviceType aType);
         std::shared_ptr<IParser> BuildParser(Global::DeviceType aType, std::filesystem::path path);
     private:
         std::vector<std::string> fDigitizerTypes = {};
         bool fCutFlag = false;
+        bool fThresholdFlag = false;
     };
 }

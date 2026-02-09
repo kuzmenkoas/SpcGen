@@ -18,6 +18,7 @@ std::shared_ptr<Parser::IParser> Parser::ParserFactory::BuildParser(Global::Devi
     }
     if (parser) {
         parser->SetCutFlag(fCutFlag);
+        parser->SetThresholdFlag(fThresholdFlag);
         parser->Start();
     }
     return parser;
@@ -35,6 +36,7 @@ std::shared_ptr<Parser::IParser> Parser::ParserFactory::BuildParser(Global::Devi
     }
     if (parser) {
         parser->SetCutFlag(fCutFlag);
+        parser->SetThresholdFlag(fThresholdFlag);
         parser->Start();
     }
     return parser;
