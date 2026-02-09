@@ -71,22 +71,22 @@ void Parser::DRSConsoleParser::ReadConfig() {
         std::cout << "\n";
         std::cout << "Configure limits for signal processing" << "\n";
 
-        std::cout << "Enter min value point for baseline" << "\n";
+        std::cout << "Enter min value point for baseline: ";
         int16_t min;
         std::cin >> min;
 
-        std::cout << "Enter max value point for baseline" << "\n";
+        std::cout << "Enter max value point for baseline: ";
         int16_t max;
         std::cin >> max;
 
         usedPar.baselineLimits = std::make_pair(min, max);
     }
     if (usedPar.charge.has_value() || usedPar.amplitude.has_value()) {
-        std::cout << "Enter min value point for signal" << "\n";
+        std::cout << "Enter min value point for signal: ";
         int16_t min;
         std::cin >> min;
 
-        std::cout << "Enter max value point for signal" << "\n";
+        std::cout << "Enter max value point for signal: ";
         int16_t max;
         std::cin >> max;
 
@@ -94,13 +94,13 @@ void Parser::DRSConsoleParser::ReadConfig() {
     }
     if (usedPar.baseline.has_value() || usedPar.charge.has_value() || usedPar.amplitude.has_value()) {
         if (this->GetCutFlag()) {
-            std::cout << "Enter percents to cut signal" << "\n";
+            std::cout << "Enter percents to cut signal: ";
             double val;
             std::cin >> val;
             usedPar.cut = val;
         }
         if (this->GetThresholdFlag()) {
-            std::cout << "Enter threshold in mV to cut signal" << "\n";
+            std::cout << "Enter threshold in mV to cut signal: ";
             double val;
             std::cin >> val;
             usedPar.threshold = val;
@@ -137,14 +137,14 @@ void Parser::DRSConsoleParser::ReadHistograms() {
 
 void Parser::DRSConsoleParser::SetHistogramVector(std::string parameter) {
     std::cout << "\n";
-    std::cout << "Set number of bins for " << parameter << std::endl;
+    std::cout << "Set number of bins for " << parameter << ": ";
     int16_t Nbins;
     std::cin >> Nbins;
 
-    std::cout << "Set minimal value for " << parameter << std::endl;
+    std::cout << "Set minimal value for " << parameter << ": ";
     double min;
     std::cin >> min;
-    std::cout << "Set maximal value for " << parameter << std::endl;
+    std::cout << "Set maximal value for " << parameter << ": ";
     double max;
     std::cin >> max;
 
@@ -170,12 +170,12 @@ void Parser::DRSConsoleParser::ReadAmplitude() {
     if (val == i++) usedPar.signal = "up";
     if (val == i++) usedPar.signal = "down";
 
-    std::cout << "Enter factor for amplitude" << "\n";
+    std::cout << "Enter factor for amplitude: ";
     double factor;
     std::cin >> factor;
     usedPar.factorAmplitude = factor;
 
-    std::cout << "Enter shift for amplitude" << "\n";
+    std::cout << "Enter shift for amplitude: ";
     double shift;
     std::cin >> shift;
     usedPar.shiftAmplitude = shift;
