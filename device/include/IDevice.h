@@ -56,6 +56,7 @@ namespace Device {
         void DefineSignalDirection(std::vector<double> averageWaveform);
         double MaxCCF(std::vector<double> ccfvector);
     private:
+        template<typename T> void VectorLengthCorrect(std::vector<T>& eventWaveform);
         template<typename T> void TemplateInitializeSumWaveform(std::vector<T> eventWaveform, std::vector<double>* averageWaveform);
         void ConfigureRoot();
         void ConfigureTxt();

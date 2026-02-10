@@ -93,6 +93,8 @@ double Device::IDevice::TemplateCalculateAmplitude(std::vector<T> eventWaveform,
 
 template<typename T> 
 std::vector<double> Device::IDevice::CCF(std::vector<T> w1, std::vector<T> w2) {
+    Device::IDevice::VectorLengthCorrect(w1);
+    Device::IDevice::VectorLengthCorrect(w2);
     TSpectrumTransform* tspct = new TSpectrumTransform(w1.size());
     tspct->SetTransformType(TSpectrumTransform::kTransformFourier, 0);
     tspct->SetDirection(TSpectrumTransform::kTransformForward);
@@ -133,4 +135,19 @@ template<typename T>
 void Device::IDevice::TemplateCalculateWaveform(std::vector<T> eventWaveform, std::vector<double> *averageWaveform) {
     if (isInitialized) for (size_t i = 0; i < size(eventWaveform); i++) (*averageWaveform)[i] += eventWaveform[i];
     else std::call_once(initWaveFlag, [this, eventWaveform, averageWaveform](){TemplateInitializeSumWaveform(eventWaveform, averageWaveform);});
+}
+
+template<typename T>
+void Device::IDevice::VectorLengthCorrect(std::vector<T>& eventWaveform) {
+    unsigned short i = 0;
+    while (true) {
+        unsigned int val = TMath::Power(2, i++);
+        if (eventWaveform.size() < val) {
+            int ss = eventWaveform.size();
+            for (int k = 0; k < (val-ss); k++) {
+                eventWaveform.push_back(0);
+            }
+            break;
+        }
+    }
 }
