@@ -362,16 +362,18 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                             }
                             if (writer == "Txt") WriteTxtEvent();
                         }
-                    } else if (this->GetIsDebug()) {
-                        // add plotting waveform
-                        TGraph* gr = new TGraph();
-                        int counter = 0;
-                        for (double event : waveform) {
-                            gr->AddPoint(counter++, event);
+                    } else {
+                        if (this->GetIsDebug()) {
+                            // add plotting waveform
+                            TGraph* gr = new TGraph();
+                            int counter = 0;
+                            for (double event : waveform) {
+                                gr->AddPoint(counter++, event);
+                            }
+                            std::string nametmp = "waveform"+std::to_string(eventCounter);
+                            TString name = TString(nametmp.c_str(), nametmp.length());
+                            gr->Write(name);
                         }
-                        std::string nametmp = "waveform"+std::to_string(eventCounter);
-                        TString name = TString(nametmp.c_str(), nametmp.length());
-                        gr->Write(name);
                     }
                 }
             } else {
@@ -379,9 +381,8 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
             }
         } else {
             if (!usedParameters.signal.has_value()) DefineSignalDirection(fEvent.waveform);
-            if (!save) {
+            if (!save && (this->GetIsCut())) {
                 for (int i = 0; i < fEvent.waveform.size(); i++) fEvent.waveform[i] /= eventCounter;
-                eventCounter = 1;
             }
             if (save) {
                 for (std::string writer : GetParser()->GetUsedWriterVector()) {
@@ -390,6 +391,7 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                         if (usedParameters.waveform.has_value()) {
                             TGraph* gr = new TGraph();
                             int counter = 0;
+                            if (this->GetIsCut()) eventCounter = 1; 
                             for (double event : fEvent.waveform) {
                                 gr->AddPoint(counter++, event/eventCounter);
                             }
