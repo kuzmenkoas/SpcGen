@@ -265,4 +265,234 @@ DataWaveform
 + waveform
 \end{lstlisting}
 
+\section{Работа из терминала}
+\subsection{DRS}
+Далее приведен последовательный вывод программы при работе без конфигурационного файла. 
+
+Сначала выбирается формат вывода, выводится сообщение:
+\begin{lstlisting}
+Choose format to output:
+(0) Root
+(1) Txt
+(2) Root and Txt
+\end{lstlisting}
+
+Необходимо ввести в консоль выбранный вариант.
+
+После чего для DRS выведутся параметры для записи:
+\begin{lstlisting}
+Enter parameters to use:
+(0) all
+(1) baseline
+(2) charge
+(3) amplitude
+(4) waveform
+(5) scaler
+(6) time
+\end{lstlisting}
+
+Необходимо непрерывно ввести нужные параметры, например: 135 для baseline, amplitude и scaler.
+Либо ввести 0 для записи всех значений.
+
+После этого выведется сообщение с конфигурацией обработки (окна для вычисления baseline и charge с amplitude).
+\begin{lstlisting}
+Configure limits for signal processing
+Enter min value point for baseline: 0
+Enter max value point for baseline: 100
+Enter min value point for signal: 101
+Enter max value point for signal: 450
+\end{lstlisting}
+
+Далее вывдется текст с настройкой вида сигнала (идет вверх, или вниз).
+\begin{lstlisting}
+Choose which form of signal:
+(1) up
+(2) down
+\end{lstlisting}
+
+После чего будет настройка изменения результата (множитель и слагаемое для charge и amplitude).
+\begin{lstlisting}
+Enter factor for amplitude: 1
+Enter shift for amplitude: 0
+\end{lstlisting}
+
+\begin{lstlisting}
+Configure the results of charge algorithm
+Enter factor for charge: 1
+Enter shift for charge: 0
+\end{lstlisting}
+
+После чего выведется конфигурация гистограмм, необходимо выбрать, какие нужны вводом непрерывно чисел (123):
+\begin{lstlisting}
+Choose parameters to configure histogram
+(0) without
+(1) baseline
+(2) charge
+(3) amplitude
+(4) scaler
+\end{lstlisting}
+
+Если выбраны гистограммы, то выведется конфигурация для каждого параметра. 
+Необходимо указать количество бинов, минимальное и максимальные значения для гистограмм.
+\begin{lstlisting}
+Set number of bins for amplitude: 1000
+Set minimal value for amplitude: 0
+Set maximal value for amplitude: 10
+\end{lstlisting}
+
+Если запускать программу с флагом -threshold, то будет дополнительный вопрос:
+\begin{lstlisting}
+Enter threshold in mV to cut signal: 0.5
+\end{lstlisting}
+
+Который настраивает, порог для сигнала (считать хорошим событием или нет, отбросить и не учитывать это событие).
+
+С флагом -cut будет:
+\begin{lstlisting}
+Enter percents to cut signal: 1.2
+\end{lstlisting}
+
+Который отбросит события, если отнормированная взаимно-корелляционная функция события покажет, что текущее событие не превышает <<похожесть>> на среднюю формы сигнала с указанным процентом.
+
+То есть, алгоритм посчитает ВКФ, отнормирует в проценты (от 0 до 100), и если это значение будет ниже указанного процента тут, то посчитает <<плохим>> событием и отбросит.
+
+\subsection{Digitizer}
+Тут приведена последовательность вывода конфигурации при запуске программы при двух файлах одновременно: psd и waveform.
+
+Сначала, также настраивается формат вывода:
+\begin{lstlisting}
+Choose format to output:
+(0) Root
+(1) Txt
+(2) Root and Txt
+\end{lstlisting}
+
+Необходимо ввести число с выбранным форматом.
+
+Далее, выведутся параметры, которые записаны в PSD файле. 
+Необходимо указать все записанные, а не те, которые нужны!
+Указываются непрерывным перечислением (например, 1456).
+
+\begin{lstlisting}
+Enter parameters to use:
+(0) all
+(1) qShort
+(2) qLong
+(3) cfd_y1
+(4) cfd_y2
+(5) baseline
+(6) height
+(7) eventCounter
+(8) eventCounterPSD
+(9) psdValue
+\end{lstlisting}
+
+Далее, выведется конфигурация данных с Waveform, необходимо указать, 
+какие параметры нужно получить:
+
+\begin{lstlisting}
+Enter parameters to use:
+(0) all
+(1) baseline
+(2) charge
+(3) amplitude
+\end{lstlisting}
+
+Указывать непрерывным числом (12).
+
+После этого, необходимо настроить обработку (задать окна для вычисления baseline и charge с amplitude):
+
+\begin{lstlisting}
+Configure limits for charge algorithm
+Enter min value point for baseline: 0
+Enter max value point for baseline: 100
+Enter min value point for signal: 101
+Enter max value point for signal: 450
+\end{lstlisting}
+
+Далее вывдется текст с настройкой вида сигнала (идет вверх, или вниз).
+
+\begin{lstlisting}
+Choose which form of signal:
+(1) up
+(2) down
+\end{lstlisting}
+
+После чего будет настройка изменения результата (множитель и слагаемое для
+charge и amplitude).
+
+\begin{lstlisting}
+Enter factor for amplitude: 1
+Enter shift for amplitude: 0
+\end{lstlisting}
+
+\begin{lstlisting}
+Configure the results of charge algorithm
+Enter factor for charge: 1
+Enter shift for charge: 0
+\end{lstlisting}
+
+Далее, выведется конфигурация гистограмм, необходимо выбрать, какие
+нужны вводом непрерывно чисел (123). 
+
+Если выбраны гистограммы, то выведется конфигурация для каждого параметра. Необходимо указать количество бинов, минимальное и максимальные значения для
+гистограмм.
+
+Для PSD данных:
+\begin{lstlisting}
+Choose parameters to configure histogram
+(0) without
+PSD configuration:
+(1) qShort
+(2) qLong
+(3) cfd_y1
+(4) cfd_y2
+(5) baseline
+(6) height
+(7) eventCounter
+(8) eventCounterPSD
+(9) psdValue
+\end{lstlisting}
+
+\begin{lstlisting}
+Set number of bins for qShort: 1000
+Set minimal value for qShort: 0
+Set maximal value for qShort: 10000 
+\end{lstlisting}
+
+Для Waveform данных:
+\begin{lstlisting}
+Choose parameters to configure histogram
+(0) without
+Waveform configuration:
+(1) baseline
+(2) charge
+(3) amplitude
+\end{lstlisting}
+
+\begin{lstlisting}
+Set number of bins for baseline: 1000
+Set minimal value for baseline: 0
+Set maximal value for baseline: 1000
+\end{lstlisting}
+
+Если запускать программу с одним файлом, то необходимо будет указать, какой это тип:
+\begin{lstlisting}
+Enter format file to decode:
+(1) PSD
+(2) Waveform
+\end{lstlisting}
+
+Если запускать программу с флагом -threshold, то будет дополнительный вопрос:
+\begin{lstlisting}
+Enter threshold in mV to cut signal: 0.5
+\end{lstlisting}
+
+Который настраивает, порог для сигнала (считать хорошим событием или нет, отбросить и не учитывать это событие).
+
+С флагом -cut будет:
+\begin{lstlisting}
+Enter percents to cut signal: 1.2
+\end{lstlisting}
+
 \end{document}
