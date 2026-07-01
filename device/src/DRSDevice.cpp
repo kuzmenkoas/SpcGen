@@ -173,7 +173,7 @@ void Device::DRSDevice::ReadChannels(std::ifstream* file, std::filesystem::path*
                         }
                     }
                     else {
-                        // Error
+                        std::cerr << "Something went wrong" << std::endl;
                         break;
                         // exit
                     }
@@ -201,9 +201,7 @@ void Device::DRSDevice::ReadFileHeader(std::ifstream* file, std::filesystem::pat
     if (tmp[0] == fFileHeader[0] && tmp[1] == fFileHeader[1] && tmp[2] == fFileHeader[2]) {
         if (save) {
             std::cout << "Reading file: " << path->string() << "\n";
-            int16_t version;
-            std::memcpy(&version, &tmp[3], sizeof(version));
-            std::cout << "DRS version: " << version << "\n";
+            std::cout << "DRS version: " << tmp[3] << "\n";
         }
     } else {
         if (save) {
@@ -241,7 +239,7 @@ void Device::DRSDevice::ReadTimeHeader(std::ifstream* file, std::filesystem::pat
                     if (file->read((char*) &tmp, sizeof(tmp))) {
                         if (tmp[0] == fChannelHeader[0] && tmp[1] == fChannelHeader[1] && tmp[2] == fChannelHeader[2]) {
                             char conv2[3] = {tmp[1], tmp[2], tmp[3]};
-                            int16_t channel = std::atoi(conv2);
+                            channel = std::atoi(conv2);
                         }
 
                         if (tmp[0] == fEventHeader[0] && tmp[1] == fEventHeader[1] && tmp[2] == fEventHeader[2] && tmp[3] == fEventHeader[3]) {
