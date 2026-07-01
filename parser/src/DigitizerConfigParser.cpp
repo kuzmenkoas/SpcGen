@@ -1,4 +1,5 @@
 #include "DigitizerConfigParser.h"
+using namespace std::string_literals;
 
 Parser::DigitizerConfigParser::DigitizerConfigParser(std::filesystem::path path, std::vector<std::string> aTypes) : fPath(path), fTypes(aTypes) {
 }
@@ -10,8 +11,8 @@ void Parser::DigitizerConfigParser::Start() {
     ReadWriter();
     if (fTypes.empty()) ReadFileType();
     for (std::string file : fTypes) {
-        if (file == "PSD") ReadDataPSD();
-        if (file == "Waveform") {
+        if (file == "PSD"s) ReadDataPSD();
+        if (file == "Waveform"s) {
             ReadDataWaveform();
             ReadCharge();
             ReadAmplitude();
@@ -31,9 +32,9 @@ void Parser::DigitizerConfigParser::ReadFileType() {
     std::string CurStr;
     try {
         while(getline (file,CurStr)) {
-            if (CurStr.compare(0, keyPSD.size(), keyPSD) == 0) {
+            if (ClearString(CurStr).compare(0, keyPSD.size(), keyPSD) == 0) {
                 fTypes.push_back("PSD");
-            } else if (CurStr.compare(0, keyWaveform.size(), keyWaveform) == 0) {
+            } else if (ClearString(CurStr).compare(0, keyWaveform.size(), keyWaveform) == 0) {
                 fTypes.push_back("Waveform");
             }
         }
@@ -61,15 +62,15 @@ void Parser::DigitizerConfigParser::ReadWriter(std::string key) {
     std::string CurStr;
     std::vector<std::string> writers;
     try {
-        while(getline (file,CurStr)){
-            if (CurStr.compare(0, key.size(), key) == 0) {
+        while(getline(file,CurStr)){
+            if (ClearString(CurStr).compare(0, key.size(), key) == 0) {
                 while (getline (file, CurStr)) {
                     if (CurStr.c_str()[0]=='+') {
                         size_t found = CurStr.find_first_of(" ");
                         CurStr = CurStr.substr(found+1);
 
-                        if (CurStr == "Root") writers.push_back("Root");
-                        if (CurStr == "Txt") writers.push_back("Txt");
+                        if (ClearString(CurStr) == "Root"s) writers.push_back("Root");
+                        if (ClearString(CurStr) == "Txt"s) writers.push_back("Txt");
                     } else break;
                 }
             }
@@ -87,20 +88,20 @@ void Parser::DigitizerConfigParser::ReadDataPSD(std::string key) {
     std::string CurStr;
     try {
         while(getline (file,CurStr)){
-            if (CurStr.compare(0, key.size(), key) == 0) {
+            if (ClearString(CurStr).compare(0, key.size(), key) == 0) {
                 while (getline (file, CurStr)) {
                     if (CurStr.c_str()[0]=='+') {
                         size_t found = CurStr.find_first_of(" ");
                         CurStr = CurStr.substr(found+1);
-                        if (CurStr == "qShort") usedPar.qShort = DEFAULT_VALUE;
-                        if (CurStr == "qLong") usedPar.qLong = DEFAULT_VALUE;
-                        if (CurStr == "cfd_y1") usedPar.cfd_y1 = DEFAULT_VALUE;
-                        if (CurStr == "cfd_y2") usedPar.cfd_y2 = DEFAULT_VALUE;
-                        if (CurStr == "baseline") usedPar.baselinePSD = DEFAULT_VALUE;
-                        if (CurStr == "height") usedPar.height = DEFAULT_VALUE;
-                        if (CurStr == "eventCounter") usedPar.eventCounter = DEFAULT_VALUE;
-                        if (CurStr == "eventCounterPSD") usedPar.eventCounterPSD = DEFAULT_VALUE;
-                        if (CurStr == "psdValue") usedPar.psdValue = DEFAULT_VALUE;
+                        if (ClearString(CurStr) == "qShort"s) usedPar.qShort = DEFAULT_VALUE;
+                        if (ClearString(CurStr) == "qLong"s) usedPar.qLong = DEFAULT_VALUE;
+                        if (ClearString(CurStr) == "cfd_y1"s) usedPar.cfd_y1 = DEFAULT_VALUE;
+                        if (ClearString(CurStr) == "cfd_y2"s) usedPar.cfd_y2 = DEFAULT_VALUE;
+                        if (ClearString(CurStr) == "baseline"s) usedPar.baselinePSD = DEFAULT_VALUE;
+                        if (ClearString(CurStr) == "height"s) usedPar.height = DEFAULT_VALUE;
+                        if (ClearString(CurStr) == "eventCounter"s) usedPar.eventCounter = DEFAULT_VALUE;
+                        if (ClearString(CurStr) == "eventCounterPSD"s) usedPar.eventCounterPSD = DEFAULT_VALUE;
+                        if (ClearString(CurStr) == "psdValue"s) usedPar.psdValue = DEFAULT_VALUE;
                     } else break;
                 }
             }
@@ -117,14 +118,14 @@ void Parser::DigitizerConfigParser::ReadDataWaveform(std::string key) {
     std::string CurStr;
     try {
         while(getline (file,CurStr)){
-            if (CurStr.compare(0, key.size(), key) == 0) {
+            if (ClearString(CurStr).compare(0, key.size(), key) == 0) {
                 while (getline (file, CurStr)) {
                     if (CurStr.c_str()[0]=='+') {
                         size_t found = CurStr.find_first_of(" ");
                         CurStr = CurStr.substr(found+1);
-                        if (CurStr == "baseline") usedPar.baseline = DEFAULT_VALUE;
-                        if (CurStr == "charge") usedPar.charge = DEFAULT_VALUE;
-                        if (CurStr == "amplitude") usedPar.amplitude = DEFAULT_VALUE;
+                        if (ClearString(CurStr) == "baseline"s) usedPar.baseline = DEFAULT_VALUE;
+                        if (ClearString(CurStr) == "charge"s) usedPar.charge = DEFAULT_VALUE;
+                        if (ClearString(CurStr) == "amplitude"s) usedPar.amplitude = DEFAULT_VALUE;
                     } else break;
                 }
             }
@@ -142,7 +143,7 @@ void Parser::DigitizerConfigParser::ReadHistograms(std::string key) {
     std::vector<Global::IHist> hist; 
     try {
         while(getline (file,CurStr)){
-            if (CurStr.compare(0, key.size(), key) == 0) {
+            if (ClearString(CurStr).compare(0, key.size(), key) == 0) {
                 while (getline (file, CurStr)) {
                     if (CurStr.c_str()[0]=='+') {
                         size_t found = CurStr.find_first_of(" ");
@@ -157,18 +158,18 @@ void Parser::DigitizerConfigParser::ReadHistograms(std::string key) {
                         tmp = tmp.substr(tmp.find_first_of(" ")+1);
                         std::string max = tmp.substr(0, tmp.find_first_of(" "));
 
-                        if (parameter == "qShort") hist.push_back(Global::IHist{file, parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
-                        if (parameter == "qLong") hist.push_back(Global::IHist{file, parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
-                        if (parameter == "cfd_y1") hist.push_back(Global::IHist{file, parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
-                        if (parameter == "cfd_y2") hist.push_back(Global::IHist{file, parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
-                        if (parameter == "height") hist.push_back(Global::IHist{file, parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
-                        if (parameter == "eventCounter") hist.push_back(Global::IHist{file, parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
-                        if (parameter == "eventCounterPSD") hist.push_back(Global::IHist{file, parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
-                        if (parameter == "psdValue") hist.push_back(Global::IHist{file, parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
-                        if (parameter == "baseline") hist.push_back(Global::IHist{file, parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
-                        if (parameter == "charge") hist.push_back(Global::IHist{file, parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
-                        if (parameter == "amplitude") hist.push_back(Global::IHist{file, parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
-                        if (parameter == "scaler") hist.push_back(Global::IHist{file, parameter, std::stoi(Nbins), std::stod(min), std::stod(max)});
+                        if (ClearString(parameter) == "qShort"s) hist.push_back(Global::IHist{file, ClearString(parameter), std::stoi(Nbins), std::stod(min), std::stod(max)});
+                        if (ClearString(parameter) == "qLong"s) hist.push_back(Global::IHist{file, ClearString(parameter), std::stoi(Nbins), std::stod(min), std::stod(max)});
+                        if (ClearString(parameter) == "cfd_y1"s) hist.push_back(Global::IHist{file, ClearString(parameter), std::stoi(Nbins), std::stod(min), std::stod(max)});
+                        if (ClearString(parameter) == "cfd_y2"s) hist.push_back(Global::IHist{file, ClearString(parameter), std::stoi(Nbins), std::stod(min), std::stod(max)});
+                        if (ClearString(parameter) == "height"s) hist.push_back(Global::IHist{file, ClearString(parameter), std::stoi(Nbins), std::stod(min), std::stod(max)});
+                        if (ClearString(parameter) == "eventCounter"s) hist.push_back(Global::IHist{file, ClearString(parameter), std::stoi(Nbins), std::stod(min), std::stod(max)});
+                        if (ClearString(parameter) == "eventCounterPSD"s) hist.push_back(Global::IHist{file, ClearString(parameter), std::stoi(Nbins), std::stod(min), std::stod(max)});
+                        if (ClearString(parameter) == "psdValue"s) hist.push_back(Global::IHist{file, ClearString(parameter), std::stoi(Nbins), std::stod(min), std::stod(max)});
+                        if (ClearString(parameter) == "baseline"s) hist.push_back(Global::IHist{file, ClearString(parameter), std::stoi(Nbins), std::stod(min), std::stod(max)});
+                        if (ClearString(parameter) == "charge"s) hist.push_back(Global::IHist{file, ClearString(parameter), std::stoi(Nbins), std::stod(min), std::stod(max)});
+                        if (ClearString(parameter) == "amplitude"s) hist.push_back(Global::IHist{file, ClearString(parameter), std::stoi(Nbins), std::stod(min), std::stod(max)});
+                        if (ClearString(parameter) == "scaler"s) hist.push_back(Global::IHist{file, ClearString(parameter), std::stoi(Nbins), std::stod(min), std::stod(max)});
                     } else break;
                 }
             }
@@ -186,7 +187,7 @@ void Parser::DigitizerConfigParser::ReadCharge(std::string key) {
     std::string CurStr;
     try {
         while(getline (file,CurStr)){
-            if (CurStr.compare(0, key.size(), key) == 0) {
+            if (ClearString(CurStr).compare(0, key.size(), key) == 0) {
                 while (getline (file, CurStr)) {
                     if (CurStr.c_str()[0]=='+') {
                         size_t found = CurStr.find_first_of(" ");
@@ -194,15 +195,9 @@ void Parser::DigitizerConfigParser::ReadCharge(std::string key) {
                         std::string parameter = CurStr.substr(0, CurStr.find_first_of(" "));
                         std::string tmp = CurStr.substr(CurStr.find_first_of(" ")+1);
                         std::string min = tmp.substr(0, tmp.find_first_of(" "));
-                        tmp = tmp.substr(tmp.find_first_of(" ")+1);
-                        std::string max = tmp.substr(0, tmp.find_first_of(" "));
-                        tmp = tmp.substr(tmp.find_first_of(" ")+1);
                         
-                        // if (parameter == "baseline") usedPar.baselineLimits = std::make_pair(std::stoi(min), std::stoi(max));
-                        // if (parameter == "charge") usedPar.chargeLimits = std::make_pair(std::stoi(min), std::stoi(max));
-                        // if (parameter == "wavelength") usedPar.wavelength = std::stoi(min);
-                        if (parameter == "factor") usedPar.factorCharge = std::stod(min);
-                        if (parameter == "shift") usedPar.shiftCharge = std::stod(min);
+                        if (ClearString(parameter) == "factor"s) usedPar.factorCharge = std::stod(min);
+                        if (ClearString(parameter) == "shift"s) usedPar.shiftCharge = std::stod(min);
                     } else break;
                 }
             }
@@ -219,7 +214,7 @@ void Parser::DigitizerConfigParser::ReadConfig(std::string key) {
     std::string CurStr;
     try {
         while(getline (file,CurStr)){
-            if (CurStr.compare(0, key.size(), key) == 0) {
+            if (ClearString(CurStr).compare(0, key.size(), key) == 0) {
                 while (getline (file, CurStr)) {
                     if (CurStr.c_str()[0]=='+') {
                         size_t found = CurStr.find_first_of(" ");
@@ -230,11 +225,11 @@ void Parser::DigitizerConfigParser::ReadConfig(std::string key) {
                         tmp = tmp.substr(tmp.find_first_of(" ")+1);
                         std::string val2 = tmp.substr(0, tmp.find_first_of(" "));
 
-                        if (parameter == "cut") usedPar.cut = std::stod(val);
-                        if (parameter == "range") usedPar.signalRange = std::make_pair(std::stoi(val), std::stoi(val2));
-                        if (parameter == "baseline") usedPar.baselineLimits = std::make_pair(std::stoi(val), std::stoi(val2));
-                        if (parameter == "wavelength") usedPar.wavelength = std::stod(val);
-                        if (parameter == "threshold") usedPar.threshold = std::stod(val);
+                        if (ClearString(parameter) == "cut"s) usedPar.cut = std::stod(val);
+                        if (ClearString(parameter) == "range"s) usedPar.signalRange = std::make_pair(std::stoi(val), std::stoi(val2));
+                        if (ClearString(parameter) == "baseline"s) usedPar.baselineLimits = std::make_pair(std::stoi(val), std::stoi(val2));
+                        if (ClearString(parameter) == "wavelength"s) usedPar.wavelength = std::stod(val);
+                        if (ClearString(parameter) == "threshold"s) usedPar.threshold = std::stod(val);
                     } else break;
                 }
             }
@@ -251,7 +246,7 @@ void Parser::DigitizerConfigParser::ReadAmplitude(std::string key) {
     std::string CurStr;
     try {
         while(getline (file,CurStr)){
-            if (CurStr.compare(0, key.size(), key) == 0) {
+            if (ClearString(CurStr).compare(0, key.size(), key) == 0) {
                 while (getline (file, CurStr)) {
                     if (CurStr.c_str()[0]=='+') {
                         size_t found = CurStr.find_first_of(" ");
@@ -259,13 +254,10 @@ void Parser::DigitizerConfigParser::ReadAmplitude(std::string key) {
                         std::string range = CurStr.substr(0, CurStr.find_first_of(" "));
                         std::string tmp = CurStr.substr(CurStr.find_first_of(" ")+1);
                         std::string lRange = tmp.substr(0, tmp.find_first_of(" "));
-                        tmp = tmp.substr(tmp.find_first_of(" ")+1);
-                        std::string rRange = tmp.substr(0, tmp.find_first_of(" "));
 
-                        if (range == "up" || range == "down") usedPar.signal = CurStr;
-                        // if (range == "range") usedPar.signalRange = std::make_pair(std::stoi(lRange), std::stoi(rRange));
-                        if (range == "factor") usedPar.factorAmplitude = std::stod(lRange);
-                        if (range == "shift") usedPar.shiftAmplitude = std::stod(lRange);
+                        if (ClearString(range) == "up"s || range == "down"s) usedPar.signal = ClearString(CurStr);
+                        if (ClearString(range) == "factor"s) usedPar.factorAmplitude = std::stod(lRange);
+                        if (ClearString(range) == "shift"s) usedPar.shiftAmplitude = std::stod(lRange);
                     } else break;
                 }
             }

@@ -34,5 +34,16 @@ namespace Parser {
         std::vector<std::string> fDigitizerTypes = {};
         bool fCutFlag = false;
         bool fThresholdFlag = false;
+    
+    protected:
+        std::string ClearString(const std::string& line) {
+            std::string res;
+            const std::string trash = " \t\n\r\f\v";
+            size_t start = line.find_first_not_of(trash);
+            if (start == std::string::npos) return "";
+            size_t end = line.find_last_not_of(trash);
+            res = line.substr(start, end-start+1);
+            return res;
+        };
     };
 }
