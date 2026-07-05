@@ -5,6 +5,7 @@
 #include "TH1.h"
 #include "TTree.h"
 #include "IDevice.h"
+#include <utility>
 
 namespace Device {
     struct DRSEvent {
@@ -50,8 +51,7 @@ namespace Device {
 
         void ReadPreAverageWaveform();
 
-        std::vector<int32_t> fTimeVector[4] = {{},{},{},{}};
-        Device::DRSEvent fEvent{};
+        std::vector<Device::DRSEvent> fEvent{};
         std::ofstream fTxtFile;
     };
 }

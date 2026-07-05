@@ -52,12 +52,12 @@ namespace Device {
         template<typename T> bool ThresholdSignalFilter(std::vector<T> eventWaveform, double baseline);
         template<typename T1, typename T2> bool CCFSignalFilter(std::vector<T1> eventWaveform, std::vector<T2> averageWaveform);
         template<typename T1, typename T2> bool SignalFilter(std::vector<T1> eventWaveform, std::vector<T2> averageWaveform, double baseline);
-        template<typename T> void TemplateCalculateWaveform(std::vector<T> eventWaveform, std::vector<double>* averageWaveform);
+        template<typename T> void TemplateCalculateWaveform(std::vector<T> eventWaveform, std::vector<double>* averageWaveform, size_t channel=0);
         void DefineSignalDirection(std::vector<double> averageWaveform);
         double MaxCCF(std::vector<double> ccfvector);
     private:
         template<typename T> void VectorLengthCorrect(std::vector<T>& eventWaveform);
-        template<typename T> void TemplateInitializeSumWaveform(std::vector<T> eventWaveform, std::vector<double>* averageWaveform);
+        template<typename T> void TemplateInitializeSumWaveform(std::vector<T> eventWaveform, std::vector<double>* averageWaveform, size_t channel=0);
         void ConfigureRoot();
         void ConfigureTxt();
         std::filesystem::path fConfigPath;
@@ -71,8 +71,8 @@ namespace Device {
         bool bDebug = false;
         bool bThreshold = false;
 
-        mutable std::once_flag initWaveFlag;
-        bool isInitialized = false;
+        mutable std::vector<std::once_flag> initWaveFlag{4};
+        std::vector<bool> isInitialized = {false, false, false, false};
     };
 }
 
