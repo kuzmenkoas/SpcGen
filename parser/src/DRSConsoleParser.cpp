@@ -127,10 +127,10 @@ void Parser::DRSConsoleParser::ReadHistograms() {
             std::string tmp(1, val[k]);
             int f = 0;
             if (tmp == std::to_string(f++)) break;
-            if (tmp == std::to_string(f++)) SetHistogramVector("baseline");
-            if (tmp == std::to_string(f++)) SetHistogramVector("charge");
-            if (tmp == std::to_string(f++)) SetHistogramVector("amplitude");
-            if (tmp == std::to_string(f++)) SetHistogramVector("scaler");
+            if (usedPar.baseline.has_value()) if (tmp == std::to_string(f++)) SetHistogramVector("baseline");
+            if (usedPar.charge.has_value())if (tmp == std::to_string(f++)) SetHistogramVector("charge");
+            if (usedPar.amplitude.has_value())if (tmp == std::to_string(f++)) SetHistogramVector("amplitude");
+            if (usedPar.scaler.has_value())if (tmp == std::to_string(f++)) SetHistogramVector("scaler");
         }
     }
 }
