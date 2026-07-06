@@ -369,16 +369,18 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                             if (usedParameters.amplitude.has_value()) fEvent[channel-1].amplitude = TemplateCalculateAmplitude(wave, fEvent[channel-1].baseline);
                             // Process event
                             for (std::string writer : GetParser()->GetUsedWriterVector()) {
-                                if (writer == "Root") if (usedParameters.time.has_value()) if (usedParameters.baseline.has_value() || usedParameters.charge.has_value()) {
-                                    fChannelEventsTreeMap[channel-1]->Fill();
-                                    int iHist = 0;
-                                    if (usedParameters.hist.has_value()) {
-                                        auto& hists = *usedParameters.hist;
-                                        for (size_t i = 0; i < size(hists); i++) {
-                                            if (hists[i].parameter == "baseline") fChannelHist[channel-1][iHist++]->Fill(fEvent[channel-1].baseline);
-                                            if (hists[i].parameter == "charge") fChannelHist[channel-1][iHist++]->Fill(fEvent[channel-1].charge);
-                                            if (hists[i].parameter == "amplitude") fChannelHist[channel-1][iHist++]->Fill(fEvent[channel-1].amplitude);
-                                            if (hists[i].parameter == "scaler") fChannelHist[channel-1][iHist++]->Fill(fEvent[channel-1].scaler);
+                                if (writer == "Root") {
+                                    if (usedParameters.baseline.has_value() || usedParameters.charge.has_value()) {
+                                        fChannelEventsTreeMap[channel-1]->Fill();
+                                        int iHist = 0;
+                                        if (usedParameters.hist.has_value()) {
+                                            auto& hists = *usedParameters.hist;
+                                            for (size_t i = 0; i < size(hists); i++) {
+                                                if (hists[i].parameter == "baseline") fChannelHist[channel-1][iHist++]->Fill(fEvent[channel-1].baseline);
+                                                if (hists[i].parameter == "charge") fChannelHist[channel-1][iHist++]->Fill(fEvent[channel-1].charge);
+                                                if (hists[i].parameter == "amplitude") fChannelHist[channel-1][iHist++]->Fill(fEvent[channel-1].amplitude);
+                                                if (hists[i].parameter == "scaler") fChannelHist[channel-1][iHist++]->Fill(fEvent[channel-1].scaler);
+                                            }
                                         }
                                     }
                                 }
