@@ -53,5 +53,9 @@ namespace Device {
 
         std::vector<Device::DRSEvent> fEvent{};
         std::ofstream fTxtFile;
+
+        bool is_first_date_ = false;
+        std::tm first_date_event_;
+        std::tm last_date_event_;
     };
 }

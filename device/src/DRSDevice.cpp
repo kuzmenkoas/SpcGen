@@ -74,6 +74,10 @@ void Device::DRSDevice::ConfigureRoot() {
                 fChannelTimeTreeMap[ch-1] = fTreeTime;
             }
 
+            // if (usedParameters.date_time.has_value()) {
+
+            // }
+
             if (usedParameters.baseline.has_value() || usedParameters.charge.has_value()) {
                 TTree* fTree = new TTree("Events", "Events");
                 if (usedParameters.baseline.has_value()) fTree->Branch("baseline", &fEvent[ch-1].baseline, "baseline/D");
@@ -436,31 +440,50 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
             break;
         }
     }
+
+    // Output about date first and last event
+    std::cout << "First event date is: " << first_date_event_.tm_hour << ":" << first_date_event_.tm_min << ":" << first_date_event_.tm_sec <<
+        " " << first_date_event_.tm_mday << "." << first_date_event_.tm_mon << "." << first_date_event_.tm_year << std::endl;
+
+    std::cout << "Last event date is: " << last_date_event_.tm_hour << ":" << last_date_event_.tm_min << ":" << last_date_event_.tm_sec <<
+        " " << last_date_event_.tm_mday << "." << last_date_event_.tm_mon << "." << last_date_event_.tm_year << std::endl;
 }
 
 void Device::DRSDevice::ReadDate(std::ifstream* file, std::filesystem::path* path) {
+    Global::Parameters usedParameters = GetParser()->GetUsedParameters();
     char tmp2[2];
     int16_t tt;
     file->read((char*) &tmp2, sizeof(tmp2));
     std::memcpy(&tt, &tmp2, sizeof(tt));
+    last_date_event_.tm_year = tt;
+    
+    file->read((char*) &tmp2, sizeof(tmp2));
+    std::memcpy(&tt, &tmp2, sizeof(tt));
+    last_date_event_.tm_mon = tt;
+
+    file->read((char*) &tmp2, sizeof(tmp2));
+    std::memcpy(&tt, &tmp2, sizeof(tt));
+    last_date_event_.tm_mday = tt;
+
+    file->read((char*) &tmp2, sizeof(tmp2));
+    std::memcpy(&tt, &tmp2, sizeof(tt));
+    last_date_event_.tm_hour = tt;
+
+    file->read((char*) &tmp2, sizeof(tmp2));
+    std::memcpy(&tt, &tmp2, sizeof(tt));
+    last_date_event_.tm_min = tt;
+
+    file->read((char*) &tmp2, sizeof(tmp2));
+    std::memcpy(&tt, &tmp2, sizeof(tt));
+    last_date_event_.tm_sec = tt;
 
     file->read((char*) &tmp2, sizeof(tmp2));
     std::memcpy(&tt, &tmp2, sizeof(tt));
 
-    file->read((char*) &tmp2, sizeof(tmp2));
-    std::memcpy(&tt, &tmp2, sizeof(tt));
-
-    file->read((char*) &tmp2, sizeof(tmp2));
-    std::memcpy(&tt, &tmp2, sizeof(tt));
-
-    file->read((char*) &tmp2, sizeof(tmp2));
-    std::memcpy(&tt, &tmp2, sizeof(tt));
-
-    file->read((char*) &tmp2, sizeof(tmp2));
-    std::memcpy(&tt, &tmp2, sizeof(tt));
-
-    file->read((char*) &tmp2, sizeof(tmp2));
-    std::memcpy(&tt, &tmp2, sizeof(tt));
+    if (!is_first_date_) {
+        first_date_event_ = last_date_event_;
+        is_first_date_ = true;
+    }
 }
 
 void Device::DRSDevice::ReadPreAverageWaveform() {

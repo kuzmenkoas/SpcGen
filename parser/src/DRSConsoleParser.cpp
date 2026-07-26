@@ -43,6 +43,7 @@ void Parser::DRSConsoleParser::ReadData() {
     std::cout << "(" << i++ << ")" << " waveform" << "\n";
     std::cout << "(" << i++ << ")" << " scaler" << "\n";
     std::cout << "(" << i++ << ")" << " time" << "\n";
+    std::cout << "(" << i++ << ")" << " date_time" << "\n";
 
     std::string val;
     std::cin >> val;
@@ -63,6 +64,7 @@ void Parser::DRSConsoleParser::ReadData() {
         if (tmp == std::to_string(f++)) usedPar.waveform = {DEFAULT_VALUE};
         if (tmp == std::to_string(f++)) usedPar.scaler = DEFAULT_VALUE;
         if (tmp == std::to_string(f++)) usedPar.time = DEFAULT_VALUE;
+        if (tmp == std::to_string(f++)) usedPar.date_time = {std::tm{}};
     }
 }
 
