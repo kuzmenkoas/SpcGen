@@ -226,7 +226,8 @@ void Parser::DigitizerConfigParser::ReadConfig(std::string key) {
                         std::string val2 = tmp.substr(0, tmp.find_first_of(" "));
 
                         if (ClearString(parameter) == "cut"s) usedPar.cut = std::stod(val);
-                        if (ClearString(parameter) == "range"s) usedPar.signalRange = std::make_pair(std::stoi(val), std::stoi(val2));
+                        if (ClearString(parameter) == "charge_range"s) usedPar.chargeLimits = std::make_pair(std::stoi(val), std::stoi(val2));
+                        if (ClearString(parameter) == "amplitude_range"s) usedPar.amplitudeLimits = std::make_pair(std::stoi(val), std::stoi(val2));
                         if (ClearString(parameter) == "baseline"s) usedPar.baselineLimits = std::make_pair(std::stoi(val), std::stoi(val2));
                         if (ClearString(parameter) == "wavelength"s) usedPar.wavelength = std::stod(val);
                         if (ClearString(parameter) == "threshold"s) usedPar.threshold = std::stod(val);

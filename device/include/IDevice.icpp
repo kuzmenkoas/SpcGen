@@ -40,8 +40,8 @@ bool Device::IDevice::ThresholdSignalFilter(std::vector<T> eventWaveform, double
 template<typename T> 
 double Device::IDevice::TemplateCalculateCharge(std::vector<T> eventWaveform, double baseline) {
     Global::Parameters usedParameters = Device::IDevice::GetParser()->GetUsedParameters();
-    int min = usedParameters.signalRange.value().first;
-    int max = usedParameters.signalRange.value().second;
+    int min = usedParameters.chargeLimits.value().first;
+    int max = usedParameters.chargeLimits.value().second;
     double charge = 0;
     int counter = 0;
     for (double waveform : eventWaveform) {
@@ -75,7 +75,7 @@ double Device::IDevice::TemplateCalculateAmplitude(std::vector<T> eventWaveform,
     Global::Parameters usedParameters = Device::IDevice::GetParser()->GetUsedParameters();
 
     double amplitude = 0;
-    TF1* parabola = new TF1("parabola", "pol2", usedParameters.signalRange.value().first, usedParameters.signalRange.value().second);
+    TF1* parabola = new TF1("parabola", "pol2", usedParameters.amplitudeLimits.value().first, usedParameters.amplitudeLimits.value().second);
     TGraph* gr = new TGraph();
     for (size_t i = 0; i < eventWaveform.size(); i++) {
         gr->SetPoint(i, i, eventWaveform[i]);
