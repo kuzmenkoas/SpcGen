@@ -4,6 +4,7 @@
 #include "TGraph.h"
 #include <TF1.h>
 #include <algorithm>
+// #include <cassert>
 
 Device::DRSDevice::DRSDevice() {
     fEvent.resize(4);
@@ -60,6 +61,11 @@ void Device::DRSDevice::ConfigureRoot() {
     Global::Parameters usedParameters = GetParser()->GetUsedParameters();
 
     int ch = 1;
+    if (usedParameters.date_time.has_value()) {
+        TTree* fDateTime = new TTree("Date_time", "Date_time");
+        fDateTime->Branch("date_time", &time_event_diff_, "date_time/L");
+        fDateTimeTree = fDateTime;
+    }
     for (bool channel : fChannelMap) {
         if (channel) {
             std::string id = "Channel " + std::to_string(ch);
@@ -73,10 +79,6 @@ void Device::DRSDevice::ConfigureRoot() {
                 fTreeTime->Branch("time", &fEvent[ch-1].time, "time/F");
                 fChannelTimeTreeMap[ch-1] = fTreeTime;
             }
-
-            // if (usedParameters.date_time.has_value()) {
-
-            // }
 
             if (usedParameters.baseline.has_value() || usedParameters.charge.has_value()) {
                 TTree* fTree = new TTree("Events", "Events");
@@ -363,6 +365,11 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
                 }
 
                 if (save) {
+                    for (std::string writer : GetParser()->GetUsedWriterVector()) {
+                        if (usedParameters.date_time.has_value()) {
+                            fDateTimeTree->Fill();
+                        }
+                    }
                     channel = 1;
                     for (auto wave : waveform) {
                         if (wave.empty()) continue;
@@ -442,11 +449,53 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
     }
 
     // Output about date first and last event
+    std::cout << "Event amount: " << eventCounter << std::endl;
     std::cout << "First event date is: " << first_date_event_.tm_hour << ":" << first_date_event_.tm_min << ":" << first_date_event_.tm_sec <<
         " " << first_date_event_.tm_mday << "." << first_date_event_.tm_mon << "." << first_date_event_.tm_year << std::endl;
 
     std::cout << "Last event date is: " << last_date_event_.tm_hour << ":" << last_date_event_.tm_min << ":" << last_date_event_.tm_sec <<
         " " << last_date_event_.tm_mday << "." << last_date_event_.tm_mon << "." << last_date_event_.tm_year << std::endl;
+
+    std::cout << "Average frequency: " << eventCounter/static_cast<double>(time_event_diff_) << " Hz" << std::endl;
+}
+
+uint64_t Device::DRSDevice::EstimateTimeDifference(std::tm t_base, std::tm t_in) {
+    uint64_t time_diff = 0;
+    const int SEC_PER_MIN = 60;
+    const int MIN_PER_HOUR = 60;
+    const int HOUR_PER_DAY = 24;
+
+    const int DAY_PER_YEAR = 365;
+    const int DAY_PER_MONTH = 30;
+
+    uint64_t days_diff = (t_in.tm_year - t_base.tm_year)*DAY_PER_YEAR + 
+        (t_in.tm_mon - t_base.tm_mon)*DAY_PER_MONTH + 
+        (t_in.tm_mday - t_base.tm_mday);
+
+    time_diff += days_diff * HOUR_PER_DAY*MIN_PER_HOUR*SEC_PER_MIN;
+
+    if (t_in.tm_hour >= t_base.tm_hour) {
+        time_diff += (t_in.tm_hour - t_base.tm_hour)*MIN_PER_HOUR*SEC_PER_MIN;
+    } else {
+        time_diff += (HOUR_PER_DAY+t_in.tm_hour-t_base.tm_hour)*MIN_PER_HOUR*SEC_PER_MIN;
+        time_diff -= HOUR_PER_DAY*MIN_PER_HOUR*SEC_PER_MIN;
+    }
+
+    if (t_in.tm_min >= t_base.tm_min) {
+        time_diff += (t_in.tm_min - t_base.tm_min)*SEC_PER_MIN;
+    } else {
+        time_diff += (MIN_PER_HOUR+t_in.tm_min - t_base.tm_min)*SEC_PER_MIN;
+        time_diff -= MIN_PER_HOUR*SEC_PER_MIN;
+    }
+
+    if (t_in.tm_sec >= t_base.tm_sec) {
+        time_diff += t_in.tm_sec - t_base.tm_sec;
+    } else {
+        time_diff += (SEC_PER_MIN+t_in.tm_sec - t_base.tm_sec);
+        time_diff -= SEC_PER_MIN;
+    }
+
+    return time_diff;
 }
 
 void Device::DRSDevice::ReadDate(std::ifstream* file, std::filesystem::path* path) {
@@ -484,6 +533,31 @@ void Device::DRSDevice::ReadDate(std::ifstream* file, std::filesystem::path* pat
         first_date_event_ = last_date_event_;
         is_first_date_ = true;
     }
+
+    if (usedParameters.date_time.has_value()) {
+        time_event_diff_ = time_event_diff_+EstimateTimeDifference(first_date_event_, last_date_event_);
+    }
+
+    // unit tests
+    // {
+    //     std::tm base_time;
+    //     base_time.tm_hour = 23;
+    //     base_time.tm_min = 50;
+    //     base_time.tm_sec = 20;
+    //     base_time.tm_mday = 25;
+    //     base_time.tm_mon = 7;
+    //     base_time.tm_year = 2026;
+
+    //     std::tm test_time;
+    //     test_time.tm_hour = 0;
+    //     test_time.tm_min = 10;
+    //     test_time.tm_sec = 10;
+    //     test_time.tm_mday = 26;
+    //     test_time.tm_mon = 7;
+    //     test_time.tm_year = 2026;
+
+    //     assert(EstimateTimeDifference(base_time, test_time) == 1190);
+    // }
 }
 
 void Device::DRSDevice::ReadPreAverageWaveform() {
