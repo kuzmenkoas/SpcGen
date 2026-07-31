@@ -218,16 +218,27 @@ void Parser::DigitizerConsoleParser::ReadConfig() {
 
         usedPar.baselineLimits = std::make_pair(min, max);
     }
-    if (usedPar.charge.has_value() || usedPar.amplitude.has_value()) {
-        std::cout << "Enter min value point for signal: ";
+    if (usedPar.charge.has_value()) {
+        std::cout << "Enter min value point for charge signal: ";
         int16_t min;
         std::cin >> min;
 
-        std::cout << "Enter max value point for signal: ";
+        std::cout << "Enter max value point for charge signal: ";
         int16_t max;
         std::cin >> max;
 
-        usedPar.signalRange = std::make_pair(min, max);
+        usedPar.chargeLimits = std::make_pair(min, max);
+    }
+    if (usedPar.amplitude.has_value()) {
+        std::cout << "Enter min value point for amplitude signal: ";
+        int16_t min;
+        std::cin >> min;
+
+        std::cout << "Enter max value point for amplitude signal: ";
+        int16_t max;
+        std::cin >> max;
+
+        usedPar.amplitudeLimits = std::make_pair(min, max);
     }
     if (usedPar.baseline.has_value() || usedPar.charge.has_value() || usedPar.amplitude.has_value()) {
         if (this->GetCutFlag()) {
