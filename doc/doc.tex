@@ -163,7 +163,8 @@ Config
 + cut 0.5
 + threshold -0.05
 + baseline 0 100
-+ range 101 221
++ charge_range 101 221
++ amplitude_range 101 221
 + wavelength 1000
 \end{lstlisting}
 
@@ -299,8 +300,10 @@ Enter parameters to use:
 Configure limits for signal processing
 Enter min value point for baseline: 0
 Enter max value point for baseline: 100
-Enter min value point for signal: 101
-Enter max value point for signal: 450
+Enter min value point for charge signal: 101
+Enter max value point for charge signal: 450
+Enter min value point for amplitude signal: 101
+Enter max value point for amplitude signal: 450
 \end{lstlisting}
 
 Далее вывдется текст с настройкой вида сигнала (идет вверх, или вниз).
@@ -406,8 +409,10 @@ Enter parameters to use:
 Configure limits for charge algorithm
 Enter min value point for baseline: 0
 Enter max value point for baseline: 100
-Enter min value point for signal: 101
-Enter max value point for signal: 450
+Enter min value point for charge signal: 101
+Enter max value point for charge signal: 450
+Enter min value point for amplitude signal: 101
+Enter max value point for amplitude signal: 450
 \end{lstlisting}
 
 Далее вывдется текст с настройкой вида сигнала (идет вверх, или вниз).
