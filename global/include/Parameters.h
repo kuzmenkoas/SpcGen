@@ -9,6 +9,7 @@
 #include "IHist.h"
 #include "IDate.h"
 #include <ctime>
+#include "Time.h"
 
 namespace Global {
     struct Parameters {
@@ -36,7 +37,7 @@ namespace Global {
         std::optional<uint32_t> scaler;
         std::optional<std::string> signal;
         std::optional<std::pair<int16_t, int16_t>> signalRange;
-        std::optional<std::tm> date_time;
+        std::optional<Time> date_time;
 
         // Digitizer PSD
         std::optional<int32_t> qShort;

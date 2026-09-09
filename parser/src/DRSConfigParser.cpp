@@ -1,5 +1,6 @@
 #include "DRSConfigParser.h"
 using namespace std::string_literals;
+#include "Time.h"
 
 Parser::DRSConfigParser::DRSConfigParser(std::filesystem::path path) : fPath(path) {
 }
@@ -70,7 +71,7 @@ void Parser::DRSConfigParser::ReadData(std::string key) {
                         if (ClearString(CurStr) == "waveform"s) usedPar.waveform = {DEFAULT_VALUE};
                         if (ClearString(CurStr) == "scaler"s) usedPar.scaler = DEFAULT_VALUE;
                         if (ClearString(CurStr) == "time"s) usedPar.time = DEFAULT_VALUE;
-                        if (ClearString(CurStr) == "date_time"s) usedPar.date_time = {std::tm{}};
+                        if (ClearString(CurStr) == "date_time"s) usedPar.date_time = {Global::Time{}};
                     } else break;
                 }
             }

@@ -1,4 +1,5 @@
 #include "DRSConsoleParser.h"
+#include "Time.h"
 
 Parser::DRSConsoleParser::DRSConsoleParser() {
 }
@@ -64,7 +65,7 @@ void Parser::DRSConsoleParser::ReadData() {
         if (tmp == std::to_string(f++)) usedPar.waveform = {DEFAULT_VALUE};
         if (tmp == std::to_string(f++)) usedPar.scaler = DEFAULT_VALUE;
         if (tmp == std::to_string(f++)) usedPar.time = DEFAULT_VALUE;
-        if (tmp == std::to_string(f++)) usedPar.date_time = {std::tm{}};
+        if (tmp == std::to_string(f++)) usedPar.date_time = {Global::Time{}};
     }
 }
 

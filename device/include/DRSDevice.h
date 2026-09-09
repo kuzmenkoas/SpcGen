@@ -6,6 +6,7 @@
 #include "TTree.h"
 #include "IDevice.h"
 #include <utility>
+#include "Time.h"
 
 namespace Device {
     struct DRSEvent {
@@ -55,11 +56,11 @@ namespace Device {
         std::ofstream fTxtFile;
 
         bool is_first_date_ = false;
-        std::tm first_date_event_;
-        std::tm last_date_event_;
+        Global::Time first_date_event_;
+        Global::Time last_date_event_;
         uint64_t time_event_diff_ = 0;
         TTree* fDateTimeTree = nullptr;
 
-        uint64_t EstimateTimeDifference(std::tm t_base, std::tm t_in);
+        uint64_t EstimateTimeDifference(Global::Time t_base, Global::Time t_in);
     };
 }

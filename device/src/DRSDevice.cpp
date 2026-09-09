@@ -450,17 +450,18 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
 
     // Output about date first and last event
     std::cout << "Event amount: " << eventCounter << std::endl;
-    std::cout << "First event date is: " << first_date_event_.tm_hour << ":" << first_date_event_.tm_min << ":" << first_date_event_.tm_sec <<
-        " " << first_date_event_.tm_mday << "." << first_date_event_.tm_mon << "." << first_date_event_.tm_year << std::endl;
+    std::cout << "First event date is: " << first_date_event_.hour << ":" << first_date_event_.min << ":" << first_date_event_.sec << ":" << first_date_event_.msec <<
+        " " << first_date_event_.mday << "." << first_date_event_.mon << "." << first_date_event_.year << std::endl;
 
-    std::cout << "Last event date is: " << last_date_event_.tm_hour << ":" << last_date_event_.tm_min << ":" << last_date_event_.tm_sec <<
-        " " << last_date_event_.tm_mday << "." << last_date_event_.tm_mon << "." << last_date_event_.tm_year << std::endl;
+    std::cout << "Last event date is: " << last_date_event_.hour << ":" << last_date_event_.min << ":" << last_date_event_.sec << ":" << last_date_event_.msec <<
+        " " << last_date_event_.mday << "." << last_date_event_.mon << "." << last_date_event_.year << std::endl;
 
-    std::cout << "Average frequency: " << eventCounter/static_cast<double>(time_event_diff_) << " Hz" << std::endl;
+    std::cout << "Average frequency: " << eventCounter/(static_cast<double>(time_event_diff_)/1000) << " Hz" << std::endl;
 }
 
-uint64_t Device::DRSDevice::EstimateTimeDifference(std::tm t_base, std::tm t_in) {
+uint64_t Device::DRSDevice::EstimateTimeDifference(Global::Time t_base, Global::Time t_in) {
     uint64_t time_diff = 0;
+    const int MSEC_PER_SEC = 1000;
     const int SEC_PER_MIN = 60;
     const int MIN_PER_HOUR = 60;
     const int HOUR_PER_DAY = 24;
@@ -468,31 +469,38 @@ uint64_t Device::DRSDevice::EstimateTimeDifference(std::tm t_base, std::tm t_in)
     const int DAY_PER_YEAR = 365;
     const int DAY_PER_MONTH = 30;
 
-    uint64_t days_diff = (t_in.tm_year - t_base.tm_year)*DAY_PER_YEAR + 
-        (t_in.tm_mon - t_base.tm_mon)*DAY_PER_MONTH + 
-        (t_in.tm_mday - t_base.tm_mday);
+    uint64_t days_diff = (t_in.year - t_base.year)*DAY_PER_YEAR + 
+        (t_in.mon - t_base.mon)*DAY_PER_MONTH + 
+        (t_in.mday - t_base.mday);
 
-    time_diff += days_diff * HOUR_PER_DAY*MIN_PER_HOUR*SEC_PER_MIN;
+    time_diff += days_diff * HOUR_PER_DAY*MIN_PER_HOUR*SEC_PER_MIN*MSEC_PER_SEC;
 
-    if (t_in.tm_hour >= t_base.tm_hour) {
-        time_diff += (t_in.tm_hour - t_base.tm_hour)*MIN_PER_HOUR*SEC_PER_MIN;
+    if (t_in.hour >= t_base.hour) {
+        time_diff += (t_in.hour - t_base.hour)*MIN_PER_HOUR*SEC_PER_MIN*MSEC_PER_SEC;
     } else {
-        time_diff += (HOUR_PER_DAY+t_in.tm_hour-t_base.tm_hour)*MIN_PER_HOUR*SEC_PER_MIN;
-        time_diff -= HOUR_PER_DAY*MIN_PER_HOUR*SEC_PER_MIN;
+        time_diff += (HOUR_PER_DAY+t_in.hour-t_base.hour)*MIN_PER_HOUR*SEC_PER_MIN*MSEC_PER_SEC;
+        time_diff -= HOUR_PER_DAY*MIN_PER_HOUR*SEC_PER_MIN*MSEC_PER_SEC;
     }
 
-    if (t_in.tm_min >= t_base.tm_min) {
-        time_diff += (t_in.tm_min - t_base.tm_min)*SEC_PER_MIN;
+    if (t_in.min >= t_base.min) {
+        time_diff += (t_in.min - t_base.min)*SEC_PER_MIN*MSEC_PER_SEC;
     } else {
-        time_diff += (MIN_PER_HOUR+t_in.tm_min - t_base.tm_min)*SEC_PER_MIN;
-        time_diff -= MIN_PER_HOUR*SEC_PER_MIN;
+        time_diff += (MIN_PER_HOUR+t_in.min - t_base.min)*SEC_PER_MIN*MSEC_PER_SEC;
+        time_diff -= MIN_PER_HOUR*SEC_PER_MIN*MSEC_PER_SEC;
     }
 
-    if (t_in.tm_sec >= t_base.tm_sec) {
-        time_diff += t_in.tm_sec - t_base.tm_sec;
+    if (t_in.sec >= t_base.sec) {
+        time_diff += t_in.sec - t_base.sec;
     } else {
-        time_diff += (SEC_PER_MIN+t_in.tm_sec - t_base.tm_sec);
-        time_diff -= SEC_PER_MIN;
+        time_diff += (SEC_PER_MIN*MSEC_PER_SEC+t_in.sec - t_base.sec);
+        time_diff -= SEC_PER_MIN*MSEC_PER_SEC;
+    }
+
+    if (t_in.msec >= t_base.msec) {
+        time_diff += t_in.sec - t_base.sec;
+    } else {
+        time_diff += (MSEC_PER_SEC+t_in.sec - t_base.sec);
+        time_diff -= MSEC_PER_SEC;
     }
 
     return time_diff;
@@ -504,30 +512,31 @@ void Device::DRSDevice::ReadDate(std::ifstream* file, std::filesystem::path* pat
     int16_t tt;
     file->read((char*) &tmp2, sizeof(tmp2));
     std::memcpy(&tt, &tmp2, sizeof(tt));
-    last_date_event_.tm_year = tt;
+    last_date_event_.year = tt;
     
     file->read((char*) &tmp2, sizeof(tmp2));
     std::memcpy(&tt, &tmp2, sizeof(tt));
-    last_date_event_.tm_mon = tt;
+    last_date_event_.mon = tt;
 
     file->read((char*) &tmp2, sizeof(tmp2));
     std::memcpy(&tt, &tmp2, sizeof(tt));
-    last_date_event_.tm_mday = tt;
+    last_date_event_.mday = tt;
 
     file->read((char*) &tmp2, sizeof(tmp2));
     std::memcpy(&tt, &tmp2, sizeof(tt));
-    last_date_event_.tm_hour = tt;
+    last_date_event_.hour = tt;
 
     file->read((char*) &tmp2, sizeof(tmp2));
     std::memcpy(&tt, &tmp2, sizeof(tt));
-    last_date_event_.tm_min = tt;
+    last_date_event_.min = tt;
 
     file->read((char*) &tmp2, sizeof(tmp2));
     std::memcpy(&tt, &tmp2, sizeof(tt));
-    last_date_event_.tm_sec = tt;
+    last_date_event_.sec = tt;
 
     file->read((char*) &tmp2, sizeof(tmp2));
     std::memcpy(&tt, &tmp2, sizeof(tt));
+    last_date_event_.msec = tt;
 
     if (!is_first_date_) {
         first_date_event_ = last_date_event_;
