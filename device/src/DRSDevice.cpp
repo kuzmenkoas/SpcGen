@@ -459,6 +459,7 @@ void Device::DRSDevice::ReadEventHeader(std::ifstream* file, std::filesystem::pa
     std::cout << "Average frequency: " << eventCounter/(static_cast<double>(time_event_diff_)/1000) << " Hz" << std::endl;
 }
 
+// returns in msec
 uint64_t Device::DRSDevice::EstimateTimeDifference(Global::Time t_base, Global::Time t_in) {
     uint64_t time_diff = 0;
     const int MSEC_PER_SEC = 1000;
@@ -492,17 +493,17 @@ uint64_t Device::DRSDevice::EstimateTimeDifference(Global::Time t_base, Global::
     if (t_in.sec >= t_base.sec) {
         time_diff += t_in.sec - t_base.sec;
     } else {
-        time_diff += (SEC_PER_MIN*MSEC_PER_SEC+t_in.sec - t_base.sec);
+        time_diff += (SEC_PER_MIN+t_in.sec - t_base.sec)*MSEC_PER_SEC;
         time_diff -= SEC_PER_MIN*MSEC_PER_SEC;
     }
 
     if (t_in.msec >= t_base.msec) {
-        time_diff += t_in.sec - t_base.sec;
+        time_diff += t_in.msec - t_base.msec;
     } else {
-        time_diff += (MSEC_PER_SEC+t_in.sec - t_base.sec);
+        time_diff += (MSEC_PER_SEC+t_in.msec - t_base.msec);
         time_diff -= MSEC_PER_SEC;
     }
-
+    
     return time_diff;
 }
 
@@ -549,23 +550,25 @@ void Device::DRSDevice::ReadDate(std::ifstream* file, std::filesystem::path* pat
 
     // unit tests
     // {
-    //     std::tm base_time;
-    //     base_time.tm_hour = 23;
-    //     base_time.tm_min = 50;
-    //     base_time.tm_sec = 20;
-    //     base_time.tm_mday = 25;
-    //     base_time.tm_mon = 7;
-    //     base_time.tm_year = 2026;
+    //     Global::Time base_time;
+    //     base_time.hour = 23;
+    //     base_time.min = 50;
+    //     base_time.sec = 20;
+    //     base_time.msec = 0;
+    //     base_time.mday = 25;
+    //     base_time.mon = 7;
+    //     base_time.year = 2026;
 
-    //     std::tm test_time;
-    //     test_time.tm_hour = 0;
-    //     test_time.tm_min = 10;
-    //     test_time.tm_sec = 10;
-    //     test_time.tm_mday = 26;
-    //     test_time.tm_mon = 7;
-    //     test_time.tm_year = 2026;
+    //     Global::Time test_time;
+    //     test_time.hour = 0;
+    //     test_time.min = 10;
+    //     test_time.sec = 10;
+    //     test_time.msec = 0;
+    //     test_time.mday = 26;
+    //     test_time.mon = 7;
+    //     test_time.year = 2026;
 
-    //     assert(EstimateTimeDifference(base_time, test_time) == 1190);
+    //     assert(EstimateTimeDifference(base_time, test_time) == 1190000);
     // }
 }
 
