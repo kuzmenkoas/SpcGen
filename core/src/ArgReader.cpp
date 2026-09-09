@@ -1,26 +1,26 @@
 #include "ArgReader.h"
-#include <iostream>
 #include <filesystem>
+#include <iostream>
 
 Core::ArgReader::ArgReader(int argc, char *argv[]) {
-        ParseThreads(argc, argv);
-        if (ParseDRSBinaryFile(argc, argv)) fDeviceType = Global::DeviceType::DRS;
-        else if (ParseDigitizerBinaryFile(argc, argv)) {
-            fDeviceType = Global::DeviceType::Digitizer;
-        }
-        ParseConfigFile(argc, argv);
-        ParseKeys(argc, argv);
+    ParseThreads(argc, argv);
+    if (ParseDRSBinaryFile(argc, argv))
+        fDeviceType = Global::DeviceType::DRS;
+    else if (ParseDigitizerBinaryFile(argc, argv)) {
+        fDeviceType = Global::DeviceType::Digitizer;
+    }
+    ParseConfigFile(argc, argv);
+    ParseKeys(argc, argv);
 }
 
-Core::ArgReader::~ArgReader() {
-}
+Core::ArgReader::~ArgReader() {}
 
 // Parse number of threads if exists in argument with key
 // input must be as -key+Int, key is threadKey (now j)
 void Core::ArgReader::ParseThreads(int argc, char *argv[]) {
     for (int i = 1; i < argc; i++) {
         std::string name = argv[i];
-        if ((name.substr(0,threadKey.size()) == threadKey) && (name.size() > threadKey.size())) {
+        if ((name.substr(0, threadKey.size()) == threadKey) && (name.size() > threadKey.size())) {
             try {
                 // fConfigurator->SetThreadNumber(std::stoi(name.substr(threadKey.size(), name.size())));
             } catch (...) {
@@ -35,8 +35,8 @@ bool Core::ArgReader::ParseDRSBinaryFile(int argc, char *argv[]) {
     bool is = false;
     for (int i = 1; i < argc; i++) {
         std::string name = argv[i];
-        if (name.size() > binaryDRSExtension.size()+1) {
-            if (name.substr(name.size()-binaryDRSExtension.size(), name.size()) == binaryDRSExtension) {
+        if (name.size() > binaryDRSExtension.size() + 1) {
+            if (name.substr(name.size() - binaryDRSExtension.size(), name.size()) == binaryDRSExtension) {
                 fBinaryPathVector.push_back(name);
                 SetDRSBinaryFileName(name);
                 is = true;
@@ -52,24 +52,25 @@ bool Core::ArgReader::ParseDigitizerBinaryFile(int argc, char *argv[]) {
     int counter = 0;
     for (int i = 1; i < argc; i++) {
         std::string name = argv[i];
-        if (name.size() > binaryDigitizerExtension.size()+1) {
-            if (name.substr(name.size()-binaryDigitizerExtension.size(), name.size()) == binaryDigitizerExtension) {
+        if (name.size() > binaryDigitizerExtension.size() + 1) {
+            if (name.substr(name.size() - binaryDigitizerExtension.size(), name.size()) == binaryDigitizerExtension) {
                 fBinaryPathVector.push_back(name);
-                std::call_once(initDigitizerFlag, [this, name](){SetDigitizerBinaryFileName(name);});
+                std::call_once(initDigitizerFlag, [this, name]() { SetDigitizerBinaryFileName(name); });
                 is = true;
                 counter++;
             }
         }
     }
-    if (counter == 2) fDigitizerTypes = {"PSD", "Waveform"};
+    if (counter == 2)
+        fDigitizerTypes = {"PSD", "Waveform"};
     return is;
 }
 
 void Core::ArgReader::ParseConfigFile(int argc, char *argv[]) {
     for (int i = 1; i < argc; i++) {
         std::string name = argv[i];
-        if (name.size() > (configExtension.size()+1)) {
-            if (name.substr(name.size()-configExtension.size(), name.size()) == configExtension) {
+        if (name.size() > (configExtension.size() + 1)) {
+            if (name.substr(name.size() - configExtension.size(), name.size()) == configExtension) {
                 fConfigPath = name;
                 break;
             }
@@ -79,13 +80,13 @@ void Core::ArgReader::ParseConfigFile(int argc, char *argv[]) {
 
 void Core::ArgReader::SetDRSBinaryFileName(std::string name) {
     name = GetBinaryFileName(name);
-    name = name.substr(0, name.size()-(binaryDRSExtension.size()+1));
+    name = name.substr(0, name.size() - (binaryDRSExtension.size() + 1));
     fFileName = name;
 }
 
 void Core::ArgReader::SetDigitizerBinaryFileName(std::string name) {
     name = GetBinaryFileName(name);
-    name = name.substr(0, name.size()-(binaryDigitizerExtension.size()+1));
+    name = name.substr(0, name.size() - (binaryDigitizerExtension.size() + 1));
     fFileName = name;
 }
 
@@ -94,22 +95,17 @@ std::string Core::ArgReader::GetBinaryFileName(std::string name) {
     return path.filename().string();
 }
 
-void Core::ArgReader::ParseCut(int argc, char *argv[]) {
-    isCut = ParserKeys(argc, argv, cutKey);
-}
+void Core::ArgReader::ParseCut(int argc, char *argv[]) { isCut = ParserKeys(argc, argv, cutKey); }
 
-void Core::ArgReader::ParseDebug(int argc, char *argv[]) {
-    isDebug = ParserKeys(argc, argv, debugKey);
-}
+void Core::ArgReader::ParseDebug(int argc, char *argv[]) { isDebug = ParserKeys(argc, argv, debugKey); }
 
-void Core::ArgReader::ParseThreshold(int argc, char *argv[]) {
-    isThreshold = ParserKeys(argc, argv, thresholdKey);
-}
+void Core::ArgReader::ParseThreshold(int argc, char *argv[]) { isThreshold = ParserKeys(argc, argv, thresholdKey); }
 
 bool Core::ArgReader::ParserKeys(int argc, char *argv[], std::string key) {
     for (int i = 0; i < argc; i++) {
         std::string name = argv[i];
-        if (name == key) return true;
+        if (name == key)
+            return true;
     }
     return false;
 }

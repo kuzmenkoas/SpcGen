@@ -3,9 +3,9 @@
 #include "IParser.h"
 
 namespace Parser {
-    class IDigitizerParser : public IParser {
-    public:
-        IDigitizerParser() {};
-        ~IDigitizerParser() {};
-    };
-}
+class IDigitizerParser : public IParser {
+public:
+    IDigitizerParser(){};
+    ~IDigitizerParser(){};
+};
+}  // namespace Parser

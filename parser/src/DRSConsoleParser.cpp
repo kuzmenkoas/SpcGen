@@ -1,18 +1,18 @@
 #include "DRSConsoleParser.h"
 #include "Time.h"
 
-Parser::DRSConsoleParser::DRSConsoleParser() {
-}
+Parser::DRSConsoleParser::DRSConsoleParser() {}
 
-Parser::DRSConsoleParser::~DRSConsoleParser() {
-}
+Parser::DRSConsoleParser::~DRSConsoleParser() {}
 
 void Parser::DRSConsoleParser::Start() {
     ReadWriter();
     ReadData();
     ReadConfig();
-    if (usedPar.amplitude.has_value()) ReadAmplitude();
-    if (usedPar.charge.has_value()) ReadCharge();
+    if (usedPar.amplitude.has_value())
+        ReadAmplitude();
+    if (usedPar.charge.has_value())
+        ReadCharge();
     ReadHistograms();
 
     SetUsedParameters(usedPar);
@@ -28,9 +28,12 @@ void Parser::DRSConsoleParser::ReadWriter() {
     i = 0;
     int val;
     std::cin >> val;
-    if (val == i++) SetUsedWriterVector({"Root"});
-    if (val == i++) SetUsedWriterVector({"Txt"});
-    if (val == i++) SetUsedWriterVector({"Root", "Txt"});
+    if (val == i++)
+        SetUsedWriterVector({"Root"});
+    if (val == i++)
+        SetUsedWriterVector({"Txt"});
+    if (val == i++)
+        SetUsedWriterVector({"Root", "Txt"});
 }
 
 void Parser::DRSConsoleParser::ReadData() {
@@ -59,13 +62,20 @@ void Parser::DRSConsoleParser::ReadData() {
             usedPar.scaler = DEFAULT_VALUE;
             usedPar.time = DEFAULT_VALUE;
         }
-        if (tmp == std::to_string(f++)) usedPar.baseline = DEFAULT_VALUE;
-        if (tmp == std::to_string(f++)) usedPar.charge = DEFAULT_VALUE;
-        if (tmp == std::to_string(f++)) usedPar.amplitude = DEFAULT_VALUE;
-        if (tmp == std::to_string(f++)) usedPar.waveform = {DEFAULT_VALUE};
-        if (tmp == std::to_string(f++)) usedPar.scaler = DEFAULT_VALUE;
-        if (tmp == std::to_string(f++)) usedPar.time = DEFAULT_VALUE;
-        if (tmp == std::to_string(f++)) usedPar.date_time = {Global::Time{}};
+        if (tmp == std::to_string(f++))
+            usedPar.baseline = DEFAULT_VALUE;
+        if (tmp == std::to_string(f++))
+            usedPar.charge = DEFAULT_VALUE;
+        if (tmp == std::to_string(f++))
+            usedPar.amplitude = DEFAULT_VALUE;
+        if (tmp == std::to_string(f++))
+            usedPar.waveform = {DEFAULT_VALUE};
+        if (tmp == std::to_string(f++))
+            usedPar.scaler = DEFAULT_VALUE;
+        if (tmp == std::to_string(f++))
+            usedPar.time = DEFAULT_VALUE;
+        if (tmp == std::to_string(f++))
+            usedPar.date_time = {Global::Time{}};
     }
 }
 
@@ -125,16 +135,20 @@ void Parser::DRSConsoleParser::ReadConfig() {
 }
 
 void Parser::DRSConsoleParser::ReadHistograms() {
-    if (usedPar.baseline.has_value() || usedPar.charge.has_value() || 
-        usedPar.amplitude.has_value() || usedPar.scaler.has_value() ) {
+    if (usedPar.baseline.has_value() || usedPar.charge.has_value() || usedPar.amplitude.has_value() ||
+        usedPar.scaler.has_value()) {
         std::cout << "\n";
         std::cout << "Choose parameters to configure histogram" << std::endl;
         int i = 0;
         std::cout << "(" << i++ << ") without" << "\n";
-        if (usedPar.baseline.has_value()) std::cout << "(" << i++ << ") baseline" << "\n";
-        if (usedPar.charge.has_value()) std::cout << "(" << i++ << ") charge" << "\n";
-        if (usedPar.amplitude.has_value()) std::cout << "(" << i++ << ") amplitude" << "\n";
-        if (usedPar.scaler.has_value()) std::cout << "(" << i++ << ") scaler" << "\n";
+        if (usedPar.baseline.has_value())
+            std::cout << "(" << i++ << ") baseline" << "\n";
+        if (usedPar.charge.has_value())
+            std::cout << "(" << i++ << ") charge" << "\n";
+        if (usedPar.amplitude.has_value())
+            std::cout << "(" << i++ << ") amplitude" << "\n";
+        if (usedPar.scaler.has_value())
+            std::cout << "(" << i++ << ") scaler" << "\n";
 
         std::string val;
         std::cin >> val;
@@ -142,11 +156,20 @@ void Parser::DRSConsoleParser::ReadHistograms() {
         for (int k = 0; k < val.length(); k++) {
             std::string tmp(1, val[k]);
             int f = 0;
-            if (tmp == std::to_string(f++)) break;
-            if (usedPar.baseline.has_value()) if (tmp == std::to_string(f++)) SetHistogramVector("baseline");
-            if (usedPar.charge.has_value())if (tmp == std::to_string(f++)) SetHistogramVector("charge");
-            if (usedPar.amplitude.has_value())if (tmp == std::to_string(f++)) SetHistogramVector("amplitude");
-            if (usedPar.scaler.has_value())if (tmp == std::to_string(f++)) SetHistogramVector("scaler");
+            if (tmp == std::to_string(f++))
+                break;
+            if (usedPar.baseline.has_value())
+                if (tmp == std::to_string(f++))
+                    SetHistogramVector("baseline");
+            if (usedPar.charge.has_value())
+                if (tmp == std::to_string(f++))
+                    SetHistogramVector("charge");
+            if (usedPar.amplitude.has_value())
+                if (tmp == std::to_string(f++))
+                    SetHistogramVector("amplitude");
+            if (usedPar.scaler.has_value())
+                if (tmp == std::to_string(f++))
+                    SetHistogramVector("scaler");
         }
     }
 }
@@ -168,7 +191,7 @@ void Parser::DRSConsoleParser::SetHistogramVector(std::string parameter) {
     if (!usedPar.hist.has_value()) {
         usedPar.hist = {Hist};
     } else {
-        auto& v = *usedPar.hist;
+        auto &v = *usedPar.hist;
         v.push_back(Hist);
     }
 }
@@ -183,8 +206,10 @@ void Parser::DRSConsoleParser::ReadAmplitude() {
     int val;
     std::cin >> val;
     i = 1;
-    if (val == i++) usedPar.signal = "up";
-    if (val == i++) usedPar.signal = "down";
+    if (val == i++)
+        usedPar.signal = "up";
+    if (val == i++)
+        usedPar.signal = "down";
 
     std::cout << "Enter factor for amplitude: ";
     double factor;

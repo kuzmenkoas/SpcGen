@@ -1,8 +1,8 @@
 #include <iostream>
 
-#include <memory>
-#include "ArgReader.h"
 #include "ApplicationManager.h"
+#include "ArgReader.h"
+#include <memory>
 
 #include <IDRSParser.h>
 

@@ -1,79 +1,93 @@
 #pragma once
 
-#include <memory>
-#include <vector>
-#include "TFile.h"
 #include "ParserFactory.h"
-#include <algorithm>
-#include "TSpectrumTransform.h"
+#include "TFile.h"
 #include "TGraph.h"
+#include "TSpectrumTransform.h"
 #include <TF1.h>
+#include <algorithm>
+#include <memory>
 #include <mutex>
+#include <vector>
 
 namespace Device {
-    class IDevice {
-    public:
-        IDevice();
-        ~IDevice();
+class IDevice {
+public:
+    IDevice();
+    ~IDevice();
 
-        void SetConfigPath(std::filesystem::path path) {fConfigPath = path;};
-        std::filesystem::path GetConfigPath() {return fConfigPath;};
+    void SetConfigPath(std::filesystem::path path) { fConfigPath = path; };
+    std::filesystem::path GetConfigPath() { return fConfigPath; };
 
-        void SetBinaryPathVector(std::vector<std::filesystem::path> pathVector) {fBinaryPathVector = pathVector;};
-        std::vector<std::filesystem::path> GetBinaryPathVector() {return fBinaryPathVector;};
-        
-        void SetFileName(std::string name) {fFileName = name;};
-        std::string GetFileName() {return fFileName;};
+    void SetBinaryPathVector(std::vector<std::filesystem::path> pathVector) { fBinaryPathVector = pathVector; };
+    std::vector<std::filesystem::path> GetBinaryPathVector() { return fBinaryPathVector; };
 
-        void SetDeviceType(Global::DeviceType aType) {fDeviceType = aType;};
+    void SetFileName(std::string name) { fFileName = name; };
+    std::string GetFileName() { return fFileName; };
 
-        std::shared_ptr<Parser::IParser> GetParser() {return fParser;};
-        void Prepare();
-        virtual void PrepareDevice() {};
-        virtual void Start() {};
+    void SetDeviceType(Global::DeviceType aType) { fDeviceType = aType; };
 
-        void SetDigitizerTypes(std::vector<std::string> aDigitizerTypes) {fDigitizerTypes = aDigitizerTypes;};
-        std::vector<std::string> GetDigitizerTypes() {return fDigitizerTypes;};
+    std::shared_ptr<Parser::IParser> GetParser() { return fParser; };
+    void Prepare();
+    virtual void PrepareDevice() {};
+    virtual void Start() {};
 
-        TFile* fRootFile = nullptr;
+    void SetDigitizerTypes(std::vector<std::string> aDigitizerTypes) { fDigitizerTypes = aDigitizerTypes; };
+    std::vector<std::string> GetDigitizerTypes() { return fDigitizerTypes; };
 
-        void SetIsCut(bool val) {bCut = val;};
-        bool GetIsCut() {return bCut;};
-        void SetIsDebug(bool val) {bDebug = val;};
-        bool GetIsDebug() {return bDebug;};
-        void SetIsThreshold(bool val) {bThreshold = val;};
-        bool GetIsThreshold() {return bThreshold;};
+    TFile *fRootFile = nullptr;
 
-        template<typename T> std::vector<double> NormalizeWaveform(std::vector<T> waveform);
-        template<typename T> std::vector<double> CCF(std::vector<T> w1, std::vector<T> w2);
-        template<typename T> double TemplateCalculateAmplitude(std::vector<T> eventWaveform, double baseline);
-        template<typename T> double TemplateCalculateBaseline(std::vector<T> eventWaveform);
-        template<typename T> double TemplateCalculateCharge(std::vector<T> eventWaveform, double baseline);
-        template<typename T> bool ThresholdSignalFilter(std::vector<T> eventWaveform, double baseline);
-        template<typename T1, typename T2> bool CCFSignalFilter(std::vector<T1> eventWaveform, std::vector<T2> averageWaveform);
-        template<typename T1, typename T2> bool SignalFilter(std::vector<T1> eventWaveform, std::vector<T2> averageWaveform, double baseline);
-        template<typename T> void TemplateCalculateWaveform(std::vector<T> eventWaveform, std::vector<double>* averageWaveform, size_t channel=0);
-        void DefineSignalDirection(std::vector<double> averageWaveform);
-        double MaxCCF(std::vector<double> ccfvector);
-    private:
-        template<typename T> void VectorLengthCorrect(std::vector<T>& eventWaveform);
-        template<typename T> void TemplateInitializeSumWaveform(std::vector<T> eventWaveform, std::vector<double>* averageWaveform, size_t channel=0);
-        void ConfigureRoot();
-        void ConfigureTxt();
-        std::filesystem::path fConfigPath;
-        std::vector<std::filesystem::path> fBinaryPathVector{};
-        std::shared_ptr<Parser::IParser> fParser = nullptr;
-        std::string fFileName;
-        Global::DeviceType fDeviceType;
-        std::vector<std::string> fDigitizerTypes = {};
+    void SetIsCut(bool val) { bCut = val; };
+    bool GetIsCut() { return bCut; };
+    void SetIsDebug(bool val) { bDebug = val; };
+    bool GetIsDebug() { return bDebug; };
+    void SetIsThreshold(bool val) { bThreshold = val; };
+    bool GetIsThreshold() { return bThreshold; };
 
-        bool bCut = false;
-        bool bDebug = false;
-        bool bThreshold = false;
+    template <typename T>
+    std::vector<double> NormalizeWaveform(std::vector<T> waveform);
+    template <typename T>
+    std::vector<double> CCF(std::vector<T> w1, std::vector<T> w2);
+    template <typename T>
+    double TemplateCalculateAmplitude(std::vector<T> eventWaveform, double baseline);
+    template <typename T>
+    double TemplateCalculateBaseline(std::vector<T> eventWaveform);
+    template <typename T>
+    double TemplateCalculateCharge(std::vector<T> eventWaveform, double baseline);
+    template <typename T>
+    bool ThresholdSignalFilter(std::vector<T> eventWaveform, double baseline);
+    template <typename T1, typename T2>
+    bool CCFSignalFilter(std::vector<T1> eventWaveform, std::vector<T2> averageWaveform);
+    template <typename T1, typename T2>
+    bool SignalFilter(std::vector<T1> eventWaveform, std::vector<T2> averageWaveform, double baseline);
+    template <typename T>
+    void TemplateCalculateWaveform(std::vector<T> eventWaveform, std::vector<double> *averageWaveform,
+                                   size_t channel = 0);
+    void DefineSignalDirection(std::vector<double> averageWaveform);
+    double MaxCCF(std::vector<double> ccfvector);
 
-        mutable std::vector<std::once_flag> initWaveFlag{4};
-        std::vector<bool> isInitialized = {false, false, false, false};
-    };
-}
+private:
+    template <typename T>
+    void VectorLengthCorrect(std::vector<T> &eventWaveform);
+    template <typename T>
+    void TemplateInitializeSumWaveform(std::vector<T> eventWaveform, std::vector<double> *averageWaveform,
+                                       size_t channel = 0);
+    void ConfigureRoot();
+    void ConfigureTxt();
+    std::filesystem::path fConfigPath;
+    std::vector<std::filesystem::path> fBinaryPathVector{};
+    std::shared_ptr<Parser::IParser> fParser = nullptr;
+    std::string fFileName;
+    Global::DeviceType fDeviceType;
+    std::vector<std::string> fDigitizerTypes = {};
+
+    bool bCut = false;
+    bool bDebug = false;
+    bool bThreshold = false;
+
+    mutable std::vector<std::once_flag> initWaveFlag{4};
+    std::vector<bool> isInitialized = {false, false, false, false};
+};
+}  // namespace Device
 
 #include "IDevice.icpp"

@@ -1,8 +1,5 @@
 #pragma once
 
 namespace Global {
-    enum DeviceType {
-        DRS,
-        Digitizer
-    };
+enum DeviceType { DRS, Digitizer };
 }

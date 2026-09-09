@@ -1,66 +1,67 @@
 #pragma once
 
-#include <mutex>
-#include <fstream>
+#include "IDevice.h"
 #include "TH1.h"
 #include "TTree.h"
-#include "IDevice.h"
-#include <utility>
 #include "Time.h"
+#include <fstream>
+#include <mutex>
+#include <utility>
 
 namespace Device {
-    struct DRSEvent {
-        int32_t time;
-        double baseline;
-        double charge;
-        double amplitude;
-        int16_t range;
-        int16_t trigger;
-        uint32_t scaler;
-        std::vector<double> waveform;
-    };
+struct DRSEvent {
+    int32_t time;
+    double baseline;
+    double charge;
+    double amplitude;
+    int16_t range;
+    int16_t trigger;
+    uint32_t scaler;
+    std::vector<double> waveform;
+};
 
-    class DRSDevice : public IDevice {
-    public:
-        DRSDevice();
-        ~DRSDevice();
+class DRSDevice : public IDevice {
+public:
+    DRSDevice();
+    ~DRSDevice();
 
-        void PrepareDevice() final;
-        void Start() final;
-    private:
-        const char fFileHeader[4] = {'D', 'R', 'S', ' '};
-        const char fTimeHeader[4] = {'T', 'I', 'M', 'E'};
-        const char fBoardNumberHeader[4] = {'B', '#', ' ', ' '};
-        const char fChannelHeader[4] = {'C', '0', '0', ' '};
-        const char fEventHeader[4] = {'E', 'H', 'D', 'R'};
+    void PrepareDevice() final;
+    void Start() final;
 
-        bool fChannelMap[4] ={0, 0, 0, 0};
-        TTree* fChannelEventsTreeMap[4] = {};
-        TTree* fChannelTimeTreeMap[4] = {};
-        std::vector<TH1*> fChannelHist[4] = {};
-        TDirectory* fDirectoryMap[4] = {};
+private:
+    const char fFileHeader[4] = {'D', 'R', 'S', ' '};
+    const char fTimeHeader[4] = {'T', 'I', 'M', 'E'};
+    const char fBoardNumberHeader[4] = {'B', '#', ' ', ' '};
+    const char fChannelHeader[4] = {'C', '0', '0', ' '};
+    const char fEventHeader[4] = {'E', 'H', 'D', 'R'};
 
-        void ConfigureRoot();
-        void ConfigureTxt();
-        void WriteTxtEvent();
-        void DefineChannels();
-        void ReadChannels(std::ifstream* file, std::filesystem::path* path);
-        void ReadFileHeader(std::ifstream* file, std::filesystem::path* path, bool save);
-        void ReadTimeHeader(std::ifstream* file, std::filesystem::path* path, bool save);
-        void ReadEventHeader(std::ifstream* file, std::filesystem::path* path, bool save);
-        void ReadDate(std::ifstream* file, std::filesystem::path* path);
+    bool fChannelMap[4] = {0, 0, 0, 0};
+    TTree *fChannelEventsTreeMap[4] = {};
+    TTree *fChannelTimeTreeMap[4] = {};
+    std::vector<TH1 *> fChannelHist[4] = {};
+    TDirectory *fDirectoryMap[4] = {};
 
-        void ReadPreAverageWaveform();
+    void ConfigureRoot();
+    void ConfigureTxt();
+    void WriteTxtEvent();
+    void DefineChannels();
+    void ReadChannels(std::ifstream *file, std::filesystem::path *path);
+    void ReadFileHeader(std::ifstream *file, std::filesystem::path *path, bool save);
+    void ReadTimeHeader(std::ifstream *file, std::filesystem::path *path, bool save);
+    void ReadEventHeader(std::ifstream *file, std::filesystem::path *path, bool save);
+    void ReadDate(std::ifstream *file, std::filesystem::path *path);
 
-        std::vector<Device::DRSEvent> fEvent{};
-        std::ofstream fTxtFile;
+    void ReadPreAverageWaveform();
 
-        bool is_first_date_ = false;
-        Global::Time first_date_event_;
-        Global::Time last_date_event_;
-        uint64_t time_event_diff_ = 0;
-        TTree* fDateTimeTree = nullptr;
+    std::vector<Device::DRSEvent> fEvent{};
+    std::ofstream fTxtFile;
 
-        uint64_t EstimateTimeDifference(Global::Time t_base, Global::Time t_in);
-    };
-}
+    bool is_first_date_ = false;
+    Global::Time first_date_event_;
+    Global::Time last_date_event_;
+    uint64_t time_event_diff_ = 0;
+    TTree *fDateTimeTree = nullptr;
+
+    uint64_t EstimateTimeDifference(Global::Time t_base, Global::Time t_in);
+};
+}  // namespace Device

@@ -3,37 +3,43 @@
 #include <TF1.h>
 #include <algorithm>
 
-Device::DigitizerDevice::DigitizerDevice() {
-}
+Device::DigitizerDevice::DigitizerDevice() {}
 
-Device::DigitizerDevice::~DigitizerDevice() {
-}
+Device::DigitizerDevice::~DigitizerDevice() {}
 
 void Device::DigitizerDevice::PrepareDevice() {
     usedParameters = GetParser()->GetUsedParameters();
     for (std::string writer : GetParser()->GetUsedWriterVector()) {
-        if (writer == "Root") ConfigureRoot();
-        if (writer == "Txt") ConfigureTxt();
+        if (writer == "Root")
+            ConfigureRoot();
+        if (writer == "Txt")
+            ConfigureTxt();
     }
 }
 
 void Device::DigitizerDevice::Start() {
     int i = 0;
-    if (GetDigitizerTypes().size() == 2) PreProcessWaveform(GetBinaryPathVector());
+    if (GetDigitizerTypes().size() == 2)
+        PreProcessWaveform(GetBinaryPathVector());
     for (std::string file : GetDigitizerTypes()) {
-        if (file == "PSD") ProcessPSD(GetBinaryPathVector()[i++]);
+        if (file == "PSD")
+            ProcessPSD(GetBinaryPathVector()[i++]);
         if (file == "Waveform") {
-            if (this->GetIsCut()) ProcessWaveform(GetBinaryPathVector()[i], false);
+            if (this->GetIsCut())
+                ProcessWaveform(GetBinaryPathVector()[i], false);
             ProcessWaveform(GetBinaryPathVector()[i++], true);
         }
     }
 
     for (std::string writer : GetParser()->GetUsedWriterVector()) {
-        if (writer == "Root") fRootFile->Write();
+        if (writer == "Root")
+            fRootFile->Write();
         if (writer == "Txt") {
             for (std::string file : GetDigitizerTypes()) {
-                if (file == "PSD") fTxtFilePSD.close();
-                if (file == "Waveform") fTxtFileWaveform.close();
+                if (file == "PSD")
+                    fTxtFilePSD.close();
+                if (file == "Waveform")
+                    fTxtFileWaveform.close();
             }
         }
     }
@@ -43,37 +49,55 @@ void Device::DigitizerDevice::PreProcessWaveform(std::vector<std::filesystem::pa
     // define wavelength by file size
     uint32_t psdFileSize = std::filesystem::file_size(pathVector[0].string());
     uint32_t waveformFileSize = std::filesystem::file_size(pathVector[1].string());
-    int rubbishBytes = 2+2*CountUsedParameters();
+    int rubbishBytes = 2 + 2 * CountUsedParameters();
     int dataBytes = CountUsedParametersBytes();
-    usedParameters.wavelength = waveformFileSize/(psdFileSize/(dataBytes+rubbishBytes))/2;
+    usedParameters.wavelength = waveformFileSize / (psdFileSize / (dataBytes + rubbishBytes)) / 2;
 }
 
 int Device::DigitizerDevice::CountUsedParameters() {
     int i = 0;
-    if (usedParameters.qShort.has_value()) i++;
-    if (usedParameters.qLong.has_value()) i++;
-    if (usedParameters.cfd_y1.has_value()) i++;
-    if (usedParameters.cfd_y2.has_value()) i++;
-    if (usedParameters.baselinePSD.has_value()) i++;
-    if (usedParameters.height.has_value()) i++;
-    if (usedParameters.eventCounter.has_value()) i++;
-    if (usedParameters.eventCounterPSD.has_value()) i++;
-    if (usedParameters.psdValue.has_value()) i++;
+    if (usedParameters.qShort.has_value())
+        i++;
+    if (usedParameters.qLong.has_value())
+        i++;
+    if (usedParameters.cfd_y1.has_value())
+        i++;
+    if (usedParameters.cfd_y2.has_value())
+        i++;
+    if (usedParameters.baselinePSD.has_value())
+        i++;
+    if (usedParameters.height.has_value())
+        i++;
+    if (usedParameters.eventCounter.has_value())
+        i++;
+    if (usedParameters.eventCounterPSD.has_value())
+        i++;
+    if (usedParameters.psdValue.has_value())
+        i++;
 
     return i;
 }
 
 int Device::DigitizerDevice::CountUsedParametersBytes() {
     int i = 0;
-    if (usedParameters.qShort.has_value()) i += sizeof(fEvent.qShort);
-    if (usedParameters.qLong.has_value()) i += sizeof(fEvent.qLong);
-    if (usedParameters.cfd_y1.has_value()) i += sizeof(fEvent.cfd_y1);
-    if (usedParameters.cfd_y2.has_value()) i += sizeof(fEvent.cfd_y2);
-    if (usedParameters.baselinePSD.has_value()) i += sizeof(fEvent.baselinePSD);
-    if (usedParameters.height.has_value()) i += sizeof(fEvent.height);
-    if (usedParameters.eventCounter.has_value()) i += sizeof(fEvent.eventCounter);
-    if (usedParameters.eventCounterPSD.has_value()) i += sizeof(fEvent.eventCounterPSD);
-    if (usedParameters.psdValue.has_value()) i += sizeof(fEvent.psdValue);
+    if (usedParameters.qShort.has_value())
+        i += sizeof(fEvent.qShort);
+    if (usedParameters.qLong.has_value())
+        i += sizeof(fEvent.qLong);
+    if (usedParameters.cfd_y1.has_value())
+        i += sizeof(fEvent.cfd_y1);
+    if (usedParameters.cfd_y2.has_value())
+        i += sizeof(fEvent.cfd_y2);
+    if (usedParameters.baselinePSD.has_value())
+        i += sizeof(fEvent.baselinePSD);
+    if (usedParameters.height.has_value())
+        i += sizeof(fEvent.height);
+    if (usedParameters.eventCounter.has_value())
+        i += sizeof(fEvent.eventCounter);
+    if (usedParameters.eventCounterPSD.has_value())
+        i += sizeof(fEvent.eventCounterPSD);
+    if (usedParameters.psdValue.has_value())
+        i += sizeof(fEvent.psdValue);
 
     return i;
 }
@@ -86,41 +110,62 @@ void Device::DigitizerDevice::ProcessPSD(std::filesystem::path path) {
     int nEvents = 0;
     while (true) {
         // Unused bytes (read and forget)
-        const int id = 2+2*parNumber;
-        char* tmp = new char[id];
+        const int id = 2 + 2 * parNumber;
+        char *tmp = new char[id];
         file.read(tmp, id);
         // Read a parameter to value (struct)
-        // if saved parameter order has changes - change it there also 
-        if (usedParameters.qShort.has_value()) file.read(reinterpret_cast<char*>(&fEvent.qShort), sizeof(fEvent.qShort));
-        if (usedParameters.qLong.has_value()) file.read(reinterpret_cast<char*>(&fEvent.qLong), sizeof(fEvent.qLong));
-        if (usedParameters.cfd_y1.has_value()) file.read(reinterpret_cast<char*>(&fEvent.cfd_y1), sizeof(fEvent.cfd_y1));
-        if (usedParameters.cfd_y2.has_value()) file.read(reinterpret_cast<char*>(&fEvent.cfd_y2), sizeof(fEvent.cfd_y2));
-        if (usedParameters.baselinePSD.has_value()) file.read(reinterpret_cast<char*>(&fEvent.baselinePSD), sizeof(fEvent.baselinePSD));
-        if (usedParameters.height.has_value()) file.read(reinterpret_cast<char*>(&fEvent.height), sizeof(fEvent.height));
-        if (usedParameters.eventCounter.has_value()) file.read(reinterpret_cast<char*>(&fEvent.eventCounter), sizeof(fEvent.eventCounter));
-        if (usedParameters.eventCounterPSD.has_value()) file.read(reinterpret_cast<char*>(&fEvent.eventCounterPSD), sizeof(fEvent.eventCounterPSD));
-        if (usedParameters.psdValue.has_value()) file.read(reinterpret_cast<char*>(&fEvent.psdValue), sizeof(fEvent.psdValue));
-        if (file.eof()) break;
+        // if saved parameter order has changes - change it there also
+        if (usedParameters.qShort.has_value())
+            file.read(reinterpret_cast<char *>(&fEvent.qShort), sizeof(fEvent.qShort));
+        if (usedParameters.qLong.has_value())
+            file.read(reinterpret_cast<char *>(&fEvent.qLong), sizeof(fEvent.qLong));
+        if (usedParameters.cfd_y1.has_value())
+            file.read(reinterpret_cast<char *>(&fEvent.cfd_y1), sizeof(fEvent.cfd_y1));
+        if (usedParameters.cfd_y2.has_value())
+            file.read(reinterpret_cast<char *>(&fEvent.cfd_y2), sizeof(fEvent.cfd_y2));
+        if (usedParameters.baselinePSD.has_value())
+            file.read(reinterpret_cast<char *>(&fEvent.baselinePSD), sizeof(fEvent.baselinePSD));
+        if (usedParameters.height.has_value())
+            file.read(reinterpret_cast<char *>(&fEvent.height), sizeof(fEvent.height));
+        if (usedParameters.eventCounter.has_value())
+            file.read(reinterpret_cast<char *>(&fEvent.eventCounter), sizeof(fEvent.eventCounter));
+        if (usedParameters.eventCounterPSD.has_value())
+            file.read(reinterpret_cast<char *>(&fEvent.eventCounterPSD), sizeof(fEvent.eventCounterPSD));
+        if (usedParameters.psdValue.has_value())
+            file.read(reinterpret_cast<char *>(&fEvent.psdValue), sizeof(fEvent.psdValue));
+        if (file.eof())
+            break;
 
         nEvents++;
         for (std::string writer : GetParser()->GetUsedWriterVector()) {
-            if (writer == "Root") fTreePSD->Fill();
-            if (writer == "Txt") WriteTxtEventPSD();
+            if (writer == "Root")
+                fTreePSD->Fill();
+            if (writer == "Txt")
+                WriteTxtEventPSD();
         }
 
         if (usedParameters.hist.has_value()) {
-            auto& hists = *usedParameters.hist;
+            auto &hists = *usedParameters.hist;
             int iHist = 0;
             for (size_t i = 0; i < size(hists); i++) {
-                if (hists[i].parameter == "qShort" && hists[i].file == "PSD") fHist[i]->Fill(fEvent.qShort);
-                if (hists[i].parameter == "qLong" && hists[i].file == "PSD") fHist[i]->Fill(fEvent.qLong);
-                if (hists[i].parameter == "cfd_y1" && hists[i].file == "PSD") fHist[i]->Fill(fEvent.cfd_y1);
-                if (hists[i].parameter == "cfd_y2" && hists[i].file == "PSD") fHist[i]->Fill(fEvent.cfd_y2);
-                if (hists[i].parameter == "baseline" && hists[i].file == "PSD") fHist[i]->Fill(fEvent.baselinePSD);
-                if (hists[i].parameter == "height" && hists[i].file == "PSD") fHist[i]->Fill(fEvent.height);
-                if (hists[i].parameter == "eventCounter" && hists[i].file == "PSD") fHist[i]->Fill(fEvent.eventCounter);
-                if (hists[i].parameter == "eventCounterPSD" && hists[i].file == "PSD") fHist[i]->Fill(fEvent.eventCounterPSD);
-                if (hists[i].parameter == "psdValue" && hists[i].file == "PSD") fHist[i]->Fill(fEvent.psdValue);
+                if (hists[i].parameter == "qShort" && hists[i].file == "PSD")
+                    fHist[i]->Fill(fEvent.qShort);
+                if (hists[i].parameter == "qLong" && hists[i].file == "PSD")
+                    fHist[i]->Fill(fEvent.qLong);
+                if (hists[i].parameter == "cfd_y1" && hists[i].file == "PSD")
+                    fHist[i]->Fill(fEvent.cfd_y1);
+                if (hists[i].parameter == "cfd_y2" && hists[i].file == "PSD")
+                    fHist[i]->Fill(fEvent.cfd_y2);
+                if (hists[i].parameter == "baseline" && hists[i].file == "PSD")
+                    fHist[i]->Fill(fEvent.baselinePSD);
+                if (hists[i].parameter == "height" && hists[i].file == "PSD")
+                    fHist[i]->Fill(fEvent.height);
+                if (hists[i].parameter == "eventCounter" && hists[i].file == "PSD")
+                    fHist[i]->Fill(fEvent.eventCounter);
+                if (hists[i].parameter == "eventCounterPSD" && hists[i].file == "PSD")
+                    fHist[i]->Fill(fEvent.eventCounterPSD);
+                if (hists[i].parameter == "psdValue" && hists[i].file == "PSD")
+                    fHist[i]->Fill(fEvent.psdValue);
             }
         }
     }
@@ -137,28 +182,38 @@ void Device::DigitizerDevice::ProcessWaveform(std::filesystem::path path, bool s
         std::vector<int16_t> eventWaveform;
         for (int i = 0; i < usedParameters.wavelength.value(); i++) {
             int16_t wave;
-            file.read(reinterpret_cast<char*>(&wave), sizeof(wave));
+            file.read(reinterpret_cast<char *>(&wave), sizeof(wave));
             eventWaveform.push_back(wave);
         }
-        if (file.eof()) break;
-        if ((usedParameters.charge.has_value() || usedParameters.baseline.has_value()) && save) fEvent.baseline = TemplateCalculateBaseline(eventWaveform);
-        if ((usedParameters.charge.has_value()) && save) fEvent.charge = TemplateCalculateCharge(eventWaveform, fEvent.baseline);
-        if ((usedParameters.amplitude.has_value()) && save) fEvent.amplitude = TemplateCalculateAmplitude(eventWaveform, fEvent.baseline);
-        if ((!this->GetIsCut()) || ((this->GetIsCut()) && (!save))) TemplateCalculateWaveform(eventWaveform, &(fEvent.waveform));
+        if (file.eof())
+            break;
+        if ((usedParameters.charge.has_value() || usedParameters.baseline.has_value()) && save)
+            fEvent.baseline = TemplateCalculateBaseline(eventWaveform);
+        if ((usedParameters.charge.has_value()) && save)
+            fEvent.charge = TemplateCalculateCharge(eventWaveform, fEvent.baseline);
+        if ((usedParameters.amplitude.has_value()) && save)
+            fEvent.amplitude = TemplateCalculateAmplitude(eventWaveform, fEvent.baseline);
+        if ((!this->GetIsCut()) || ((this->GetIsCut()) && (!save)))
+            TemplateCalculateWaveform(eventWaveform, &(fEvent.waveform));
 
         if (save && SignalFilter(eventWaveform, fEvent.waveform, fEvent.baseline)) {
             for (std::string writer : GetParser()->GetUsedWriterVector()) {
-                if (writer == "Root") fTreeWaveform->Fill();
-                if (writer == "Txt") WriteTxtEventWaveform();
+                if (writer == "Root")
+                    fTreeWaveform->Fill();
+                if (writer == "Txt")
+                    WriteTxtEventWaveform();
             }
-        
+
             if (usedParameters.hist.has_value()) {
-                auto& hists = *usedParameters.hist;
+                auto &hists = *usedParameters.hist;
                 int iHist = 0;
                 for (size_t i = 0; i < size(hists); i++) {
-                    if (hists[i].parameter == "baseline" && hists[i].file == "Waveform") fHist[i]->Fill(fEvent.baseline);
-                    if (hists[i].parameter == "charge" && hists[i].file == "Waveform") fHist[i]->Fill(fEvent.charge);
-                    if (hists[i].parameter == "amplitude" && hists[i].file == "Waveform") fHist[i]->Fill(fEvent.amplitude);
+                    if (hists[i].parameter == "baseline" && hists[i].file == "Waveform")
+                        fHist[i]->Fill(fEvent.baseline);
+                    if (hists[i].parameter == "charge" && hists[i].file == "Waveform")
+                        fHist[i]->Fill(fEvent.charge);
+                    if (hists[i].parameter == "amplitude" && hists[i].file == "Waveform")
+                        fHist[i]->Fill(fEvent.amplitude);
                 }
             }
         }
@@ -166,10 +221,10 @@ void Device::DigitizerDevice::ProcessWaveform(std::filesystem::path path, bool s
     }
 
     if (save) {
-        TGraph* gr = new TGraph();
+        TGraph *gr = new TGraph();
         int counter = 0;
         for (double event : fEvent.waveform) {
-            gr->AddPoint(counter++, event/eventCounter);
+            gr->AddPoint(counter++, event / eventCounter);
         }
         gr->Write("waveform");
     }
@@ -180,88 +235,123 @@ void Device::DigitizerDevice::ProcessWaveform(std::filesystem::path path, bool s
 void Device::DigitizerDevice::ConfigureRoot() {
     // 1 channel
     // PSD
-    if (usedParameters.qShort.has_value() || usedParameters.qLong.has_value() ||
-        usedParameters.cfd_y1.has_value() || usedParameters.cfd_y2.has_value() ||
-        usedParameters.baselinePSD.has_value() || usedParameters.height.has_value() ||
-        usedParameters.eventCounter.has_value() || usedParameters.eventCounterPSD.has_value() ||
-        usedParameters.psdValue.has_value()) {
-            fTreePSD = new TTree("PSD", "PSD");
-            
-            if (usedParameters.qShort.has_value()) fTreePSD->Branch("qShort", &fEvent.qShort);
-            if (usedParameters.qLong.has_value()) fTreePSD->Branch("qLong", &fEvent.qLong);
-            if (usedParameters.cfd_y1.has_value()) fTreePSD->Branch("cfd_y1", &fEvent.cfd_y1);
-            if (usedParameters.cfd_y2.has_value()) fTreePSD->Branch("cfd_y2", &fEvent.cfd_y2);
-            if (usedParameters.baselinePSD.has_value()) fTreePSD->Branch("baseline", &fEvent.baselinePSD);
-            if (usedParameters.height.has_value()) fTreePSD->Branch("height", &fEvent.height);
-            if (usedParameters.eventCounter.has_value()) fTreePSD->Branch("eventCounter", &fEvent.eventCounter);
-            if (usedParameters.eventCounterPSD.has_value()) fTreePSD->Branch("eventCounterPSD", &fEvent.eventCounterPSD);
-            if (usedParameters.psdValue.has_value()) fTreePSD->Branch("psdValue", &fEvent.psdValue);
+    if (usedParameters.qShort.has_value() || usedParameters.qLong.has_value() || usedParameters.cfd_y1.has_value() ||
+        usedParameters.cfd_y2.has_value() || usedParameters.baselinePSD.has_value() ||
+        usedParameters.height.has_value() || usedParameters.eventCounter.has_value() ||
+        usedParameters.eventCounterPSD.has_value() || usedParameters.psdValue.has_value()) {
+        fTreePSD = new TTree("PSD", "PSD");
+
+        if (usedParameters.qShort.has_value())
+            fTreePSD->Branch("qShort", &fEvent.qShort);
+        if (usedParameters.qLong.has_value())
+            fTreePSD->Branch("qLong", &fEvent.qLong);
+        if (usedParameters.cfd_y1.has_value())
+            fTreePSD->Branch("cfd_y1", &fEvent.cfd_y1);
+        if (usedParameters.cfd_y2.has_value())
+            fTreePSD->Branch("cfd_y2", &fEvent.cfd_y2);
+        if (usedParameters.baselinePSD.has_value())
+            fTreePSD->Branch("baseline", &fEvent.baselinePSD);
+        if (usedParameters.height.has_value())
+            fTreePSD->Branch("height", &fEvent.height);
+        if (usedParameters.eventCounter.has_value())
+            fTreePSD->Branch("eventCounter", &fEvent.eventCounter);
+        if (usedParameters.eventCounterPSD.has_value())
+            fTreePSD->Branch("eventCounterPSD", &fEvent.eventCounterPSD);
+        if (usedParameters.psdValue.has_value())
+            fTreePSD->Branch("psdValue", &fEvent.psdValue);
     }
 
-    if (usedParameters.baseline.has_value() || usedParameters.charge.has_value() || usedParameters.amplitude.has_value()) {
+    if (usedParameters.baseline.has_value() || usedParameters.charge.has_value() ||
+        usedParameters.amplitude.has_value()) {
         fTreeWaveform = new TTree("Waveform", "Waveform");
-        if (usedParameters.baseline.has_value()) fTreeWaveform->Branch("baseline", &fEvent.baseline);
-        if (usedParameters.charge.has_value()) fTreeWaveform->Branch("charge", &fEvent.charge);
-        if (usedParameters.amplitude.has_value()) fTreeWaveform->Branch("amplitude", &fEvent.amplitude);
+        if (usedParameters.baseline.has_value())
+            fTreeWaveform->Branch("baseline", &fEvent.baseline);
+        if (usedParameters.charge.has_value())
+            fTreeWaveform->Branch("charge", &fEvent.charge);
+        if (usedParameters.amplitude.has_value())
+            fTreeWaveform->Branch("amplitude", &fEvent.amplitude);
     }
 
     if (usedParameters.hist.has_value() || usedParameters.waveform.has_value()) {
-        TDirectory* dir = fRootFile->mkdir("Histograms");
+        TDirectory *dir = fRootFile->mkdir("Histograms");
         dir->cd();
 
         if (usedParameters.hist.has_value()) {
-            for (auto& hist : *usedParameters.hist) {
+            for (auto &hist : *usedParameters.hist) {
                 std::string sName = hist.parameter + hist.file;
                 TString name = TString(sName.c_str(), sName.length());
-                TH1* h1 = new TH1D(name, name, hist.Nbins, hist.min, hist.max);
+                TH1 *h1 = new TH1D(name, name, hist.Nbins, hist.min, hist.max);
                 fHist.push_back(h1);
             }
         }
     }
-    
 }
 
 void Device::DigitizerDevice::ConfigureTxt() {
     for (std::string file : GetDigitizerTypes()) {
         if (file == "PSD") {
-            fTxtFilePSD = std::ofstream(GetFileName()+"_"+file+".txt");
-            if (usedParameters.qShort.has_value()) fTxtFilePSD << "qShort ";
-            if (usedParameters.qLong.has_value()) fTxtFilePSD << "qLong ";
-            if (usedParameters.cfd_y1.has_value()) fTxtFilePSD << "cfd_y1 ";
-            if (usedParameters.cfd_y2.has_value()) fTxtFilePSD << "cfd_y2 ";
-            if (usedParameters.baselinePSD.has_value()) fTxtFilePSD << "baseline ";
-            if (usedParameters.height.has_value()) fTxtFilePSD << "height ";
-            if (usedParameters.eventCounter.has_value()) fTxtFilePSD << "eventCounter ";
-            if (usedParameters.eventCounterPSD.has_value()) fTxtFilePSD << "eventCounterPSD ";
-            if (usedParameters.psdValue.has_value()) fTxtFilePSD << "psdValue ";
+            fTxtFilePSD = std::ofstream(GetFileName() + "_" + file + ".txt");
+            if (usedParameters.qShort.has_value())
+                fTxtFilePSD << "qShort ";
+            if (usedParameters.qLong.has_value())
+                fTxtFilePSD << "qLong ";
+            if (usedParameters.cfd_y1.has_value())
+                fTxtFilePSD << "cfd_y1 ";
+            if (usedParameters.cfd_y2.has_value())
+                fTxtFilePSD << "cfd_y2 ";
+            if (usedParameters.baselinePSD.has_value())
+                fTxtFilePSD << "baseline ";
+            if (usedParameters.height.has_value())
+                fTxtFilePSD << "height ";
+            if (usedParameters.eventCounter.has_value())
+                fTxtFilePSD << "eventCounter ";
+            if (usedParameters.eventCounterPSD.has_value())
+                fTxtFilePSD << "eventCounterPSD ";
+            if (usedParameters.psdValue.has_value())
+                fTxtFilePSD << "psdValue ";
             fTxtFilePSD << "\n";
         }
         if (file == "Waveform") {
-            fTxtFilePSD = std::ofstream(GetFileName()+"_"+file+".txt");
-            if (usedParameters.baseline.has_value()) fTxtFilePSD << "baseline ";
-            if (usedParameters.charge.has_value()) fTxtFilePSD << "charge ";
-            if (usedParameters.amplitude.has_value()) fTxtFilePSD << "amplitude ";
+            fTxtFilePSD = std::ofstream(GetFileName() + "_" + file + ".txt");
+            if (usedParameters.baseline.has_value())
+                fTxtFilePSD << "baseline ";
+            if (usedParameters.charge.has_value())
+                fTxtFilePSD << "charge ";
+            if (usedParameters.amplitude.has_value())
+                fTxtFilePSD << "amplitude ";
             fTxtFilePSD << "\n";
         }
     }
 }
 
 void Device::DigitizerDevice::WriteTxtEventPSD() {
-    if (usedParameters.qShort.has_value()) fTxtFilePSD << fEvent.qShort << " ";
-    if (usedParameters.qLong.has_value()) fTxtFilePSD << fEvent.qLong << " ";
-    if (usedParameters.cfd_y1.has_value()) fTxtFilePSD << fEvent.cfd_y1 << " ";
-    if (usedParameters.cfd_y2.has_value()) fTxtFilePSD << fEvent.cfd_y2 << " ";
-    if (usedParameters.baselinePSD.has_value()) fTxtFilePSD << fEvent.baselinePSD << " ";
-    if (usedParameters.height.has_value()) fTxtFilePSD << fEvent.height << " ";
-    if (usedParameters.eventCounter.has_value()) fTxtFilePSD << fEvent.eventCounter << " ";
-    if (usedParameters.eventCounterPSD.has_value()) fTxtFilePSD << fEvent.eventCounterPSD << " ";
-    if (usedParameters.psdValue.has_value()) fTxtFilePSD << fEvent.psdValue << " ";
+    if (usedParameters.qShort.has_value())
+        fTxtFilePSD << fEvent.qShort << " ";
+    if (usedParameters.qLong.has_value())
+        fTxtFilePSD << fEvent.qLong << " ";
+    if (usedParameters.cfd_y1.has_value())
+        fTxtFilePSD << fEvent.cfd_y1 << " ";
+    if (usedParameters.cfd_y2.has_value())
+        fTxtFilePSD << fEvent.cfd_y2 << " ";
+    if (usedParameters.baselinePSD.has_value())
+        fTxtFilePSD << fEvent.baselinePSD << " ";
+    if (usedParameters.height.has_value())
+        fTxtFilePSD << fEvent.height << " ";
+    if (usedParameters.eventCounter.has_value())
+        fTxtFilePSD << fEvent.eventCounter << " ";
+    if (usedParameters.eventCounterPSD.has_value())
+        fTxtFilePSD << fEvent.eventCounterPSD << " ";
+    if (usedParameters.psdValue.has_value())
+        fTxtFilePSD << fEvent.psdValue << " ";
     fTxtFilePSD << "\n";
 }
 
 void Device::DigitizerDevice::WriteTxtEventWaveform() {
-    if (usedParameters.baseline.has_value()) fTxtFileWaveform << fEvent.baseline << " ";
-    if (usedParameters.charge.has_value()) fTxtFileWaveform << fEvent.charge << " ";
-    if (usedParameters.amplitude.has_value()) fTxtFileWaveform << fEvent.amplitude << " ";
+    if (usedParameters.baseline.has_value())
+        fTxtFileWaveform << fEvent.baseline << " ";
+    if (usedParameters.charge.has_value())
+        fTxtFileWaveform << fEvent.charge << " ";
+    if (usedParameters.amplitude.has_value())
+        fTxtFileWaveform << fEvent.amplitude << " ";
     fTxtFileWaveform << "\n";
 }
